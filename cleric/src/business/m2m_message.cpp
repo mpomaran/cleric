@@ -96,9 +96,6 @@ std::string M2MMessage::encode(const M2MMessage &msg) {
   M2MMessage buff = msg;
   buff.encryptPayload();
 
-  uint16_t b = msg.getBoxId();
-  uint32_t n = msg.getNonce();
-
   M2MHeader header;
   header.boxId = buff.getBoxId();
   header.nonce = buff.getNonce();
