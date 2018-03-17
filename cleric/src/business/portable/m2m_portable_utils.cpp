@@ -24,27 +24,20 @@ SOFTWARE.
 
 */
 
-#define CATCH_CONFIG_RUNNER
-#include <catch/catch.hpp>
+#include "m2m_portable_utils.hpp"
 
-#include <iostream>
+static int64_t seed = 0;
 
-int runTests(int argc, char* argv[]) {
-  return Catch::Session().run(argc, argv);
+uint64_t yrand_rand(yrand_generator *generator) {
+  generator->seed = generator->seed * 1664525L + 1013904223L;
+
+  return generator->seed & 0xFFFFFFFFL;
 }
 
-int main(int argc, char* argv[]) {
-  auto testResult = runTests(argc, argv);
+yrand_generator yrand_seed(uint64_t a, uint64_t b) {
+  yrand_generator result;
+  result.seed = (int64_t)(a + b);
 
-
-  if (testResult != 0) {
-    std::cout << testResult << " test(s) failed, bailing out" << std::endl;
-	std::cout << testResult << " Press RETURN to continue" << std::endl;
-	auto key = std::cin.get();
-
-	std::exit(1);
-  }
-
-  std::cout << "Exiting" << std::endl;
-  return 0;
+  return result;
 }
+

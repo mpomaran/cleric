@@ -24,27 +24,24 @@ SOFTWARE.
 
 */
 
-#define CATCH_CONFIG_RUNNER
-#include <catch/catch.hpp>
+#ifndef CLERIC_BUSINESS_M2M_MESSAGE_PORTABLE_UTILS_H_
+#define CLERIC_BUSINESS_M2M_MESSAGE_PORTABLE_UTILS_H_
 
-#include <iostream>
+#include <stdint.h>
 
-int runTests(int argc, char* argv[]) {
-  return Catch::Session().run(argc, argv);
-}
+//#ifdef __cplusplus
+// extern "C" {
+//#endif
 
-int main(int argc, char* argv[]) {
-  auto testResult = runTests(argc, argv);
+typedef struct {
+  int64_t seed;
+} yrand_generator;
 
+uint64_t yrand_rand(yrand_generator *generator);
+yrand_generator yrand_seed(uint64_t a, uint64_t b);
 
-  if (testResult != 0) {
-    std::cout << testResult << " test(s) failed, bailing out" << std::endl;
-	std::cout << testResult << " Press RETURN to continue" << std::endl;
-	auto key = std::cin.get();
+//#ifdef __cplusplus
+//}
+//#endif
 
-	std::exit(1);
-  }
-
-  std::cout << "Exiting" << std::endl;
-  return 0;
-}
+#endif

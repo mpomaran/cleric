@@ -4,10 +4,20 @@ if (UNIX)
   add_definitions(-Wno-sign-compare -Wno-enum-compare)
 endif()
 
+if (WIN32)
+  add_definitions(/std:c++14)
+endif()
+
 include_directories(include)
 
 add_executable(cleric-server
+  src/business/m2m_message.cpp
+  src/business/m2m_message_test.cpp
   src/main.cpp
+  src/business/portable/base64/base64.hpp
+  src/business/portable/m2m_portable_utils.hpp
+  src/business/portable/base64/base64.cpp
+  src/business/portable/m2m_portable_utils.cpp
   ${GRANADA_SOURCE_DIR}/defaults.cpp
   ${GRANADA_SOURCE_DIR}/functions.cpp
   ${GRANADA_SOURCE_DIR}/util/file.cpp
@@ -25,4 +35,5 @@ add_executable(cleric-server
   ${GRANADA_SOURCE_DIR}/http/controller/oauth2_controller.cpp
   )
 
-target_link_libraries(cleric-server ${Casablanca_LIBRARIES} libeay32 ssleay32 )
+target_link_libraries(cleric-server ${Casablanca_LIBRARIES} libeay32 ssleay32)
+
