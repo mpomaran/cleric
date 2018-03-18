@@ -8,6 +8,12 @@ if (WIN32)
   add_definitions(/std:c++14)
 endif()
 
+IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
+set (SSL_LIBS "ssl -lcrypto")
+ELSE()
+set (SSL_LIBS "libeay32.lib ssleay32.lib")
+ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+
 include_directories(include)
 
 add_executable(cleric-server
@@ -40,5 +46,4 @@ add_executable(cleric-server
   ${GRANADA_SOURCE_DIR}/util/file.cpp
   )
 
-target_link_libraries(cleric-server ${Casablanca_LIBRARIES} libeay32 ssleay32)
-
+target_link_libraries(cleric-server ${Casablanca_LIBRARIES} ${SSL_LIBS}) 

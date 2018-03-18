@@ -1,29 +1,51 @@
-#set (CMAKE_VERBOSE_MAKEFILE ON)
+project(Cleric)
+
+set (CMAKE_VERBOSE_MAKEFILE ON)
 
 # to disable conflict with boost
 #add_definitions(-D_TURN_OFF_PLATFORM_STRING)
 
-set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/boost_1_66_0/include")
-set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/boost_1_66_0/lib")
-
 set (BOOST_DEBUG FALSE CACHE BOOL "Debug on boost not needed" FORCE)
 set (BOOST_USE_MULTITHREADED TRUE CACHE BOOL "MT ON, please" FORCE)
-#set (Boost_USE_STATIC_LIBS TRUE CACHE BOOL "Link statically" FORCE)
 
-set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/openssl-1.0.2n")
+message (STATUS "System processor: " ${CMAKE_SYSTEM_PROCESSOR})
+
+IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
+	message ("Compiling for ARM")
+
+	SET(CXX_FLAGS "-Wno-conversion -fPIC")
+	SET(LINKER_FLAGS "")
+
+	set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/include")
+	set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/lib")
+	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/include")
+	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/lib")
+	set(WERROR OFF CACHE BOOL "Do not treat Warnings as Errors.")
+
+	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/arm_openssl-1.0.2n")
+	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/arm_openssl-1.0.2n/lib")
+ELSE() 
+	message ("Compiling for Windows")
+	set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
+	set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
+	set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
+	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
+	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
+
+	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n")
+	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/lib")
+	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/include")
+ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
+
+SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}" )
+SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}" )
+
 set (ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/thirdparty/zlib-1.2.11/lib/zlibstaticd.lib")
 set (ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/zlib-1.2.11/include")
 
 set (CPPREST_EXCLUDE_WEBSOCKETS ON CACHE BOOL "Disable websockets" FORCE)
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/boost_1_66_0/include")
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/redisclient-0.6.0/include")
-
-link_directories("${CMAKE_SOURCE_DIR}/thirdparty/boost_1_66_0/lib")
-
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/openssl-1.0.2n/include")
-link_directories("${CMAKE_SOURCE_DIR}/thirdparty/openssl-1.0.2n/lib")
-
 
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 3.0)
@@ -38,7 +60,6 @@ endif()
 
 #enable_testing()
 
-set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
 set(CPPREST_EXCLUDE_WEBSOCKETS OFF CACHE BOOL "Exclude websockets functionality.")
 set(CPPREST_EXCLUDE_COMPRESSION OFF CACHE BOOL "Exclude compression functionality.")
 set(CPPREST_EXPORT_DIR lib/cpprestsdk CACHE STRING "Directory to install CMake config files.")
@@ -171,29 +192,29 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR IOS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wno-pointer-arith")
   elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    set(WARNINGS -Wall -Wextra -Wcast-qual -Wconversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
+    set(WARNINGS -Wall -Wextra -Wcast-qual -Wno-conversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
     set(LINUX_SUPPRESSIONS -Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-reorder -Wno-unused-local-typedefs)
     set(WARNINGS ${WARNINGS} ${LINUX_SUPPRESSIONS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage -Wno-unneeded-internal-declaration")
   else()
-    set(WARNINGS -Wall -Wextra -Wcast-qual -Wconversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
+    set(WARNINGS -Wall -Wextra -Wcast-qual -Wno-conversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
     set(OSX_SUPPRESSIONS -Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-reorder -Wno-unused-local-typedefs)
     set(WARNINGS ${WARNINGS} ${OSX_SUPPRESSIONS})
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wno-return-type-c-linkage -Wno-unneeded-internal-declaration")
     set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
   endif()
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fno-strict-aliasing")
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   message("-- Setting gcc options")
 
-  set(WARNINGS -Wall -Wextra -Wunused-parameter -Wcast-align -Wcast-qual -Wconversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls -Wunreachable-code)
+  set(WARNINGS -Wall -Wextra -Wunused-parameter -Wcast-align -Wcast-qual -Wno-conversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls -Wunreachable-code)
   set(LD_FLAGS "${LD_FLAGS} -Wl,-z,defs")
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fno-strict-aliasing")
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message("-- Setting msvc options")

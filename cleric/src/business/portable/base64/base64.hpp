@@ -6,6 +6,7 @@
 #define _BASE64_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
 //
 //#ifdef __cplusplus

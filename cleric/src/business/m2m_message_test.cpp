@@ -26,9 +26,10 @@ SOFTWARE.
 #include "m2m_message.hpp"
 #include <algorithm>
 #include <catch/catch.hpp>
+#include <cstring>
 #include <memory>
 #include <string>
-#include "portable\base64\base64.hpp"
+#include "portable/base64/base64.hpp"
 
 using namespace cleric;
 using namespace std;
@@ -59,7 +60,7 @@ SCENARIO("M2MMessage can be created", "[M2MMessage]") {
   GIVEN("An plain payload, which is then encoded") {
     M2MPaylaod payload = {1, 2, 3};
     BoxId boxId = {1};
-    auto m2m = M2MMessage::M2MMessage(boxId, payload);
+    auto m2m = M2MMessage(boxId, payload);
     auto encodedMsg = M2MMessage::encode(m2m);
 
     WHEN("box is found and key is valid") {

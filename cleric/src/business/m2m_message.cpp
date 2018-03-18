@@ -33,8 +33,8 @@ SOFTWARE.
 #include <string>
 #include <utility>
 #include <vector>
-#include "portable\base64\base64.hpp"
-#include "portable\m2m_portable_utils.hpp"
+#include "portable/base64/base64.hpp"
+#include "portable/m2m_portable_utils.hpp"
 
 #include "m2m_message.hpp"
 
@@ -73,6 +73,8 @@ M2MMessage M2MMessage::decode(const std::string &message) {
   if (messageLen < sizeof(uint8_t) + sizeof(uint64_t)) {
     throw length_error("M2M message too short");
   }
+
+
 
   auto decoded = make_unique<uint8_t[]>(messageLen);
   base64_decode(const_cast<uint8_t *>(decoded.get()), message.c_str(),
