@@ -24,39 +24,27 @@ SOFTWARE.
 
 */
 
-#define CATCH_CONFIG_RUNNER
-#include <catch/catch.hpp>
-#include <iostream>
+#ifndef CLERIC_APP_H_
+#define CLERIC_APP_H_
 
-#include "cleric_app.hpp"
+#include <vector>
+#include "cpprest/details/basic_types.h"
+#include "granada/http/controller/controller.h"
+#include "granada/http/session/map_session.h"
 
-int runTests(int argc, char* argv[]) {
-  return Catch::Session().run(argc, argv);
-}
+class ClericApp {
+ public:
+  ClericApp(const ClericApp &) = delete;
+  ClericApp(const ClericApp &&other) = delete;
 
-int main(int argc, char* argv[]) {
-  int result = -1;
+  ClericApp();
+  ~ClericApp();
 
-  ClericApp app;
+  void go();
 
-  try {
-    auto testResult = runTests(argc, argv);
+ private:
+  std::vector<std::unique_ptr<granada::http::controller::Controller>>
+      controllers;
+};
 
-    if (testResult != 0) {
-      std::cout << testResult << " test(s) failed, bailing out" << std::endl;
-      result = 1;
-    } else {
-      app.go();
-      result = 0;
-    }
-
-  } catch (std::exception& e) {
-    std::cerr << "Exception caught" << e.what() << std::endl;
-    result = 2;
-  }
-
-  std::cout << "Press RETURN to exit" << std::endl;
-  auto key = std::cin.get();
-
-  return result;
-}
+#endif

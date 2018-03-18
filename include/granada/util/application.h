@@ -78,6 +78,12 @@ namespace granada{
        */
       const std::string GetProperty(const std::string& name);
 
+	  /**
+	   * Sets property file path
+	   * @param filename of the property file
+	   */
+	  void set_property_file(const std::string & filename);
+
 
       /**
        * Homogenize a given path in the form of string to a format like: /path/to/directory
