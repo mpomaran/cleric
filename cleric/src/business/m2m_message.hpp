@@ -27,65 +27,47 @@ SOFTWARE.
 #ifndef CLERIC_BUSINESS_M2M_MESSAGE_H_
 #define CLERIC_BUSINESS_M2M_MESSAGE_H_
 
+#include "portable/m2m_portable_utils.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "portable/m2m_portable_utils.hpp"
 
 namespace cleric {
 
 using BoxId = uint16_t;
-using M2MNonce = uint32_t;
-using M2MPaylaod = std::vector<uint8_t>;
+
+struct M2MPayload {
+  uint32_t type;
+  uint32_t reading;
+  uint32_t vcc;
+};
 
 class M2MMessage {
- public:
-  typedef typename M2MPaylaod::iterator M2MIterator;
-
+public:
   M2MMessage() = delete;
   M2MMessage(const M2MMessage &) = default;
   M2MMessage(const M2MMessage &&other);
-  M2MMessage(BoxId boxId, const M2MPaylaod &payload);
 
-  /*
-  Decodes the message
-  */
-  static M2MMessage decode(const std::string &message);
-  static std::string encode(const M2MMessage &message);
+  static M2MMessage decode(const std::string &message, uint64_t secret);
 
   /*
   Side channel data, not included in payload
   */
   BoxId getBoxId() const;
-  M2MNonce getNonce() const;
+  static BoxId getBoxId(const ::std::string &message);
 
-  /*
-  Size of the payload
-  */
-  size_t size();
+  uint64_t getSensorPowerSupplyVoltage() const { return payload.vcc; }
+  uint64_t getMeasurement() const { return payload.reading; }
+  uint64_t getSensorType() const { return payload.type; }
 
-  /*
-  Enables access to the payload
-  */
-  uint8_t &operator[](int x);
-
-  /*
-  Methods enabling STL algorithms to work
-  */
-  M2MIterator begin() { return payload.begin(); };
-  M2MIterator end() { return payload.end(); };
-
- private:
+private:
   BoxId boxId;
-  M2MNonce nonce;
-  M2MPaylaod payload;
+  M2MPayload payload;
 
-  M2MMessage(BoxId boxId, M2MNonce nonce, M2MPaylaod &payload);
+  M2MMessage(const BoxId &boxId, const M2MPayload &p);
 
-  void encryptPayload();
-  void decryptPayload();
-  yrand_generator nonceToGenerator() const;
+  static uint64_t stringToInt(const ::std::string &str);
 };
-}  // namespace cleric
+} // namespace cleric
 
 #endif

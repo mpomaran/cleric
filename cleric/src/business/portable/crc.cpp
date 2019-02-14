@@ -5,7 +5,7 @@ https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
 
 #include <cstdint>
 
-#define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
+#define POLYNOMIAL 0xD8 /* 11011 followed by 0's */
 
 #define POLYNOMIAL_8 0xD8
 #define POLYNOMINAL_16 0x1021

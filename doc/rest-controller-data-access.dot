@@ -1,0 +1,16 @@
+digraph {
+    node [shape="box"]
+
+    app [label="REST API"];
+    box_server_locator[label="BoxServerLocator"];
+    db[label="DB", shape=cylinder];
+    box_server[label="BoxServer"];
+    box [label="Box"];
+
+    app -> box_server_locator[label="box server info"]
+    app -> box_server[label="direct access to box"]
+    app -> box[arrowhead=none, style=dashed]
+    box_server_locator -> box_server [arrowhead=none]
+    box_server -> box [arrowhead=none]
+    box -> db [arrowhead=none]
+}

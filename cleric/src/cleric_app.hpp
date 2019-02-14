@@ -24,16 +24,16 @@ SOFTWARE.
 
 */
 
-#ifndef CLERIC_APP_H_
-#define CLERIC_APP_H_
+#ifndef CLERIC_APP_HPP_HAS_BEEN_INCLUDED
+#define CLERIC_APP_HPP_HAS_BEEN_INCLUDED
 
-#include <vector>
 #include "cpprest/details/basic_types.h"
 #include "granada/http/controller/controller.h"
 #include "granada/http/session/map_session.h"
+#include <vector>
 
 class ClericApp {
- public:
+public:
   ClericApp(const ClericApp &) = delete;
   ClericApp(const ClericApp &&other) = delete;
 
@@ -42,7 +42,7 @@ class ClericApp {
 
   void go();
 
- private:
+private:
   std::vector<std::unique_ptr<granada::http::controller::Controller>>
       controllers;
 };

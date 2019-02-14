@@ -1,0 +1,28 @@
+# MSC for storing data in the DB
+msc {
+    Sensor,m2mController,BoxServerLocator,BoxServer,BoxInstance,DB;
+
+    Sensor->m2mController[label="process(message)"];
+    m2mController => m2mController [label="getBoxIdFromMessage(message)"];
+    m2mController->BoxServerLocator [label="getBoxServerByBoxId(boxId)"];
+    BoxServerLocator->m2mController [label="returns boxServer"];
+    m2mController->BoxServer[label="getBoxById[boxId]"];
+    ---[label="box is not cached"];
+    BoxServer->BoxInstance[label="new(boxId,iostream)"];
+    BoxInstance->DB[label="deserialize box data"];
+    DB->BoxInstance[label="deserialized box data"];
+    BoxInstance->BoxServer[label="box instance"];
+    BoxServer->m2mController[label="box instance"];
+    ---[label="box is  cached"];
+    BoxServer->m2mController[label="box instance"];
+    ---[label="sensor data processing"];
+    m2mController=>m2mController[label="decode message data"];
+    m2mController->BoxInstance[label="process(data)"];
+    BoxInstance->m2mController[label="process=OK"];
+    m2mController => m2mController[label="RESPONSE=OK+..."];
+    m2mController -> Sensor [label="process=RESPONSE"];
+    BoxInstance => BoxInstance [label="purge old data"];
+    BoxInstance->DB[label="serialize data (write back)"];
+
+
+}

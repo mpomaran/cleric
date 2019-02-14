@@ -40,4 +40,3 @@ yrand_generator yrand_seed(uint64_t a, uint64_t b) {
 
   return result;
 }
-

@@ -42,6 +42,10 @@ namespace granada{
         }
       };
 
+	  void PropertyFile::SetProperty(const std::string& name, const std::string& value) {
+		  properties_[name] = value;
+	  }
+
       std::unordered_map<std::string,std::string> PropertyFile::ParseConfigurationFile(const std::string &configuration_file_path){
         std::unordered_map<std::string,std::string> properties;
 

@@ -29,8 +29,13 @@ namespace granada{
   namespace http{
     namespace session{
 
+
       granada::util::mutex::call_once MapSession::load_properties_call_once_;
-      std::unique_ptr<granada::http::session::SessionHandler> MapSession::session_handler_(new granada::http::session::MapSessionHandler());
+
+	  // TODO - move the below initialization to the main, here it breaks loading properties
+	  // after moved, uncomment checks in set_property_file in application.cpp
+
+	  std::unique_ptr<granada::http::session::SessionHandler> MapSession::session_handler_(new granada::http::session::MapSessionHandler());
       std::unique_ptr<granada::Functions> MapSession::close_callbacks_(new granada::FunctionsMap());
 
 

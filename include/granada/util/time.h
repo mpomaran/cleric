@@ -198,6 +198,10 @@ namespace granada{
             loop_ = false;
           };
 
+		  static void stopAll() {
+			  stopAll_ = false;
+		  }
+
         private:
 
           /**
@@ -213,6 +217,7 @@ namespace granada{
            * break the loop.
            */
           std::atomic_bool loop_;
+		  static std::atomic_bool stopAll_;
 
 
           /**
@@ -222,6 +227,9 @@ namespace granada{
            */
           void recursive(std::function<void(void)> fn){
             granada::util::time::sleep_milliseconds(num_);
+			if (stopAll_) {
+				return;
+			}
             fn();
             if (loop_){
               recursive(fn);

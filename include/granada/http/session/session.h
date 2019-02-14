@@ -726,6 +726,7 @@ namespace granada{
            *          function will be executed.
            */
           virtual double& clean_sessions_frequency(){
+			  SessionHandler::clean_sessions_frequency_ = 1.0; // TODO MPP it's causing library to freece, as it cannot join threads - cleaning up sessions OR timer need to be reworked
             return SessionHandler::clean_sessions_frequency_;
           }
 

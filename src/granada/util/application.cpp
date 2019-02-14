@@ -1,5 +1,12 @@
 
 #include "granada/util/application.h"
+#include "granada/util/time.h"
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
+std::atomic_bool granada::util::time::timer::stopAll_(false);
 
 namespace granada {
 namespace util {
@@ -30,7 +37,6 @@ const std::string& get_selfpath() {
         std::wstring(pathBuf.begin(), pathBuf.end()));
     selfpath = selfpath.substr(0, selfpath.find_last_of("\\"));
 
-	selfpath = "C:\\workspace";
 #else
     char buff[PATH_MAX];
     ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
@@ -46,19 +52,29 @@ const std::string& get_selfpath() {
 
 const std::string GetProperty(const std::string& name) {
   if (property_file_ == NULL) {
-    std::string configuration_file_path = get_selfpath() + "/server.conf";
+    std::string configuration_file_path = get_selfpath() + "/cleric.conf";
     set_property_file(configuration_file_path);
   }
   return property_file_->GetProperty(name);
 }
 
+void SetProperty(const std::string& name, const std::string& value)
+{
+	if (property_file_ == nullptr) {
+		std::string configuration_file_path = get_selfpath() + "/cleric.conf";
+		set_property_file(configuration_file_path);
+	}
+	property_file_->SetProperty(name, value);
+}
+
+
 void set_property_file(const std::string& filename) {
-  if (property_file_ == nullptr) {
+//  if (property_file_ == nullptr) {
     property_file_ = std::unique_ptr<granada::util::file::PropertyFile>(
         new granada::util::file::PropertyFile(filename));
-  } else {
-    throw std::runtime_error("property file already initialized, error");
-  }
+  //} else {
+  //  throw std::runtime_error("property file already initialized, error");
+  //}
 }
 
 }  // namespace application

@@ -79,6 +79,14 @@ namespace granada{
       const std::string GetProperty(const std::string& name);
 
 	  /**
+	  * Sets the property, without changing the file, effectively overriding it's value
+	  * @param  name name of the property
+	  * @param  value value of the property
+	  */
+	  void SetProperty(const std::string& name, const std::string& value);
+
+
+	  /**
 	   * Sets property file path
 	   * @param filename of the property file
 	   */

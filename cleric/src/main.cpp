@@ -26,37 +26,104 @@ SOFTWARE.
 
 #define CATCH_CONFIG_RUNNER
 #include <catch/catch.hpp>
+#include <easylogging++.h>
+#include <future>
 #include <iostream>
+#include <boost/program_options.hpp>
+#include <granada/util/application.h>
+#include <props.hpp>
 
 #include "cleric_app.hpp"
 
-int runTests(int argc, char* argv[]) {
-  return Catch::Session().run(argc, argv);
+INITIALIZE_EASYLOGGINGPP
+
+using namespace std;
+namespace po = boost::program_options;
+
+void setupLogger(int argc, char *argv[]) {
+	START_EASYLOGGINGPP(argc, argv);
 }
 
-int main(int argc, char* argv[]) {
-  int result = -1;
+int runTests() {
+	return Catch::Session().run();
+}
 
-  ClericApp app;
+void exposeProperty(const std::string &propertyName, const std::string &defVal, const po::variables_map& vm) {
+	string val;
+	if (granada::util::application::GetProperty(propertyName).empty()) {
+		val = defVal;
+	}
+	if (vm.count(propertyName))
+	{
+		val = vm[propertyName].as< string >();
+	}
+	granada::util::application::SetProperty(propertyName, val);
+	LOG(INFO) << "[main] {" << propertyName << "} {" << granada::util::application::GetProperty(propertyName) << "}";
+}
 
-  try {
-    auto testResult = runTests(argc, argv);
+int main(int argc, char *argv[]) {
 
-    if (testResult != 0) {
-      std::cout << testResult << " test(s) failed, bailing out" << std::endl;
-      result = 1;
-    } else {
-      app.go();
-      result = 0;
-    }
 
-  } catch (std::exception& e) {
-    std::cerr << "Exception caught" << e.what() << std::endl;
-    result = 2;
-  }
+	int result = -1;
+	try {
 
-  std::cout << "Press RETURN to exit" << std::endl;
-  auto key = std::cin.get();
+		setupLogger(argc, argv);
 
-  return result;
+		// Declare the supported options.
+		po::options_description desc("Allowed options");
+		const auto storageStrategyDescription = std::string() + "storage strategy (default = " + cleric::props::STORAGE_STRATEGY_PROP_DEFAULT + ", available: " + cleric::props::STORAGE_STRATEGY_PROP_MEMORY + ", " + cleric::props::STORAGE_STRATEGY_PROP_HDD + ")";
+		const auto storageRootDescription = std::string() + "www root(current_directory/" + cleric::props::STORAGE_ROOT_PROP_DEFAULT + " if not specified)";
+		desc.add_options()
+			("help", "produce help message, for logging options see https://github.com/zuhd-org/easyloggingpp")
+			("tests-only", "run unit tests, do not start server")
+			("www-root", po::value<string>(), "www root (current_directory/www if not specified)")
+			(cleric::props::STORAGE_ROOT_PROP_NAME.c_str(), po::value<string>(), storageRootDescription.c_str())
+			("prop-file", po::value<string>(), "configuration file (current_dir/cleric.properties if not specified)")
+			(cleric::props::STORAGE_STRATEGY_PROP_NAME.c_str(), po::value<string>(), storageStrategyDescription.c_str());
+
+		po::variables_map vm;
+
+		po::store(po::command_line_parser(argc, argv).options(desc).allow_unregistered().run(), vm);
+		po::notify(vm);
+
+		if (vm.count("help")) {
+			cout << desc << "\n";
+			result = 0;
+		} else if (vm.count("tests-only")) {
+			exposeProperty(cleric::props::STORAGE_STRATEGY_PROP_NAME, cleric::props::STORAGE_STRATEGY_PROP_MEMORY, vm);
+			result = runTests();
+		} else {
+			// read property file if exists
+			string propFile = "cleric.properties";
+			if (vm.count("prop-file"))
+			{
+				propFile = vm["prop-file"].as< string >();
+			}
+			LOG(INFO) << "[main] {prop-file} {" << propFile << "}";
+			granada::util::application::set_property_file(propFile);
+
+			// expose properties to others
+			exposeProperty("www-root", "www", vm);
+			exposeProperty(cleric::props::STORAGE_ROOT_PROP_NAME, cleric::props::STORAGE_ROOT_PROP_DEFAULT, vm);
+			exposeProperty(cleric::props::STORAGE_STRATEGY_PROP_NAME, cleric::props::STORAGE_STRATEGY_PROP_DEFAULT, vm);
+
+			ClericApp app;
+			app.go();
+
+			cout << "Press RETURN to exit" << endl;
+			auto key = cin.get();
+			granada::util::time::timer::stopAll();
+			result = 0;
+		}
+	}
+	catch (const exception &e) {
+		LOG(ERROR) << "[main] {unhandled_exception} {" << e.what() << "}";
+		result = 2;
+
+		cout << "Press RETURN to exit" << endl;
+		auto key = cin.get();
+	}
+
+	granada::util::time::timer::stopAll();
+	return result;
 }

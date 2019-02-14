@@ -47,29 +47,33 @@ set (CPPREST_EXCLUDE_WEBSOCKETS ON CACHE BOOL "Disable websockets" FORCE)
 
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/redisclient-0.6.0/include")
 
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/msgpack-c-cpp-3.1.1/include")
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW) # use MACOSX_RPATH
 endif()
 if(UNIX)
-  project(cpprest C CXX)
+  project(cpprestsdk C CXX)
 else()
-  project(cpprest CXX)
+  project(cpprestsdk CXX)
 endif()
 
-#enable_testing()
+set(CPPREST_VERSION_MAJOR 2)
+set(CPPREST_VERSION_MINOR 10)
+set(CPPREST_VERSION_REVISION 9)
 
+enable_testing()
+
+set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
 set(CPPREST_EXCLUDE_WEBSOCKETS OFF CACHE BOOL "Exclude websockets functionality.")
 set(CPPREST_EXCLUDE_COMPRESSION OFF CACHE BOOL "Exclude compression functionality.")
-set(CPPREST_EXPORT_DIR lib/cpprestsdk CACHE STRING "Directory to install CMake config files.")
+set(CPPREST_EXCLUDE_BROTLI ON CACHE BOOL "Exclude Brotli compression functionality.")
+set(CPPREST_EXPORT_DIR cpprestsdk CACHE STRING "Directory to install CMake config files.")
 set(CPPREST_INSTALL_HEADERS ON CACHE BOOL "Install header files.")
 set(CPPREST_INSTALL ON CACHE BOOL "Add install commands.")
-
 set(BUILD_TESTS OFF CACHE BOOL "Do not build tests")
 set(BUILD_SAMPLES OFF CACHE BOOL "Do not build samples")
-
-
 if(IOS OR ANDROID)
   set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
 else()
@@ -84,6 +88,22 @@ else()
   set(BUILD_SAMPLES ON CACHE BOOL "Build sample applications.")
 endif()
 
+if(WIN32)
+  set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Default filename postfix for libraries under configuration DEBUG")
+else()
+  set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Default filename postfix for libraries under configuration DEBUG")
+endif()
+
+if(WIN32)
+  set(TOOLSET)
+  if(CMAKE_VS_PLATFORM_TOOLSET)
+    string(REGEX REPLACE "^v" "" TOOLSET "${CMAKE_VS_PLATFORM_TOOLSET}")
+  endif()
+  set(CPPREST_ABI_TAG "${TOOLSET}_${CPPREST_VERSION_MAJOR}_${CPPREST_VERSION_MINOR}" CACHE STRING "Postfix tag for the cpprest abi")
+else()
+  set(CPPREST_ABI_TAG "" CACHE STRING "Postfix tag for the cpprest abi")
+endif()
+
 if(ANDROID)
   set(Boost_USE_STATIC_LIBS ON CACHE BOOL "Link against boost statically.")
 else()
@@ -94,6 +114,9 @@ include(cmake/cpprest_find_boost.cmake)
 include(cmake/cpprest_find_zlib.cmake)
 include(cmake/cpprest_find_openssl.cmake)
 include(cmake/cpprest_find_websocketpp.cmake)
+include(cmake/cpprest_find_brotli.cmake)
+include(CheckIncludeFiles)
+include(GNUInstallDirs)
 
 find_package(Threads REQUIRED)
 if(THREADS_HAVE_PTHREAD_ARG)
@@ -106,6 +129,10 @@ endif()
 # Internal component selection logic. This allows us to avoid duplicating platform logic in multiple places.
 if(CPPREST_EXCLUDE_WEBSOCKETS)
   set(CPPREST_WEBSOCKETS_IMPL none CACHE STRING "Internal use.")
+endif()
+
+if(NOT WIN32)
+  CHECK_INCLUDE_FILES(xlocale.h HAVE_XLOCALE_H)
 endif()
 
 if(APPLE) # Note: also iOS
@@ -137,34 +164,12 @@ else()
 endif()
 
 set(WARNINGS)
-set(ANDROID_STL_FLAGS)
+set(ANDROID_LIBS)
 
 # Platform (not compiler) specific settings
-if(IOS)
-  # The cxx_flags must be reset here, because the ios-cmake toolchain file unfortunately sets "-headerpad_max_install_names" which is not a valid clang flag.
-  set(CMAKE_CXX_FLAGS "-fvisibility=hidden -fvisibility-inlines-hidden")
-elseif(ANDROID)
-  if(ARM)
-    set(LIBCXX_STL "${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a/thumb/libgnustl_static.a")
-  else()
-    set(LIBCXX_STL "${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/4.8/libs/x86/libgnustl_static.a")
-  endif()
+if(ANDROID)
   # These are used in the shared library case
-  set(ANDROID_STL_FLAGS
-    ${LIBCXX_STL}
-    atomic
-    dl
-    gcc
-    c
-    m
-    -nodefaultlibs
-    )
-
-  include_directories(SYSTEM
-    "${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/4.8/include"
-    "${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a/include"
-    "${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/4.8/include/backward"
-    )
+  set(ANDROID_LIBS atomic dl)
 elseif(UNIX) # This includes OSX
 elseif(WIN32)
   add_definitions(-DUNICODE -D_UNICODE -DWIN32 -D_SCL_SECURE_NO_WARNINGS)
@@ -189,16 +194,15 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR IOS)
   message("-- Setting clang options")
 
   if(ANDROID)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wno-pointer-arith")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic -Wno-attributes -Wno-pointer-arith")
   elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    set(WARNINGS -Wall -Wextra -Wcast-qual -Wno-conversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
-    set(LINUX_SUPPRESSIONS -Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-reorder -Wno-unused-local-typedefs)
+    set(WARNINGS -Wall -Wextra -Wcast-qual -Wconversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
+    set(LINUX_SUPPRESSIONS -Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-unused-local-typedefs)
     set(WARNINGS ${WARNINGS} ${LINUX_SUPPRESSIONS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage -Wno-unneeded-internal-declaration")
   else()
-    set(WARNINGS -Wall -Wextra -Wcast-qual -Wno-conversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
-    set(OSX_SUPPRESSIONS -Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-reorder -Wno-unused-local-typedefs)
+    set(WARNINGS -Wall -Wextra -Wcast-qual -Wconversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls)
+    set(OSX_SUPPRESSIONS -Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-unused-local-typedefs)
     set(WARNINGS ${WARNINGS} ${OSX_SUPPRESSIONS})
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wno-return-type-c-linkage -Wno-unneeded-internal-declaration")
@@ -211,16 +215,24 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR IOS)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   message("-- Setting gcc options")
 
-  set(WARNINGS -Wall -Wextra -Wunused-parameter -Wcast-align -Wcast-qual -Wno-conversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls -Wunreachable-code)
+  set(WARNINGS -Wall -Wextra -Wunused-parameter -Wcast-align -Wcast-qual -Wconversion -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-format-attribute -Wmissing-include-dirs -Wpacked -Wredundant-decls -Wunreachable-code)
   set(LD_FLAGS "${LD_FLAGS} -Wl,-z,defs")
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fno-strict-aliasing")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -D_GLIBCXX_USE_SCHED_YIELD -D_GLIBCXX_USE_NANOSLEEP")
+  endif()
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message("-- Setting msvc options")
   set(WARNINGS)
   set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /ignore:4264")
   add_compile_options(/bigobj)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP")
+  set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /MP")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MP")
+
   if (WINDOWS_STORE OR WINDOWS_PHONE)
     add_compile_options(/ZW)
   endif()
@@ -257,7 +269,7 @@ function(add_casablanca_test NAME SOURCES_VAR)
       cpprest
       common_utilities
       unittestpp
-      ${ANDROID_STL_FLAGS}
+      ${ANDROID_LIBS}
     )
     if (BUILD_SHARED_LIBS)
       add_test(NAME ${NAME}
@@ -274,6 +286,7 @@ if(BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
+
 # MPP I disabled samples (to be removed in the future) as I do not need them anymore
 #if(BUILD_SAMPLES)
 #  add_subdirectory(samples)
@@ -281,4 +294,3 @@ endif()
 #endif()
 
 add_subdirectory(cleric)
-

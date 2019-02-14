@@ -1,5 +1,13 @@
 {
   // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
+  "environments": [
+    {
+      "BuildDir": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build",
+      "WWWRoot": "${projectDir}\\cleric\\www",
+      "StorageRoot": "${projectDir}\\cleric\\test_data",
+    }
+  ],
+
   "configurations": [
     {
       "name": "x86-Debug",
@@ -10,7 +18,14 @@
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.VCPKG_HOME}\\scripts\\buildsystems\\vcpkg.cmake"
+        }
+      ]
+
     },
     {
       "name": "x86-Release",
@@ -21,7 +36,14 @@
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.VCPKG_HOME}\\scripts\\buildsystems\\vcpkg.cmake"
+        }
+      ]
+
     },
     {
       "name": "x64-Debug",
@@ -32,7 +54,14 @@
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.VCPKG_HOME}\\scripts\\buildsystems\\vcpkg.cmake"
+        }
+      ]
+
     },
     {
       "name": "x64-Release",
@@ -43,7 +72,13 @@
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.VCPKG_HOME}\\scripts\\buildsystems\\vcpkg.cmake"
+        }
+      ]
     }
   ]
 }

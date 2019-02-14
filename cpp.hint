@@ -1,0 +1,6 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define CHECK(__VA_ARGS__) INTERNAL_CATCH_TEST( "CHECK", Catch::ResultDisposition::ContinueOnFailure, __VA_ARGS__ )
+#define CHECK(__VA_ARGS__) (void)(0)
+#define CHECK(value) UNITTEST_MULTILINE_MACRO_BEGIN if (!UnitTest::Check(value)) UnitTest::CurrentTest::Results()->OnTestFailure(UnitTest::TestDetails(*UnitTest::CurrentTest::Details(), __LINE__), #value); UNITTEST_MULTILINE_MACRO_END

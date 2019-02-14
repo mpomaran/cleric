@@ -30,8 +30,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("C:/workspace/Repos/arcticpanther/Cleric/src/cmake_install.cmake")
-  include("C:/workspace/Repos/arcticpanther/Cleric/tests/cmake_install.cmake")
-  include("C:/workspace/Repos/arcticpanther/Cleric/samples/granada/cmake_install.cmake")
+  include("C:/workspace/Repos/arcticpanther/Cleric/cleric/cmake_install.cmake")
 
 endif()
 

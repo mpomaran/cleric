@@ -24,12 +24,12 @@ SOFTWARE.
 
 */
 #include "m2m_message.hpp"
+#include "portable/base64/base64.hpp"
 #include <algorithm>
 #include <catch/catch.hpp>
 #include <cstring>
 #include <memory>
 #include <string>
-#include "portable/base64/base64.hpp"
 
 using namespace cleric;
 using namespace std;
@@ -56,23 +56,65 @@ SCENARIO("Base64 encoded message can be encoded", "[base64]") {
     }
   }
 }
-SCENARIO("M2MMessage can be created", "[M2MMessage]") {
-  GIVEN("An plain payload, which is then encoded") {
-    M2MPaylaod payload = {1, 2, 3};
-    BoxId boxId = {1};
-    auto m2m = M2MMessage(boxId, payload);
-    auto encodedMsg = M2MMessage::encode(m2m);
+/*
 
-    WHEN("box is found and key is valid") {
-      THEN("M2M message can be decrypted") {
-        try {
-          M2MMessage msg = M2MMessage::decode(encodedMsg);
-          CHECK(msg.getBoxId() == boxId);
-          CHECK(std::equal(payload.begin(), payload.end(), msg.begin()));
-        } catch (...) {
-          CHECK(false);
+0x00aff6c8 "0000000ABE587DE600000000AE30AFFCAC41EAF787E215F4"
+
+0 8 0000 000A box
+8 8 BE58 7DE6 ts
+16 16 0000 0000 AE30 AFFC rand
+32 16 AC41 EAF7 F8E2 1601 pl
+
+
+box = 10
+reading 999
+type = 509
+secret = 0x474996006560796aL
+vcc = 1000
+
+yerrno_t ymessage_construct(uint8_t * buff, uint8_t buff_len, uint32_t box_id,
+uint64_t payload, ymessage_cb message_ready_cb)
+{
+        uint64_t timestamp = (uint32_t)(ytimer_get_uptime_in_ms() / 1000) &
+0xffffffff; uint64_t random = yrand_rand(); uint8_t i; uint64_t encoded_payload
+= 0;
+
+        yassert(buff_len >= (sizeof(uint64_t) * 3 * 2 + 1));
+
+        buff += uint64_to_bytes(buff, timestamp + ((uint64_t)box_id << 32)) - 1;
+        buff += uint64_to_bytes(buff, random) - 1;
+
+        yrand_seed(timestamp ^ random, SECRET_KEY);
+
+        for (i = 0; i < sizeof(payload); i++) {
+                uint8_t b = payload >> (i * 8) & 0xff;
+                uint8_t key = (uint8_t)(yrand_rand() & 0xff);
+                encoded_payload += ((uint64_t)(b ^ key)) << (i * 8);
         }
-      }
-    }
-  }
+
+        buff += uint64_to_bytes(buff, encoded_payload);
+
+        message_ready_cb();
+
+        return Y_OK;
+}
+
+*/
+
+TEST_CASE("M2MMessage from box can be decoded", "[M2MMessage]") {
+  const auto MESSAGE = "0000000ABE587DE600000000AE30AFFCD31EA91087E215F4";
+  const auto BOX_ID = 10;
+  const auto READING = 999;
+  const auto TYPE = 509;
+  const uint64_t SECRET = 0x474996006560796aUL;
+  const auto VCC = 1000;
+
+  auto decodedBoxId = M2MMessage::getBoxId(MESSAGE);
+  CHECK(decodedBoxId == BOX_ID);
+
+  M2MMessage m2m = M2MMessage::decode(MESSAGE, SECRET);
+  CHECK(m2m.getBoxId() == BOX_ID);
+  CHECK(m2m.getMeasurement() == READING);
+  CHECK(m2m.getSensorPowerSupplyVoltage() == VCC);
+  CHECK(m2m.getSensorType() == TYPE);
 }

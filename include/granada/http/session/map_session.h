@@ -185,6 +185,8 @@ namespace granada{
             });
 
             // thread for cleaning the sessions.
+			// MPP TODO refactor if needed in any future - below sementation faults at exit
+			/*
             MapSessionHandler::clean_sessions_call_once_.call([this]{
               if (clean_sessions_frequency()>-1){
                 MapSessionHandler::clean_sessions_timer_.set([this]{
@@ -192,6 +194,8 @@ namespace granada{
                 },clean_sessions_frequency());
               }
             });
+			*/ 
+
           };
 
 

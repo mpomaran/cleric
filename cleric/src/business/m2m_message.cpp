@@ -24,17 +24,18 @@ SOFTWARE.
 
 */
 
+#include "portable/base64/base64.hpp"
+#include "portable/m2m_portable_utils.hpp"
 #include <boost/endian/buffers.hpp>
 #include <boost/endian/conversion.hpp>
 #include <cassert>
 #include <exception>
 #include <memory>
 #include <random>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include "portable/base64/base64.hpp"
-#include "portable/m2m_portable_utils.hpp"
 
 #include "m2m_message.hpp"
 
@@ -44,101 +45,75 @@ const size_t MAX_M2M_MESSAGE_SIZE = 128;
 
 namespace cleric {
 
-struct M2MHeader {
-  boost::endian::big_uint16_buf_t boxId;
-  boost::endian::big_uint32_buf_t nonce;
-};
+M2MMessage::M2MMessage(const BoxId &boxId_, const M2MPayload &p_)
+    : boxId(boxId_), payload(p_) {}
 
-yrand_generator M2MMessage::nonceToGenerator() const {
-  return yrand_seed((uint64_t)nonce + (uint64_t)nonce << 32,
-                    (uint64_t)nonce + (uint64_t)nonce << 32);
+uint64_t M2MMessage::stringToInt(const ::std::string &str) {
+  uint64_t result;
+  std::stringstream ss;
+  ss << std::hex << str;
+  ss >> result;
+  return result;
 }
 
-void M2MMessage::encryptPayload() {
-  auto generator = nonceToGenerator();
-  for (auto &b : payload) {
-    b ^= yrand_rand(&generator);
-  }
+static void bufferToSensorData(uint64_t buff, uint32_t &type, uint32_t &value,
+                               uint32_t &vcc) {
+  type = (buff >> 22) & 511;
+  value = buff & 1023;
+  vcc = (buff >> 11) & 1023;
 }
 
-void M2MMessage::decryptPayload() { encryptPayload(); }
-
-M2MMessage M2MMessage::decode(const std::string &message) {
-  if (message.size() == 0 || message.size() > MAX_M2M_MESSAGE_SIZE) {
+M2MMessage M2MMessage::decode(const std::string &message, uint64_t secret) {
+  if (message.size() != 48) {
     throw length_error("M2M message out of bounds");
   }
 
-  auto messageLen = base64_dec_len(message.c_str(), message.size());
+  uint64_t boxId = stringToInt(message.substr(0, 8));
+  uint64_t timestamp = stringToInt(message.substr(8, 8));
+  uint64_t random = stringToInt(message.substr(16, 16));
+  uint64_t payloadRaw = stringToInt(message.substr(32, 16));
 
-  if (messageLen < sizeof(uint8_t) + sizeof(uint64_t)) {
-    throw length_error("M2M message too short");
+  uint64_t decodedPayload = 0;
+  auto yrand_generator = yrand_seed(timestamp ^ random, secret);
+  for (int i = 0; i < sizeof(payloadRaw); i++) {
+    uint8_t b = payloadRaw >> (i * 8) & 0xff;
+    uint8_t key = (uint8_t)(yrand_rand(&yrand_generator) & 0xff);
+    decodedPayload += ((uint64_t)(b ^ key)) << (i * 8);
   }
 
+  // check if copies match
+  uint32_t c1 = decodedPayload & 0xffffffff;
+  uint32_t c2 = (decodedPayload >> 32) & 0xffffffff;
 
+  if (c1 != c2) {
+	  // TODO: potential security flaw, but there is security by obscurity in this solution
+	  // TODO: review once real encryption is in place
+	  throw invalid_argument("Wrong format, CRC fail");
+  }
 
-  auto decoded = make_unique<uint8_t[]>(messageLen);
-  base64_decode(const_cast<uint8_t *>(decoded.get()), message.c_str(),
-                message.size());
+  uint32_t type, reading, vcc;
+  bufferToSensorData(decodedPayload, type, reading, vcc);
 
-  auto header = reinterpret_cast<M2MHeader *>(decoded.get());
+  M2MPayload payload = M2MPayload{type, reading, vcc};
 
-  auto encrypted = decoded.get() + sizeof(M2MHeader);
-  auto encryptedLen = messageLen - sizeof(M2MHeader);
-
-  std::vector<uint8_t> payload;
-  payload.assign(encrypted, encrypted + encryptedLen);
-
-  M2MMessage p = {header->boxId.value(), header->nonce.value(), payload};
-  p.decryptPayload();
+  M2MMessage p = {(BoxId)boxId, payload};
 
   return p;
 }
 
-std::string M2MMessage::encode(const M2MMessage &msg) {
-  M2MMessage buff = msg;
-  buff.encryptPayload();
-
-  M2MHeader header;
-  header.boxId = buff.getBoxId();
-  header.nonce = buff.getNonce();
-
-  auto data = buff.payload;
-  data.insert(data.begin(), (uint8_t *)&header,
-              ((uint8_t *)&header) + sizeof(M2MHeader));
-
-  auto messageLen = base64_enc_len(data.size());
-  auto encoded =
-      make_unique<char[]>(messageLen + 1);  // 1 to account for the termination
-  auto len = base64_encode(const_cast<char *>(encoded.get()), data.data(),
-                           data.size());
-
-  assert(len == messageLen);
-
-  return encoded.get();
-}
-
 BoxId M2MMessage::getBoxId() const { return boxId; }
 
-M2MNonce M2MMessage::getNonce() const { return nonce; }
+BoxId M2MMessage::getBoxId(const ::std::string &message) {
+  if (message.size() < 8) {
+    throw invalid_argument("Message too short");
+  }
 
-M2MMessage::M2MMessage(BoxId id, const M2MPaylaod &p) : payload(p), boxId(id) {
-  std::default_random_engine generator;
-  std::uniform_int_distribution<int> uniform_dist;
-
-  nonce = uniform_dist(generator);
+  return (BoxId)stringToInt(message.substr(0, 8));
 }
-
-size_t M2MMessage::size() { return payload.size(); }
-
-uint8_t &M2MMessage::operator[](int x) { return payload[x]; }
 
 M2MMessage::M2MMessage(const M2MMessage &&other) {
   boxId = other.boxId;
-  nonce = other.nonce;
   payload = std::move(other.payload);
 }
 
-M2MMessage::M2MMessage(BoxId boxId, M2MNonce nonce, M2MPaylaod &payload)
-    : boxId(boxId), nonce(nonce), payload(payload) {}
-
-}  // namespace cleric
+} // namespace cleric

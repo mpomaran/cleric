@@ -25,8 +25,7 @@ SOFTWARE.
 */
 
 #include "cleric_app.hpp"
-#include <stdio.h>
-#include <string>
+#include "controller/m2m_controller.hpp"
 #include "cpprest/details/basic_types.h"
 #include "granada/cache/redis_cache_driver.h"
 #include "granada/defaults.h"
@@ -35,14 +34,17 @@ SOFTWARE.
 #include "granada/http/oauth2/redis_oauth2.h"
 #include "granada/http/session/map_session.h"
 #include "granada/http/session/redis_session.h"
+#include <easylogging++.h>
+#include <stdio.h>
+#include <string>
 
 ClericApp::ClericApp() {}
 
 ClericApp::~ClericApp() {
-  for (auto const& controller : controllers) {
+  for (auto const &controller : controllers) {
     controller->close().wait();
   }
-  ucout << "Controllers destroyed" << std::endl;
+  LOG(INFO) << "[ClericApp] {controllers_destroyed}";
 }
 
 void ClericApp::go() {
@@ -72,10 +74,12 @@ void ClericApp::go() {
   // If this property equals "on" we will use browser controller.
   std::string browser_module =
       granada::util::application::GetProperty("browser_controller");
+
+  std::shared_ptr<granada::http::session::SessionFactory>
+      map_simple_session_factory(
+          new granada::http::session::MapSessionFactory());
+
   if (!browser_module.empty() && browser_module == "on") {
-    std::shared_ptr<granada::http::session::SessionFactory>
-        map_simple_session_factory(
-            new granada::http::session::MapSessionFactory());
 
     uri_builder uri(address);
     auto addr = uri.to_uri().to_string();
@@ -84,35 +88,17 @@ void ClericApp::go() {
             addr, map_simple_session_factory));
     browser_controller->open().wait();
     controllers.push_back(std::move(browser_controller));
-    ucout << "Browser Controller: Initialized... Listening for requests at: "
-          << addr << std::endl;
+    LOG(INFO) << "[ClericApp] {browser_controller_initialized} {" << addr
+              << "}";
   }
 
-  // uri_builder uri(address);
-  // uri.append_path(U("cart"));
-  // auto addr = uri.to_uri().to_string();
-  // std::unique_ptr<granada::http::controller::CartController> cart_controller(
-  //    new granada::http::controller::CartController(addr));
-  // try {
-  //  cart_controller->open().wait();
-  //  g_controllers.push_back(std::move(cart_controller));
-  //  ucout << "Cart Controller: Initialized... Listening for requests at: "
-  //        << addr << std::endl;
-
-  //  uri_builder auth_uri(address);
-  //  auth_uri.append_path(U("auth"));
-  //  addr = auth_uri.to_uri().to_string();
-  //  std::unique_ptr<granada::http::controller::AuthController>
-  //  auth_controller(
-  //      new granada::http::controller::AuthController(addr));
-  //  auth_controller->open().wait();
-  //  g_controllers.push_back(std::move(auth_controller));
-  //  ucout << "Auth Controller: Initialized... Listening for requests at: "
-  //        << addr << std::endl;
-  //} catch (std::exception& e) {
-  //  ucout << e.what() << std::endl;
-  //  throw;
-  //}
-
-  return;
+  uri_builder test_uri(address);
+  test_uri.append_path(_XPLATSTR("m2m/1/"));
+  auto addr = test_uri.to_uri().to_string();
+  std::unique_ptr<granada::http::controller::Controller> m2m_controller(
+      new cleric::http::controller::M2MController(addr,
+                                                  map_simple_session_factory));
+  m2m_controller->open().wait();
+  controllers.push_back(std::move(m2m_controller));
+  LOG(INFO) << "[ClericApp] {m2m_controller_initialized} {" << addr << "}";
 }
