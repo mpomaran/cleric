@@ -28,32 +28,32 @@ SOFTWARE.
 #define MEM_BOX_SERIALIZATION_STRATEGY_HPP_HAS_BEEN_INCLUDED
 
 #include "box_serialization_strategy.hpp"
+#include <easylogging++.h>
 #include <istream>
 #include <ostream>
 #include <string>
-#include <easylogging++.h>
 
 namespace cleric {
-	namespace data {
-		class MemBoxSerializationStrategy
-			: public cleric::data::IBoxSerializationStrategy {
-		public:
-			MemBoxSerializationStrategy(const ::std::string &message) { is << message; }
-			MemBoxSerializationStrategy() {}
+namespace data {
+class MemBoxSerializationStrategy
+    : public cleric::data::IBoxSerializationStrategy {
+public:
+  MemBoxSerializationStrategy(const ::std::string &message) {
+    data.assign(message.c_str(), message.c_str() + message.length());
+  }
+  MemBoxSerializationStrategy() {}
 
-			// Inherited via IBoxSerializationStrategy
-			virtual ::std::istream &getIStream() override { return is; }
-			virtual ::std::ostream &getOStream() override { return os; }
+  // Inherited via IBoxSerializationStrategy
+  virtual ::std::vector<uint8_t> get() override { return data; }
+  virtual void put(const ::std::vector<uint8_t> &data) override {
+    this->data = data;
+  }
 
-			virtual void syncOStream() override {
-				VLOG(1) << "[box_serialization_strategy] {box_serialized_data} {dataLen='" << os.str().length() << "'}";
-				std::stringstream().swap(os);
-			}
-
-		private:
-			::std::stringstream os, is;
-		};
-	}
-}
+private:
+  std::vector<uint8_t> data;
+};
+} // namespace data
+} // namespace cleric
 
 #endif
+

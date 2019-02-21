@@ -24,9 +24,9 @@ SOFTWARE.
 
 */
 
-#ifndef M2M_CONTROLLER_HPP_HAS_BEEN_INCLUDED
-#define M2M_CONTROLLER_HPP_HAS_BEEN_INCLUDED
+#pragma once
 
+#include "../data/box.hpp"
 #include "cpprest/details/basic_types.h"
 #include "granada/http/controller/controller.h"
 #include "granada/http/parser.h"
@@ -37,19 +37,12 @@ namespace cleric {
 namespace http {
 namespace controller {
 
-namespace test {
-class RestControllerTester;
-extern bool isGetInvoked;
-extern bool isPostInvoked;
-
-} // namespace test
-
-class M2MController : public granada::http::controller::Controller {
+class BoxesController : public granada::http::controller::Controller {
 public:
   /**
    * Constructor
    */
-  M2MController(
+  BoxesController(
       utility::string_t url,
       std::shared_ptr<granada::http::session::SessionFactory> &session_factory);
 
@@ -68,10 +61,30 @@ private:
 
   std::shared_ptr<granada::http::session::SessionFactory> sessionFactory;
 
-  friend class test::RestControllerTester;
+  /**
+   * Replies with a status code and an empty content
+   * @param request HTTP request
+   * @param statusCode HTTP status, for example 404 if not found
+   */
+  void reply(web::http::http_request &request,
+             web::http::status_code statusCode);
+
+  /**
+   * Replies with a status code and an empty content
+   * @param request HTTP request
+   * @param statusCode HTTP status, for example OK
+   * @param body reply in the text format
+   */
+  void reply(web::http::http_request &request,
+             web::http::status_code statusCode, const std::string &body);
+
+  /**
+   * Serializes list of all boxes available on the server
+   * THIS is for development purposes only, to be removed before the first release
+   */
+  ::std::string boxListToJSon(const ::std::vector<::cleric::BoxId> &boxes);
+
 };
 } // namespace controller
 } // namespace http
 } // namespace cleric
-
-#endif

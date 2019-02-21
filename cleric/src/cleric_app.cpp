@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include "cleric_app.hpp"
 #include "controller/m2m_controller.hpp"
+#include "controller/boxes_controller.hpp"
 #include "cpprest/details/basic_types.h"
 #include "granada/cache/redis_cache_driver.h"
 #include "granada/defaults.h"
@@ -92,13 +93,28 @@ void ClericApp::go() {
               << "}";
   }
 
-  uri_builder test_uri(address);
-  test_uri.append_path(_XPLATSTR("m2m/1/"));
-  auto addr = test_uri.to_uri().to_string();
-  std::unique_ptr<granada::http::controller::Controller> m2m_controller(
-      new cleric::http::controller::M2MController(addr,
-                                                  map_simple_session_factory));
-  m2m_controller->open().wait();
-  controllers.push_back(std::move(m2m_controller));
-  LOG(INFO) << "[ClericApp] {m2m_controller_initialized} {" << addr << "}";
+  {
+	  uri_builder test_uri(address);
+	  test_uri.append_path(_XPLATSTR("m2m/1/"));
+	  auto addr = test_uri.to_uri().to_string();
+	  std::unique_ptr<granada::http::controller::Controller> m2m_controller(
+		  new cleric::http::controller::M2MController(addr,
+			  map_simple_session_factory));
+	  m2m_controller->open().wait();
+	  controllers.push_back(std::move(m2m_controller));
+	  LOG(INFO) << "[ClericApp] {m2m_controller initialized} {" << addr << "}";
+  }
+
+  {
+	  uri_builder test_uri(address);
+	  test_uri.append_path(_XPLATSTR("api/boxes"));
+	  auto addr = test_uri.to_uri().to_string();
+	  std::unique_ptr<granada::http::controller::Controller> boxes_controller(
+		  new cleric::http::controller::BoxesController(addr,
+			  map_simple_session_factory));
+	  boxes_controller->open().wait();
+	  controllers.push_back(std::move(boxes_controller));
+	  LOG(INFO) << "[ClericApp] {boxes_controller initialized} {" << addr << "}";
+
+  }
 }

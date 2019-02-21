@@ -24,8 +24,7 @@ SOFTWARE.
 
 */
 
-#ifndef BOX_SERVER_HPP_HAS_BEEN_INCLUDED
-#define BOX_SERVER_HPP_HAS_BEEN_INCLUDED
+#pragma once
 
 #include "../business/m2m_message.hpp"
 #include "box.hpp"
@@ -42,16 +41,18 @@ public:
   ~BoxServer();
 
   ::std::shared_ptr<cleric::data::Box> getBoxById(const ::cleric::BoxId &boxId);
+  ::std::vector<::cleric::BoxId> getAllBoxes() const;
+
 private:
   ::std::unordered_map<::cleric::BoxId, ::std::shared_ptr<cleric::data::Box>>
       boxCache;
   ::std::mutex boxCacheMtx;
 
   ::std::unique_ptr<::std::thread> delayedWriteThread;
-  ::std::atomic_bool shouldStopDelayedWrite;	// TODO verify if atomic is needed; before the stable release
-  void delayedWriteOnce(); // goes over the map and persists all dirty boxes, then exits
+  ::std::atomic_bool shouldStopDelayedWrite; // TODO verify if atomic is needed;
+                                             // before the stable release
+  void delayedWriteOnce(); // goes over the map and persists all dirty boxes,
+                           // then exits
 };
 } // namespace data
 } // namespace cleric
-
-#endif

@@ -43,17 +43,13 @@ public:
                               const ::std::string &storagePath);
 
   // Inherited via IBoxSerializationStrategy
-  virtual ::std::istream &getIStream() override;
-  virtual ::std::ostream &getOStream() override;
-
-  virtual void syncOStream() override;
-
+  virtual ::std::vector<uint8_t> get();
+  virtual void put(const ::std::vector<uint8_t> &data);
 private:
-  ::std::ifstream is;
-  ::std::ofstream os;
-  ::std::string fn;
-  ::std::string tempFn;
-  ::std::string bckFn;
+	::cleric::BoxId boxId;
+	::std::string storagePath;
+
+	::std::string fn, tempFn, bckFn;
 };
 } // namespace data
 } // namespace cleric

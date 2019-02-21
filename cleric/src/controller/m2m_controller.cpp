@@ -46,7 +46,7 @@ cleric::http::controller::M2MController::M2MController(
   m_listener_->support(methods::GET, std::bind(&M2MController::handleGet, this,
                                                std::placeholders::_1));
 
-  LOG(INFO) << "[M2MController] {m2m_controller_created}";
+  LOG(INFO) << "[M2MController] {/m2m conroller created}";
 }
 
 void cleric::http::controller::M2MController::handleGet(http_request request) {

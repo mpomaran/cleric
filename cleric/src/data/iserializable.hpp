@@ -24,23 +24,30 @@ SOFTWARE.
 
 */
 
-#ifndef PROPS_HPP_HAS_BEEN_INCLUDED
-#define PROPS_HPP_HAS_BEEN_INCLUDED
+#ifndef ISERIALIZABLE_HAS_BEEN_DEFINED
+#define ISERIALIZABLE_HAS_BEEN_DEFINED
 
-#include <string>
+#include <stdint.h>
+#include <vector>
+#include <sstream>
 
-namespace cleric
-{
-	namespace props {
-		extern const std::string STORAGE_STRATEGY_PROP_NAME;
-		extern const std::string STORAGE_STRATEGY_PROP_DEFAULT;
-		extern const std::string STORAGE_STRATEGY_PROP_MEMORY;
-		extern const std::string STORAGE_STRATEGY_PROP_HDD;
-		extern const std::string STORAGE_ROOT_PROP_NAME;
-		extern const std::string STORAGE_ROOT_PROP_DEFAULT;
-		extern const std::string WWW_ROOT_PROP_NAME;
-		extern const std::string WWW_ROOT_PROP_DEFAULT;
-	}
-}
+namespace cleric {
+namespace data {
+
+class ISerializable {
+public:
+  virtual std::vector<uint8_t> toByteArray() const = 0;
+  virtual void fromByteArray(const std::vector<uint8_t> &data) = 0;
+
+  static ::std::vector<uint8_t> toBuffer(::std::stringstream &ss) {
+	  std::vector<uint8_t> result;
+	  const auto str = ss.str();
+	  result.assign((uint8_t *)str.c_str(), (uint8_t *)str.c_str() + str.size());
+	  return result;
+  }
+};
+
+} // namespace data
+} // namespace cleric
 
 #endif

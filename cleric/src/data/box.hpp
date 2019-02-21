@@ -29,6 +29,7 @@ SOFTWARE.
 
 #include "../business/m2m_message.hpp"
 #include "box_serialization_strategy.hpp"
+#include "iserializable.hpp"
 #include <chrono>
 #include <deque>
 #include <exception>
@@ -46,22 +47,25 @@ public:
 
 namespace data {
 
-class Box {
+class Box : public ISerializable {
 public:
-  Box(::std::unique_ptr<IBoxSerializationStrategy> serializationStrategy);
-  Box(const cleric::BoxId &boxId, const ::std::chrono::hours &retention,
-      int maxEntries,
+  Box(const cleric::BoxId &boxId, const ::std::string &name,
+      const ::std::chrono::hours &retention, int maxEntries,
       ::std::unique_ptr<IBoxSerializationStrategy> serializationStrategy);
+
+  Box(::std::unique_ptr<IBoxSerializationStrategy> serializationStrategy);
+
   Box(const Box &box) = default;
+
   Box(Box &&other);
+
   ~Box();
 
+  // Inherited via ISerializable
+  virtual std::vector<uint8_t> toByteArray() const override;
+  virtual void fromByteArray(const std::vector<uint8_t> &data) override;
+
   ::std::string process(const ::std::string &message);
-
-  friend ::std::ostream &operator<<(::std::ostream &os,
-                                    const cleric::data::Box &b);
-
-  friend ::std::istream &operator>>(::std::istream &is, cleric::data::Box &b);
 
   friend bool operator==(const cleric::data::Box &b1,
                          const cleric::data::Box &b2);
@@ -72,37 +76,49 @@ public:
   }
   int getMaxEntries() const { return maxEntries; }
   void setMaxEntries(int maxEntries) { this->maxEntries = maxEntries; }
+
   ::std::chrono::milliseconds getHowLongIsDirty();
   bool isDirty() { return dirty; }
   void setDirty(bool dirty) { this->dirty = dirty; }
+
+  std::string getName() const { return name; }
+  void setName(const std::string &name_) { name = name_; }
+
+  std::string toJson() const;
 
   // use serialization strategy to store itself
   void persist();
 
 private:
-  volatile bool initialized; 
-  volatile bool dirty;	// TODO MPP consider it should be atomic; remove before the stable release
+  volatile bool initialized;
+  volatile bool dirty; // TODO MPP consider it should be atomic; remove before
+                       // the stable release
   ::std::chrono::system_clock::time_point lastWrite;
   cleric::BoxId id;
+  ::std::string name;
   ::std::chrono::milliseconds retention;
   size_t maxEntries;
   ::std::unique_ptr<cleric::data::IBoxSerializationStrategy>
       serializationStrategy;
 
   struct DataPoint {
-    long long
-        rcvTimeInMsSinceEpoch; // chrono not supported during serialization
-    long sensorType;
+    uint64_t rcvTimeInMsSinceEpoch; // chrono not supported during serialization
+    uint64_t sensorType;
     double value;
     double vcc;
     ::std::string originalMessage;
     ::std::string secret;
 
     bool operator==(const cleric::data::Box::DataPoint &other) const;
+    static double fromSensorFormatToVolts(uint64_t sensorVCC);
+    static double fromSensorFormatToValue(uint64_t sensorValue,
+                                          uint64_t sensorType, double vcc);
 
     MSGPACK_DEFINE(rcvTimeInMsSinceEpoch, sensorType, value, vcc,
                    originalMessage, secret);
   };
+
+  std::string dataPointsToJSon() const;
 
   mutable ::std::mutex mtx; // mutex for locking data point accesss
   ::std::deque<DataPoint>

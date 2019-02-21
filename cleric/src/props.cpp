@@ -35,5 +35,7 @@ namespace cleric
 		const std::string STORAGE_STRATEGY_PROP_HDD = "hdd";
 		const std::string STORAGE_ROOT_PROP_NAME = "storage-root";
 		const std::string STORAGE_ROOT_PROP_DEFAULT = "storage";
+		const std::string WWW_ROOT_PROP_NAME = "root_path";
+		const std::string WWW_ROOT_PROP_DEFAULT = "/www";
 	}
 }

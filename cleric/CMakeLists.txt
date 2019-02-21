@@ -20,6 +20,7 @@ ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 
 include_directories(include)
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/easyloggingpp-master/src")
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0")
 
 add_executable(cleric-server
   ${CMAKE_SOURCE_DIR}/thirdparty/easyloggingpp-master/src/easylogging++.cc
@@ -43,6 +44,8 @@ add_executable(cleric-server
   src/data/hdd_box_serialization_strategy_test.cpp
   src/controller/m2m_controller.cpp
   src/controller/m2m_controller_test.cpp
+  src/controller/boxes_controller.cpp
+  src/controller/boxes_controller_test.cpp
   ${GRANADA_SOURCE_DIR}/cache/redis_cache_driver.cpp
   ${GRANADA_SOURCE_DIR}/cache/shared_map_cache_driver.cpp
   ${GRANADA_SOURCE_DIR}/cache/web_resource_cache.cpp

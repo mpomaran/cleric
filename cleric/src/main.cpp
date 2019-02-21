@@ -72,11 +72,13 @@ int main(int argc, char *argv[]) {
 		// Declare the supported options.
 		po::options_description desc("Allowed options");
 		const auto storageStrategyDescription = std::string() + "storage strategy (default = " + cleric::props::STORAGE_STRATEGY_PROP_DEFAULT + ", available: " + cleric::props::STORAGE_STRATEGY_PROP_MEMORY + ", " + cleric::props::STORAGE_STRATEGY_PROP_HDD + ")";
-		const auto storageRootDescription = std::string() + "www root(current_directory/" + cleric::props::STORAGE_ROOT_PROP_DEFAULT + " if not specified)";
+		const auto storageRootDescription = std::string() + "storage root(current_directory/" + cleric::props::STORAGE_ROOT_PROP_DEFAULT + " if not specified)";
+		const auto wwwRootDescription = std::string() + "www root(current_directory/" + cleric::props::WWW_ROOT_PROP_DEFAULT + " if not specified)";
+
 		desc.add_options()
 			("help", "produce help message, for logging options see https://github.com/zuhd-org/easyloggingpp")
 			("tests-only", "run unit tests, do not start server")
-			("www-root", po::value<string>(), "www root (current_directory/www if not specified)")
+			(cleric::props::WWW_ROOT_PROP_NAME.c_str(), po::value<string>(), wwwRootDescription.c_str())
 			(cleric::props::STORAGE_ROOT_PROP_NAME.c_str(), po::value<string>(), storageRootDescription.c_str())
 			("prop-file", po::value<string>(), "configuration file (current_dir/cleric.properties if not specified)")
 			(cleric::props::STORAGE_STRATEGY_PROP_NAME.c_str(), po::value<string>(), storageStrategyDescription.c_str());
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) {
 			granada::util::application::set_property_file(propFile);
 
 			// expose properties to others
-			exposeProperty("www-root", "www", vm);
+			exposeProperty(cleric::props::WWW_ROOT_PROP_NAME, cleric::props::WWW_ROOT_PROP_DEFAULT, vm);
 			exposeProperty(cleric::props::STORAGE_ROOT_PROP_NAME, cleric::props::STORAGE_ROOT_PROP_DEFAULT, vm);
 			exposeProperty(cleric::props::STORAGE_STRATEGY_PROP_NAME, cleric::props::STORAGE_STRATEGY_PROP_DEFAULT, vm);
 

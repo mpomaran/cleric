@@ -56,10 +56,14 @@ cleric::data::BoxServer::BoxServer() : shouldStopDelayedWrite(false) {
       delayedWriteOnce();
     }
   });
+
+  // TODO restore list of stored boxes - before the first release
 }
 
 cleric::data::BoxServer::~BoxServer() {
   try {
+    // todo save list of stored boxes - before the first release
+
     shouldStopDelayedWrite = true;
     if (delayedWriteThread->joinable()) {
       delayedWriteThread->join();
@@ -82,7 +86,9 @@ cleric::data::BoxServer::getBoxById(const cleric::BoxId &boxId) {
         std::chrono::hours(24 * 365); // TODO expose in configurtion
     auto maxEntries = 1000;           // TODO expose in configurtion
 
-    LOG(INFO) << "[BoxServer@" << (void *)this << "@" << this_thread::get_id() << "::getBoxById] {createBox} {boxId='" << boxId << "'"
+    LOG(INFO) << "[BoxServer@" << (void *)this << "@" << this_thread::get_id()
+              << "::getBoxById] {createBox} {boxId='" << boxId << "'"
+              << " name='" << to_string(boxId) << "'"
               << " storageStrategy='" << storageStrategy << "'"
               << " retentionPeriod='" << retentionPeriod.count() << "'"
               << " maxEntries='" << maxEntries << "'}";
@@ -90,8 +96,8 @@ cleric::data::BoxServer::getBoxById(const cleric::BoxId &boxId) {
     if (storageStrategy == cleric::props::STORAGE_STRATEGY_PROP_MEMORY) {
       std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer{
           new MemBoxSerializationStrategy()};
-      auto box = make_shared<Box>(boxId, retentionPeriod, maxEntries,
-                                  std::move(serializer));
+      auto box = make_shared<Box>(boxId, to_string((int)boxId), retentionPeriod,
+                                  maxEntries, std::move(serializer));
       boxCache[boxId] = box;
       LOG(INFO) << "[BoxServer::getBoxById] {createBox} {new_box}";
       return box;
@@ -99,10 +105,12 @@ cleric::data::BoxServer::getBoxById(const cleric::BoxId &boxId) {
       auto storagePath = granada::util::application::GetProperty(
           cleric::props::STORAGE_ROOT_PROP_NAME);
 
-	  std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer{
+      std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer{
           new HddBoxSerializationStrategy(boxId, storagePath)};
 
-      if (!serializer->getIStream().fail()) {
+      auto buff = serializer->get();
+
+      if (buff.size() != 0) {
         try {
           auto box = make_shared<Box>(std::move(serializer));
           boxCache[boxId] = box;
@@ -115,16 +123,17 @@ cleric::data::BoxServer::getBoxById(const cleric::BoxId &boxId) {
         }
       }
 
-	  if (!serializer) {
-		  // we're here because of the exception below, recreate serializer
-		  std::unique_ptr<cleric::data::IBoxSerializationStrategy> newSerializer{
-		  new HddBoxSerializationStrategy(boxId, storagePath) };
-		  serializer = move(newSerializer);
-	  }
+      if (!serializer) {
+        // we're here because of the exception during derserialisation, recreate
+        // serializer
+        std::unique_ptr<cleric::data::IBoxSerializationStrategy> newSerializer{
+            new HddBoxSerializationStrategy(boxId, storagePath)};
+        serializer = move(newSerializer);
+      }
 
       LOG(INFO) << "[BoxServer::getBoxById] {createBox} {new_box}";
-      auto box = make_shared<Box>(boxId, retentionPeriod, maxEntries,
-                                  std::move(serializer));
+      auto box = make_shared<Box>(boxId, to_string((int)boxId), retentionPeriod,
+                                  maxEntries, std::move(serializer));
       boxCache[boxId] = box;
       return box;
     } else {
@@ -133,6 +142,13 @@ cleric::data::BoxServer::getBoxById(const cleric::BoxId &boxId) {
   } else {
     return cached->second;
   }
+}
+
+vector<::cleric::BoxId> cleric::data::BoxServer::getAllBoxes() const {
+  vector<::cleric::BoxId> keys;
+  transform(boxCache.begin(), boxCache.end(), back_inserter(keys),
+            [](auto pair) { return pair.first; });
+  return keys;
 }
 
 // delayed write of the box tada

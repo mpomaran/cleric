@@ -35,9 +35,8 @@ namespace data {
 
 class IBoxSerializationStrategy {
 public:
-  virtual ::std::istream &getIStream() = 0;
-  virtual ::std::ostream &getOStream() = 0;
-  virtual void syncOStream() = 0;
+	virtual ::std::vector<uint8_t> get() = 0;
+	virtual void put(const ::std::vector<uint8_t> &data) = 0;
 };
 
 } // namespace data

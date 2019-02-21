@@ -26,16 +26,16 @@ SOFTWARE.
 
 #include "hdd_box_serialization_strategy.hpp"
 #include <boost/filesystem.hpp>
+#include <cstdio>
+#include <cstring>
 #include <easylogging++.h>
 #include <exception>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
 using namespace std;
 
 cleric::data::HddBoxSerializationStrategy::HddBoxSerializationStrategy(
-    const ::cleric::BoxId &boxId, const ::std::string &storagePath) {
+    const ::cleric::BoxId &boxId_, const ::std::string &storagePath_)
+    : boxId(boxId_), storagePath(storagePath_) {
   stringstream ss;
   ss << storagePath << "/box_" << boxId << ".dat";
   fn = ss.str();
@@ -59,68 +59,82 @@ cleric::data::HddBoxSerializationStrategy::HddBoxSerializationStrategy(
                   "{unexpected_exception} {what='"
                << e.what() << "'}";
   }
-  is.setstate(ios::failbit);
-  os.setstate(ios::failbit);
 }
 
-::std::istream &cleric::data::HddBoxSerializationStrategy::getIStream() {
-  // TODO rework this wierd reading before beta - get streams is not good
-  // mechanism
-  if (is.is_open()) {
-    is.close();
+::std::vector<uint8_t> cleric::data::HddBoxSerializationStrategy::get() {
+  const uint32_t MAX_FILE_SIZE = 10 * 1024 * 1024;
+  vector<uint8_t> result;
+  FILE *in = fopen(fn.c_str(), "rb");
+  if (!in) {
+    LOG(WARNING) << "[HddBoxSerializationStrategy::get] "
+                    "{cannot open file for reading} "
+                 << "{file='" << fn << "'} "
+                 << "{message='" << strerror(errno) << "'} { errno=" << errno
+                 << "}";
+
+    return result;
   }
 
+  auto size = boost::filesystem::file_size(fn);
+  if (size >= MAX_FILE_SIZE) {
+    LOG(ERROR) << "[HddBoxSerializationStrategy::get] "
+                  "{file too big} {size='"
+               << size << "}";
+    fclose(in);
+    throw out_of_range("File " + fn + " too big to read");
+  }
+
+  // TODO benchmark and modify the API before the first release if needed
+  auto raw = make_unique<uint8_t[]>(size);
+  if (size != fread(raw.get(), 1, size, in)) {
+    LOG(ERROR) << "[HddBoxSerializationStrategy::get] "
+                  "{error during read} "
+               << "{file = '" << fn << "'} "
+               << "{message='" << strerror(errno) << "'} { errno=" << errno
+               << "}";
+    fclose(in);
+    return result;
+  }
+  fclose(in);
+  result.assign(raw.get(), raw.get() + size);
+
+  return result;
+}
+
+void cleric::data::HddBoxSerializationStrategy::put(
+    const ::std::vector<uint8_t> &data) {
   try {
-    is.open(fn, ios::binary);
-  } catch (const exception &e) {
-    LOG(WARNING) << "[HddBoxSerializationStrategy::getIStream] "
-                    "{unexpected_exception} {what='"
-                 << e.what() << "'}";
-    is.setstate(ios::failbit);
-  }
-
-  return is;
-}
-
-::std::ostream &cleric::data::HddBoxSerializationStrategy::getOStream() {
-  if (os.is_open()) {
-    return os;
-  }
-
-  try {
-    os.open(tempFn, ios::binary);
-  } catch (const exception &e) {
-    LOG(WARNING) << "[HddBoxSerializationStrategy::getOStream] "
-                    "{unexpected_exception} {what='"
-                 << e.what() << "'}";
-    os.setstate(ios::failbit);
-  }
-  return os;
-}
-
-void cleric::data::HddBoxSerializationStrategy::syncOStream() {
-  if (is.is_open()) {
-    is.close();
-  }
-
-  if (os.good()) {
-    try {
-      os.close();
-
-      if (boost::filesystem::exists(fn)) {
-        if (boost::filesystem::exists(bckFn)) {
-          boost::filesystem::remove_all(bckFn);
-        }
-        boost::filesystem::rename(fn, bckFn);
-      }
-      boost::filesystem::rename(tempFn, fn);
-      boost::filesystem::remove_all(bckFn);
-      os.setstate(ios::failbit);
-    } catch (const exception &e) {
-      LOG(WARNING) << "[HddBoxSerializationStrategy::syncOStream] "
-                      "{unexpected_exception} {what='"
-                   << e.what() << "'}";
-      os.setstate(ios::failbit);
+    FILE *out = fopen(tempFn.c_str(), "wb");
+    if (!out) {
+      LOG(ERROR) << "[HddBoxSerializationStrategy::put] "
+                    "{cannot open file for writing} "
+                 << "{file='" << tempFn << "'} "
+                 << "{message='" << strerror(errno) << "'} { errno=" << errno
+                 << "}";
+      return;
     }
+    if (data.size() != fwrite(data.data(), 1, data.size(), out)) {
+      fclose(out);
+      LOG(ERROR) << "[HddBoxSerializationStrategy::put] "
+                    "{cannot write data} "
+                 << "{file='" << tempFn << "'} "
+                 << "{message='" << strerror(errno) << "'} { errno=" << errno
+                 << "}";
+	  return;
+    }
+	fclose(out);
+
+    if (boost::filesystem::exists(fn)) {
+      if (boost::filesystem::exists(bckFn)) {
+        boost::filesystem::remove_all(bckFn);
+      }
+      boost::filesystem::rename(fn, bckFn);
+    }
+    boost::filesystem::rename(tempFn, fn);
+    boost::filesystem::remove_all(bckFn);
+  } catch (const exception &e) {
+    LOG(WARNING) << "[HddBoxSerializationStrategy::syncOStream] "
+                    "{unexpected_exception} {what='"
+                 << e.what() << "'}";
   }
 }
