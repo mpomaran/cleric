@@ -4,11 +4,14 @@ set (CMAKE_VERBOSE_MAKEFILE ON)
 
 # to disable conflict with boost
 #add_definitions(-D_TURN_OFF_PLATFORM_STRING)
-
 set (BOOST_DEBUG FALSE CACHE BOOL "Debug on boost not needed" FORCE)
 set (BOOST_USE_MULTITHREADED TRUE CACHE BOOL "MT ON, please" FORCE)
 
+set (THIRD_PARTY_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
+
 message (STATUS "System processor: " ${CMAKE_SYSTEM_PROCESSOR})
+
+set (WEBSOCKETPP_DIR "${CMAKE_SOURCE_DIR}/libs/websocket-0.8.1")
 
 IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
 	message ("Compiling for ARM")
@@ -16,38 +19,45 @@ IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 	SET(CXX_FLAGS "-Wno-conversion -fPIC")
 	SET(LINKER_FLAGS "")
 
-	set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/include")
-	set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/lib")
-	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/include")
-	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/arm_boost_1_66_0/lib")
+	set (BOOST_INCLUDEDIR "${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/include")
+	set (BOOST_LIBRARYDIR "${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/lib")
+
+	message ("${BOOST_INCLUDEDIR}")
+
+	include_directories("${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/include")
+	link_directories("${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/lib")
 	set(WERROR OFF CACHE BOOL "Do not treat Warnings as Errors.")
 
-	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/arm_openssl-1.0.2n")
-	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/arm_openssl-1.0.2n/lib")
+	include (FindOpenSSL)
+
 ELSE() 
 	message ("Compiling for Windows")
-	set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
-	set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
-	set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
-	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
-	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
+#	set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
+#	set (BOOST_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0")
+#	set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
+#	set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
+#	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
+#	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
 
-	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n")
-	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/lib")
-	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/include")
+#	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n")
+#	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/lib")
+#	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/include")
 ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
 
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}" )
 SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}" )
 
-set (ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/thirdparty/zlib-1.2.11/lib/zlibstaticd.lib")
-set (ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/zlib-1.2.11/include")
+#set (ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/thirdparty/zlib-1.2.11/lib/zlibstaticd.lib")
+#set (ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/zlib-1.2.11/include")
 
-set (CPPREST_EXCLUDE_WEBSOCKETS ON CACHE BOOL "Disable websockets" FORCE)
+set (CPPREST_EXCLUDE_WEBSOCKETS ON CACHE BOOL "Enable websockets" FORCE)
 
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/redisclient-0.6.0/include")
 
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/msgpack-c-cpp-3.1.1/include")
+
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0/")
+
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 3.1)
 if(POLICY CMP0042)
@@ -66,13 +76,13 @@ set(CPPREST_VERSION_REVISION 9)
 enable_testing()
 
 set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
-set(CPPREST_EXCLUDE_WEBSOCKETS OFF CACHE BOOL "Exclude websockets functionality.")
+# set(CPPREST_EXCLUDE_WEBSOCKETS OFF CACHE BOOL "Exclude websockets functionality.")
 set(CPPREST_EXCLUDE_COMPRESSION OFF CACHE BOOL "Exclude compression functionality.")
 set(CPPREST_EXCLUDE_BROTLI ON CACHE BOOL "Exclude Brotli compression functionality.")
 set(CPPREST_EXPORT_DIR cpprestsdk CACHE STRING "Directory to install CMake config files.")
 set(CPPREST_INSTALL_HEADERS ON CACHE BOOL "Install header files.")
 set(CPPREST_INSTALL ON CACHE BOOL "Add install commands.")
-set(BUILD_TESTS OFF CACHE BOOL "Do not build tests")
+# set(BUILD_TESTS OFF CACHE BOOL "Do not build tests")
 set(BUILD_SAMPLES OFF CACHE BOOL "Do not build samples")
 if(IOS OR ANDROID)
   set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")

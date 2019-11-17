@@ -60,7 +60,7 @@ namespace granada{
         web::http::http_response response;
 
         response.set_status_code(status_codes::OK);
-        response.headers().add(header_names::content_type, U("text/html; charset=utf-8"));
+        response.headers().add(header_names::content_type, __U("text/html; charset=utf-8"));
 
         auto paths = uri::split_path(uri::decode(request.relative_uri().path()));
 
@@ -199,7 +199,7 @@ namespace granada{
         }
 
         response.set_status_code(status_codes::OK);
-        response.headers().add(header_names::content_type, U("text/json; charset=utf-8"));
+        response.headers().add(header_names::content_type, __U("text/json; charset=utf-8"));
 
         request.reply(response);
 
@@ -276,7 +276,7 @@ namespace granada{
         }
 
         response.set_status_code(status_codes::OK);
-        response.headers().add(U("Content-Type"), U("text/json; charset=utf-8"));
+        response.headers().add(__U("Content-Type"), __U("text/json; charset=utf-8"));
         request.reply(response);
       }
 
@@ -319,7 +319,7 @@ namespace granada{
         }
 
         response.set_status_code(status_codes::OK);
-        response.headers().add(U("Content-Type"), U("text/json; charset=utf-8"));
+        response.headers().add(__U("Content-Type"), __U("text/json; charset=utf-8"));
         request.reply(response);
       }
 
@@ -331,13 +331,13 @@ namespace granada{
         if (it == cookies.end()){
           session = session_factory_->Session_unique_ptr();
           session->Open();
-          response.headers().add(U("Set-Cookie"), utility::conversions::to_string_t(token_label + "=" + session->GetToken() + "; path=/"));
+          response.headers().add(__U("Set-Cookie"), utility::conversions::to_string_t(token_label + "=" + session->GetToken() + "; path=/"));
         }else{
           std::string token = it->second;
           session = session_factory_->Session_unique_ptr(token);
           if (session->GetToken().empty() || session->IsGarbage()){
             session->Open();
-            response.headers().add(U("Set-Cookie"), utility::conversions::to_string_t(token_label + "=" + session->GetToken() + "; path=/"));
+            response.headers().add(__U("Set-Cookie"), utility::conversions::to_string_t(token_label + "=" + session->GetToken() + "; path=/"));
           }
         }
       }
@@ -359,7 +359,7 @@ namespace granada{
         std::string client_id;
         std::string client_secret("");
 
-        web::uri uri(U("http://localhost:80/client"));
+        web::uri uri(__U("http://localhost:80/client"));
         web::http::client::http_client client(uri);
 
         web::http::http_request request2(methods::POST);
@@ -370,14 +370,14 @@ namespace granada{
         {
           try{
             web::json::value json = response2.extract_json().get();
-            if (json.has_field(U("client_id"))){
-              web::json::value client_id_json = json.at(U("client_id"));
+            if (json.has_field(__U("client_id"))){
+              web::json::value client_id_json = json.at(__U("client_id"));
               if (client_id_json.is_string()){
 				  client_id.assign(utility::conversions::to_utf8string(client_id_json.as_string()));
               }
             }
-            if (json.has_field(U("client_secret"))){
-              web::json::value client_secret_json = json.at(U("client_secret"));
+            if (json.has_field(__U("client_secret"))){
+              web::json::value client_secret_json = json.at(__U("client_secret"));
               if (client_secret_json.is_string()){
 				  client_secret.assign(utility::conversions::to_utf8string(client_secret_json.as_string()));
               }
@@ -410,8 +410,8 @@ namespace granada{
         if (!code.empty()){
 
 
-          web::uri_builder uri_builder(U("http://localhost:80/oauth2"));
-          uri_builder.append_path(U("auth"));
+          web::uri_builder uri_builder(__U("http://localhost:80/oauth2"));
+          uri_builder.append_path(__U("auth"));
           web::uri uri = uri_builder.to_uri();
           web::http::client::http_client client(uri);
 
@@ -421,8 +421,8 @@ namespace granada{
           client.request(request2).then([access_token](web::http::http_response response2){
             try{
               web::json::value json = response2.extract_json().get();
-              if (json.has_field(U("access_token"))){
-                web::json::value access_token_json = json.at(U("access_token"));
+              if (json.has_field(__U("access_token"))){
+                web::json::value access_token_json = json.at(__U("access_token"));
                 if (access_token_json.is_string()){
 					access_token->assign(utility::conversions::to_utf8string(access_token_json.as_string()));
                 }
@@ -477,20 +477,20 @@ namespace granada{
         client.request(request).then([message_list,error_ptr,error_description_ptr](web::http::http_response response2){
           try{
             web::json::value json = response2.extract_json().get();
-            if (json.has_field(U("data"))){
-              web::json::value data_json = json.at(U("data"));
+            if (json.has_field(__U("data"))){
+              web::json::value data_json = json.at(__U("data"));
               if (data_json.is_array()){
 				  message_list->assign(utility::conversions::to_utf8string(data_json.serialize()));
               }
             }else{
-              if (json.has_field(U("error"))){
-                web::json::value error_json = json.at(U("error"));
+              if (json.has_field(__U("error"))){
+                web::json::value error_json = json.at(__U("error"));
                 if (error_json.is_string()){
 					error_ptr->assign(utility::conversions::to_utf8string(error_json.as_string()));
                 }
               }
-              if (json.has_field(U("error_description"))){
-                web::json::value error_description_json = json.at(U("error_description"));
+              if (json.has_field(__U("error_description"))){
+                web::json::value error_description_json = json.at(__U("error_description"));
                 if (error_description_json.is_string()){
 					error_description_ptr->assign(utility::conversions::to_utf8string(error_description_json.as_string()));
                 }

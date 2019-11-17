@@ -67,6 +67,8 @@ private:
   M2MMessage(const BoxId &boxId, const M2MPayload &p);
 
   static uint64_t stringToInt(const ::std::string &str);
+
+  static const int OFFSET;
 };
 } // namespace cleric
 

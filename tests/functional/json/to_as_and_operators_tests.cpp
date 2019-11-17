@@ -28,49 +28,49 @@ SUITE(to_as_and_operators_tests)
 
         // null
         json::value n;
-        VERIFY_ARE_EQUAL(U("null"), n.serialize());
+        VERIFY_ARE_EQUAL(__U("null"), n.serialize());
         n.serialize(stream);
-        VERIFY_ARE_EQUAL(U("null"), stream.str());
+        VERIFY_ARE_EQUAL(__U("null"), stream.str());
 
         // bool - true
-        stream.str(U(""));
+        stream.str(__U(""));
         json::value b(true);
-        VERIFY_ARE_EQUAL(U("true"), b.serialize());
+        VERIFY_ARE_EQUAL(__U("true"), b.serialize());
         b.serialize(stream);
-        VERIFY_ARE_EQUAL(U("true"), stream.str());
+        VERIFY_ARE_EQUAL(__U("true"), stream.str());
 
         // bool - false
-        stream.str(U(""));
+        stream.str(__U(""));
         json::value b2(false);
-        VERIFY_ARE_EQUAL(U("false"), b2.serialize());
+        VERIFY_ARE_EQUAL(__U("false"), b2.serialize());
         b2.serialize(stream);
-        VERIFY_ARE_EQUAL(U("false"), stream.str());
+        VERIFY_ARE_EQUAL(__U("false"), stream.str());
 
         // number - int
-        stream.str(U(""));
+        stream.str(__U(""));
         json::value num(44);
-        VERIFY_ARE_EQUAL(U("44"), num.serialize());
+        VERIFY_ARE_EQUAL(__U("44"), num.serialize());
         num.serialize(stream);
-        VERIFY_ARE_EQUAL(U("44"), stream.str());
+        VERIFY_ARE_EQUAL(__U("44"), stream.str());
 
         // number - double
-        stream.str(U(""));
+        stream.str(__U(""));
         json::value dNum(11.5);
-        VERIFY_ARE_EQUAL(U("11.5"), dNum.serialize());
+        VERIFY_ARE_EQUAL(__U("11.5"), dNum.serialize());
         dNum.serialize(stream);
-        VERIFY_ARE_EQUAL(U("11.5"), stream.str());
+        VERIFY_ARE_EQUAL(__U("11.5"), stream.str());
 
         // string
-        stream.str(U(""));
-        json::value string = json::value::string(U("hehehe"));
-        VERIFY_ARE_EQUAL(U("\"hehehe\""), string.serialize());
+        stream.str(__U(""));
+        json::value string = json::value::string(__U("hehehe"));
+        VERIFY_ARE_EQUAL(__U("\"hehehe\""), string.serialize());
         string.serialize(stream);
-        VERIFY_ARE_EQUAL(U("\"hehehe\""), stream.str());
+        VERIFY_ARE_EQUAL(__U("\"hehehe\""), stream.str());
 
         // object - with values created from parsing
-        stream.str(U(""));
-        const utility::string_t strValue1(U("{ \"key\" : true }"));
-        const utility::string_t strValue2(U("{\"key\":true}"));
+        stream.str(__U(""));
+        const utility::string_t strValue1(__U("{ \"key\" : true }"));
+        const utility::string_t strValue2(__U("{\"key\":true}"));
         json::value obj1 = json::value::parse(strValue1);
         VERIFY_ARE_EQUAL(strValue2, obj1.serialize());
         json::value obj2 = json::value::parse(strValue2);
@@ -79,33 +79,33 @@ SUITE(to_as_and_operators_tests)
         VERIFY_ARE_EQUAL(strValue2, stream.str());
 
         // object - with values added
-        stream.str(U(""));
+        stream.str(__U(""));
         json::value obj3 = json::value::object();
-        obj3[U("key")] = json::value(true);
+        obj3[__U("key")] = json::value(true);
         VERIFY_ARE_EQUAL(strValue2, obj3.serialize());
         obj3.serialize(stream);
         VERIFY_ARE_EQUAL(strValue2, stream.str());
 
         // array
-        stream.str(U(""));
+        stream.str(__U(""));
         json::value arr = json::value::array();
-        arr[0] = json::value::string(U("Here"));
+        arr[0] = json::value::string(__U("Here"));
         arr[1] = json::value(true);
-        VERIFY_ARE_EQUAL(U("[\"Here\",true]"), arr.serialize());
-        VERIFY_ARE_EQUAL(U("[\"Here\",true]"), arr.serialize());
+        VERIFY_ARE_EQUAL(__U("[\"Here\",true]"), arr.serialize());
+        VERIFY_ARE_EQUAL(__U("[\"Here\",true]"), arr.serialize());
         arr.serialize(stream);
-        VERIFY_ARE_EQUAL(U("[\"Here\",true]"), stream.str());
+        VERIFY_ARE_EQUAL(__U("[\"Here\",true]"), stream.str());
     }
 
     TEST(empty_arrays_objects)
     {
         // array
-        auto arr = json::value::parse(U("[   ]"));
-        VERIFY_ARE_EQUAL(U("[]"), arr.serialize());
+        auto arr = json::value::parse(__U("[   ]"));
+        VERIFY_ARE_EQUAL(__U("[]"), arr.serialize());
 
         // object
-        auto obj = json::value::parse(U("{   }"));
-        VERIFY_ARE_EQUAL(U("{}"), obj.serialize());
+        auto obj = json::value::parse(__U("{   }"));
+        VERIFY_ARE_EQUAL(__U("{}"), obj.serialize());
     }
 
     void verify_escaped_chars(const utility::string_t& str1, const utility::string_t& str2)
@@ -122,23 +122,23 @@ SUITE(to_as_and_operators_tests)
 
     TEST(to_string_escaped_chars)
     {
-        verify_escaped_chars(U(" \" "), U("\" \\\" \""));
-        verify_escaped_chars(U(" \b "), U("\" \\b \""));
-        verify_escaped_chars(U(" \f "), U("\" \\f \""));
-        verify_escaped_chars(U(" \n "), U("\" \\n \""));
-        verify_escaped_chars(U(" \r "), U("\" \\r \""));
-        verify_escaped_chars(U(" \t "), U("\" \\t \""));
+        verify_escaped_chars(__U(" \" "), __U("\" \\\" \""));
+        verify_escaped_chars(__U(" \b "), __U("\" \\b \""));
+        verify_escaped_chars(__U(" \f "), __U("\" \\f \""));
+        verify_escaped_chars(__U(" \n "), __U("\" \\n \""));
+        verify_escaped_chars(__U(" \r "), __U("\" \\r \""));
+        verify_escaped_chars(__U(" \t "), __U("\" \\t \""));
 
         json::value obj = json::value::object();
-        obj[U(" \t ")] = json::value::string(U(" \b "));
+        obj[__U(" \t ")] = json::value::string(__U(" \b "));
 
         json::value arr = json::value::array();
-        arr[0] = json::value::string(U(" \f "));
+        arr[0] = json::value::string(__U(" \f "));
 
-        VERIFY_ARE_EQUAL(U("{\" \\t \":\" \\b \"}"), obj.serialize());
-        VERIFY_ARE_EQUAL(U("[\" \\f \"]"), arr.serialize());
+        VERIFY_ARE_EQUAL(__U("{\" \\t \":\" \\b \"}"), obj.serialize());
+        VERIFY_ARE_EQUAL(__U("[\" \\f \"]"), arr.serialize());
 
-        utility::string_t str(U("{\"hello\":\" \\\"here's looking at you kid\\\" \\r \"}"));
+        utility::string_t str(__U("{\"hello\":\" \\\"here's looking at you kid\\\" \\r \"}"));
         json::value obj2 = json::value::parse(str);
 
         VERIFY_ARE_EQUAL(str, obj2.serialize());
@@ -146,21 +146,21 @@ SUITE(to_as_and_operators_tests)
 
     TEST(to_string_unescaped_chars)
     {
-        verify_unescaped_chars(U(" \" "), U("\" \" \""));
-        verify_unescaped_chars(U(" \b "), U("\" \b \""));
-        verify_unescaped_chars(U(" \f "), U("\" \f \""));
-        verify_unescaped_chars(U(" \n "), U("\" \n \""));
-        verify_unescaped_chars(U(" \r "), U("\" \r \""));
-        verify_unescaped_chars(U(" \t "), U("\" \t \""));
+        verify_unescaped_chars(__U(" \" "), __U("\" \" \""));
+        verify_unescaped_chars(__U(" \b "), __U("\" \b \""));
+        verify_unescaped_chars(__U(" \f "), __U("\" \f \""));
+        verify_unescaped_chars(__U(" \n "), __U("\" \n \""));
+        verify_unescaped_chars(__U(" \r "), __U("\" \r \""));
+        verify_unescaped_chars(__U(" \t "), __U("\" \t \""));
 
         json::value obj = json::value::object();
-        obj[U(" \t ")] = json::value::string(U(" \b "), false);
+        obj[__U(" \t ")] = json::value::string(__U(" \b "), false);
 
         json::value arr = json::value::array();
-        arr[0] = json::value::string(U(" \f "), false);
+        arr[0] = json::value::string(__U(" \f "), false);
 
-        VERIFY_ARE_EQUAL(U("{\" \\t \":\" \b \"}"), obj.serialize());
-        VERIFY_ARE_EQUAL(U("[\" \f \"]"), arr.serialize());
+        VERIFY_ARE_EQUAL(__U("{\" \\t \":\" \b \"}"), obj.serialize());
+        VERIFY_ARE_EQUAL(__U("[\" \f \"]"), arr.serialize());
     }
 
     TEST(as_string)
@@ -169,7 +169,7 @@ SUITE(to_as_and_operators_tests)
         VERIFY_THROWS(b.as_string(), json::json_exception);
         VERIFY_THROWS(b.as_string(), json::json_exception);
 
-        utility::string_t data(U("HERE IS A STRING"));
+        utility::string_t data(__U("HERE IS A STRING"));
         utility::string_t wdata(data.begin(), data.end());
         json::value str = json::value::string(data);
         VERIFY_ARE_EQUAL(data, str.as_string());
@@ -180,22 +180,22 @@ SUITE(to_as_and_operators_tests)
     {
         auto arr = json::value::array();
         arr[0] = json::value::number(44);
-        arr[1] = json::value::string(U("abc"));
+        arr[1] = json::value::string(__U("abc"));
         json::array arrCopy = arr.as_array();
         VERIFY_ARE_EQUAL(2, arrCopy.size());
         VERIFY_ARE_EQUAL(2, arr.size());
         VERIFY_ARE_EQUAL(44, arrCopy[0].as_integer());
-        VERIFY_ARE_EQUAL(U("abc"), arrCopy[1].as_string());
+        VERIFY_ARE_EQUAL(__U("abc"), arrCopy[1].as_string());
         VERIFY_ARE_EQUAL(44, arr[0].as_integer());
-        VERIFY_ARE_EQUAL(U("abc"), arr[1].as_string());
+        VERIFY_ARE_EQUAL(__U("abc"), arr[1].as_string());
 
         auto obj = json::value::object();
-        obj[U("abc")] = json::value::number(123);
+        obj[__U("abc")] = json::value::number(123);
         json::object objCopy = obj.as_object();
         VERIFY_ARE_EQUAL(1, objCopy.size());
         VERIFY_ARE_EQUAL(1, obj.size());
-        VERIFY_ARE_EQUAL(123, objCopy[U("abc")].as_integer());
-        VERIFY_ARE_EQUAL(123, obj[U("abc")].as_integer());
+        VERIFY_ARE_EQUAL(123, objCopy[__U("abc")].as_integer());
+        VERIFY_ARE_EQUAL(123, obj[__U("abc")].as_integer());
 
         auto num = json::value::number(44);
         json::number numCopy = num.as_number();
@@ -206,39 +206,39 @@ SUITE(to_as_and_operators_tests)
     TEST(as_bool_as_double_as_string)
     {
         utility::stringstream_t ss1;
-        ss1 << U("17");
+        ss1 << __U("17");
         json::value v1 = json::value::parse(ss1);
 
         utility::stringstream_t ss2;
-        ss2 << U("3.1415");
+        ss2 << __U("3.1415");
         json::value v2 = json::value::parse(ss2);
 
         utility::stringstream_t ss3;
-        ss3 << U("true");
+        ss3 << __U("true");
         json::value v3 = json::value::parse(ss3);
 
         utility::stringstream_t ss4;
-        ss4 << U("\"Hello!\"");
+        ss4 << __U("\"Hello!\"");
         json::value v4 = json::value::parse(ss4);
 
         utility::stringstream_t ss8;
-        ss8 << U("{ \"a\" : 10, \"b\" : 4711.17, \"c\" : false }");
+        ss8 << __U("{ \"a\" : 10, \"b\" : 4711.17, \"c\" : false }");
         json::value v8 = json::value::parse(ss8);
 
         utility::stringstream_t ss9;
-        ss9 << U("[1,2,3,true]");
+        ss9 << __U("[1,2,3,true]");
         json::value v9 = json::value::parse(ss9);
 
         VERIFY_ARE_EQUAL(v1.as_double(), 17);
         VERIFY_ARE_EQUAL(v2.as_double(), 3.1415);
         VERIFY_IS_TRUE(v3.as_bool());
-        VERIFY_ARE_EQUAL(v4.as_string(), U("Hello!"));
-        VERIFY_ARE_EQUAL(v4.as_string(), U("Hello!"));
+        VERIFY_ARE_EQUAL(v4.as_string(), __U("Hello!"));
+        VERIFY_ARE_EQUAL(v4.as_string(), __U("Hello!"));
 
-        VERIFY_ARE_EQUAL(v8[U("a")].as_double(), 10);
-        VERIFY_ARE_EQUAL(v8[U("b")].as_double(), 4711.17);
-        VERIFY_ARE_EQUAL(v8[U("a")].as_integer(), 10);
-        VERIFY_IS_FALSE(v8[U("c")].as_bool());
+        VERIFY_ARE_EQUAL(v8[__U("a")].as_double(), 10);
+        VERIFY_ARE_EQUAL(v8[__U("b")].as_double(), 4711.17);
+        VERIFY_ARE_EQUAL(v8[__U("a")].as_integer(), 10);
+        VERIFY_IS_FALSE(v8[__U("c")].as_bool());
 
         VERIFY_ARE_EQUAL(v9[0].as_double(), 1);
         VERIFY_ARE_EQUAL(v9[1].as_double(), 2);
@@ -248,7 +248,7 @@ SUITE(to_as_and_operators_tests)
 
     TEST(to_stream_operator)
     {
-        utility::string_t str(U("\"JSON STRING\""));
+        utility::string_t str(__U("\"JSON STRING\""));
         json::value value = json::value::parse(str);
         utility::stringstream_t stream;
         stream << value;
@@ -257,7 +257,7 @@ SUITE(to_as_and_operators_tests)
 
     TEST(from_stream_operator)
     {
-        utility::string_t str(U("\"JSON STRING!\""));
+        utility::string_t str(__U("\"JSON STRING!\""));
         utility::stringstream_t stream;
         stream << str;
         json::value value;
@@ -269,7 +269,7 @@ SUITE(to_as_and_operators_tests)
     TEST(negative_is_tests)
     {
         json::value b(true);
-        json::value str(U("string"));
+        json::value str(__U("string"));
         json::value d(22.5);
         json::value n;
         json::value a = json::value::array(2);
@@ -289,18 +289,18 @@ SUITE(to_as_and_operators_tests)
         json::value v = json::value::boolean(true);
 
         VERIFY_THROWS(v[0], json::json_exception);
-        VERIFY_THROWS(v[U("H")], json::json_exception);
-        VERIFY_THROWS(v[U("A")], json::json_exception);
+        VERIFY_THROWS(v[__U("H")], json::json_exception);
+        VERIFY_THROWS(v[__U("A")], json::json_exception);
     }
 
     TEST(negative_get_field_object)
     {
         json::value v;
 
-        v[U("a")] = json::value::number(1);
+        v[__U("a")] = json::value::number(1);
         VERIFY_IS_TRUE(v.is_object());
-        VERIFY_ARE_EQUAL(v[U("a")].as_integer(), 1);
-        VERIFY_IS_TRUE(v[U("b")].is_null());
+        VERIFY_ARE_EQUAL(v[__U("a")].as_integer(), 1);
+        VERIFY_IS_TRUE(v[__U("b")].is_null());
         VERIFY_THROWS(v[0], json::json_exception);
     }
 
@@ -311,73 +311,73 @@ SUITE(to_as_and_operators_tests)
         v[0] = json::value::number(1);
         VERIFY_ARE_EQUAL(v[0].as_integer(), 1);
         VERIFY_IS_TRUE(v[1].is_null());
-        VERIFY_THROWS(v[U("a")], json::json_exception);
+        VERIFY_THROWS(v[__U("a")], json::json_exception);
     }
 
     TEST(has_field_object)
     {
         json::value v1;
 
-        v1[U("a")] = json::value::number(1);
-        v1[U("b")] = json::value::boolean(true);
-        v1[U("c")] = json::value::string(U("a string"));
-        v1[U("d")] = json::value::array({});
+        v1[__U("a")] = json::value::number(1);
+        v1[__U("b")] = json::value::boolean(true);
+        v1[__U("c")] = json::value::string(__U("a string"));
+        v1[__U("d")] = json::value::array({});
         json::value sub_field;
-        sub_field[U("x")] = json::value::number(1);
-        v1[U("e")] = sub_field;
+        sub_field[__U("x")] = json::value::number(1);
+        v1[__U("e")] = sub_field;
 
-        VERIFY_IS_TRUE(v1.has_field(U("a")));
-        VERIFY_IS_TRUE(v1.has_field(U("b")));
-        VERIFY_IS_TRUE(v1.has_field(U("c")));
-        VERIFY_IS_TRUE(v1.has_field(U("d")));
-        VERIFY_IS_TRUE(v1.has_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_field(U("f")));
+        VERIFY_IS_TRUE(v1.has_field(__U("a")));
+        VERIFY_IS_TRUE(v1.has_field(__U("b")));
+        VERIFY_IS_TRUE(v1.has_field(__U("c")));
+        VERIFY_IS_TRUE(v1.has_field(__U("d")));
+        VERIFY_IS_TRUE(v1.has_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_field(__U("f")));
 
-        VERIFY_IS_TRUE(v1.has_number_field(U("a")));
-        VERIFY_IS_TRUE(v1.has_integer_field(U("a")));
-        VERIFY_IS_FALSE(v1.has_double_field(U("a")));
-        VERIFY_IS_FALSE(v1.has_boolean_field(U("a")));
-        VERIFY_IS_FALSE(v1.has_string_field(U("a")));
-        VERIFY_IS_FALSE(v1.has_array_field(U("a")));
-        VERIFY_IS_FALSE(v1.has_object_field(U("a")));
+        VERIFY_IS_TRUE(v1.has_number_field(__U("a")));
+        VERIFY_IS_TRUE(v1.has_integer_field(__U("a")));
+        VERIFY_IS_FALSE(v1.has_double_field(__U("a")));
+        VERIFY_IS_FALSE(v1.has_boolean_field(__U("a")));
+        VERIFY_IS_FALSE(v1.has_string_field(__U("a")));
+        VERIFY_IS_FALSE(v1.has_array_field(__U("a")));
+        VERIFY_IS_FALSE(v1.has_object_field(__U("a")));
 
-        VERIFY_IS_TRUE(v1.has_boolean_field(U("b")));
-        VERIFY_IS_FALSE(v1.has_number_field(U("b")));
-        VERIFY_IS_FALSE(v1.has_integer_field(U("b")));
-        VERIFY_IS_FALSE(v1.has_double_field(U("b")));
-        VERIFY_IS_FALSE(v1.has_string_field(U("b")));
-        VERIFY_IS_FALSE(v1.has_array_field(U("b")));
-        VERIFY_IS_FALSE(v1.has_object_field(U("b")));
+        VERIFY_IS_TRUE(v1.has_boolean_field(__U("b")));
+        VERIFY_IS_FALSE(v1.has_number_field(__U("b")));
+        VERIFY_IS_FALSE(v1.has_integer_field(__U("b")));
+        VERIFY_IS_FALSE(v1.has_double_field(__U("b")));
+        VERIFY_IS_FALSE(v1.has_string_field(__U("b")));
+        VERIFY_IS_FALSE(v1.has_array_field(__U("b")));
+        VERIFY_IS_FALSE(v1.has_object_field(__U("b")));
 
-        VERIFY_IS_TRUE(v1.has_string_field(U("c")));
-        VERIFY_IS_FALSE(v1.has_boolean_field(U("c")));
-        VERIFY_IS_FALSE(v1.has_number_field(U("c")));
-        VERIFY_IS_FALSE(v1.has_integer_field(U("c")));
-        VERIFY_IS_FALSE(v1.has_double_field(U("c")));
-        VERIFY_IS_FALSE(v1.has_array_field(U("c")));
-        VERIFY_IS_FALSE(v1.has_object_field(U("c")));
+        VERIFY_IS_TRUE(v1.has_string_field(__U("c")));
+        VERIFY_IS_FALSE(v1.has_boolean_field(__U("c")));
+        VERIFY_IS_FALSE(v1.has_number_field(__U("c")));
+        VERIFY_IS_FALSE(v1.has_integer_field(__U("c")));
+        VERIFY_IS_FALSE(v1.has_double_field(__U("c")));
+        VERIFY_IS_FALSE(v1.has_array_field(__U("c")));
+        VERIFY_IS_FALSE(v1.has_object_field(__U("c")));
 
-        VERIFY_IS_TRUE(v1.has_array_field(U("d")));
-        VERIFY_IS_FALSE(v1.has_string_field(U("d")));
-        VERIFY_IS_FALSE(v1.has_boolean_field(U("d")));
-        VERIFY_IS_FALSE(v1.has_number_field(U("d")));
-        VERIFY_IS_FALSE(v1.has_integer_field(U("d")));
-        VERIFY_IS_FALSE(v1.has_double_field(U("d")));
-        VERIFY_IS_FALSE(v1.has_object_field(U("d")));
+        VERIFY_IS_TRUE(v1.has_array_field(__U("d")));
+        VERIFY_IS_FALSE(v1.has_string_field(__U("d")));
+        VERIFY_IS_FALSE(v1.has_boolean_field(__U("d")));
+        VERIFY_IS_FALSE(v1.has_number_field(__U("d")));
+        VERIFY_IS_FALSE(v1.has_integer_field(__U("d")));
+        VERIFY_IS_FALSE(v1.has_double_field(__U("d")));
+        VERIFY_IS_FALSE(v1.has_object_field(__U("d")));
 
-        VERIFY_IS_TRUE(v1.has_object_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_array_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_string_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_boolean_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_number_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_integer_field(U("e")));
-        VERIFY_IS_FALSE(v1.has_double_field(U("e")));
+        VERIFY_IS_TRUE(v1.has_object_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_array_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_string_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_boolean_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_number_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_integer_field(__U("e")));
+        VERIFY_IS_FALSE(v1.has_double_field(__U("e")));
 
         json::value v2;
 
         v2[0] = json::value::number(1);
-        VERIFY_IS_FALSE(v2.has_field(U("0")));
-        VERIFY_IS_FALSE(v2.has_field(U("b")));
+        VERIFY_IS_FALSE(v2.has_field(__U("0")));
+        VERIFY_IS_FALSE(v2.has_field(__U("b")));
     }
 
     TEST(negative_as_tests)
@@ -387,7 +387,7 @@ SUITE(to_as_and_operators_tests)
         VERIFY_THROWS(b.as_integer(), json::json_exception);
         VERIFY_THROWS(b.as_string(), json::json_exception);
 
-        json::value str = json::value::string(U("string"));
+        json::value str = json::value::string(__U("string"));
         VERIFY_THROWS(str.as_double(), json::json_exception);
         VERIFY_THROWS(str.as_bool(), json::json_exception);
         VERIFY_THROWS(str.as_integer(), json::json_exception);
@@ -444,45 +444,45 @@ SUITE(to_as_and_operators_tests)
     TEST(erase_object_key)
     {
         auto o = json::value::object();
-        o[U("a")] = json::value(1);
-        o[U("b")] = json::value(2);
-        o[U("c")] = json::value(3);
-        o[U("d")] = json::value(4);
+        o[__U("a")] = json::value(1);
+        o[__U("b")] = json::value(2);
+        o[__U("c")] = json::value(3);
+        o[__U("d")] = json::value(4);
 
-        o.erase(U("a"));
+        o.erase(__U("a"));
         VERIFY_ARE_EQUAL(3, o.size());
-        VERIFY_ARE_EQUAL(2, o[U("b")].as_integer());
-        VERIFY_ARE_EQUAL(3, o[U("c")].as_integer());
-        VERIFY_ARE_EQUAL(4, o[U("d")].as_integer());
+        VERIFY_ARE_EQUAL(2, o[__U("b")].as_integer());
+        VERIFY_ARE_EQUAL(3, o[__U("c")].as_integer());
+        VERIFY_ARE_EQUAL(4, o[__U("d")].as_integer());
 
-        o.as_object().erase(U("d"));
+        o.as_object().erase(__U("d"));
         VERIFY_ARE_EQUAL(2, o.size());
-        VERIFY_ARE_EQUAL(2, o[U("b")].as_integer());
-        VERIFY_ARE_EQUAL(3, o[U("c")].as_integer());
+        VERIFY_ARE_EQUAL(2, o[__U("b")].as_integer());
+        VERIFY_ARE_EQUAL(3, o[__U("c")].as_integer());
     }
 
     TEST(erase_object_iter)
     {
         auto o = json::value::object();
-        o[U("a")] = json::value(1);
-        o[U("b")] = json::value(2);
-        o[U("c")] = json::value(3);
-        o[U("d")] = json::value(4);
+        o[__U("a")] = json::value(1);
+        o[__U("b")] = json::value(2);
+        o[__U("c")] = json::value(3);
+        o[__U("d")] = json::value(4);
 
         auto iter = o.as_object().begin() + 1;
         auto afterLoc = o.as_object().erase(iter);
         VERIFY_ARE_EQUAL(3, o.size());
         VERIFY_ARE_EQUAL(3, afterLoc->second.as_integer());
-        VERIFY_ARE_EQUAL(1, o[U("a")].as_integer());
-        VERIFY_ARE_EQUAL(3, o[U("c")].as_integer());
-        VERIFY_ARE_EQUAL(4, o[U("d")].as_integer());
+        VERIFY_ARE_EQUAL(1, o[__U("a")].as_integer());
+        VERIFY_ARE_EQUAL(3, o[__U("c")].as_integer());
+        VERIFY_ARE_EQUAL(4, o[__U("d")].as_integer());
 
         iter = o.as_object().begin() + 2;
         afterLoc = o.as_object().erase(iter);
         VERIFY_ARE_EQUAL(2, o.size());
         VERIFY_ARE_EQUAL(o.as_object().end(), afterLoc);
-        VERIFY_ARE_EQUAL(1, o[U("a")].as_integer());
-        VERIFY_ARE_EQUAL(3, o[U("c")].as_integer());
+        VERIFY_ARE_EQUAL(1, o[__U("a")].as_integer());
+        VERIFY_ARE_EQUAL(3, o[__U("c")].as_integer());
     }
 
     TEST(floating_number_serialize)

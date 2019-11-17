@@ -41,7 +41,7 @@ SUITE(request_helper_tests)
         http_client client(m_uri);
 
         server.next_request().then([](test_request* p_request) {
-            p_request->reply(200, U("OK"), {{header_names::content_encoding, U("chunked")}});
+            p_request->reply(200, __U("OK"), {{header_names::content_encoding, __U("chunked")}});
         });
 
         http_asserts::assert_response_equals(client.request(methods::GET).get(), status_codes::OK);
@@ -58,7 +58,7 @@ SUITE(request_helper_tests)
             http_client client(m_uri, config);
 
             server.next_request().then([](test_request* p_request) {
-                p_request->reply(200, U("OK"), {{header_names::content_encoding, U("unsupported-algorithm")}});
+                p_request->reply(200, __U("OK"), {{header_names::content_encoding, __U("unsupported-algorithm")}});
             });
 
             VERIFY_THROWS(client.request(methods::GET).get(), web::http::http_exception);
@@ -80,7 +80,7 @@ SUITE(request_helper_tests)
             server.next_request().then([&found_accept_encoding](test_request* p_request) {
                 found_accept_encoding =
                     p_request->m_headers.find(header_names::accept_encoding) != p_request->m_headers.end();
-                p_request->reply(200, U("OK"));
+                p_request->reply(200, __U("OK"));
             });
 
             client.request(methods::GET).get();
@@ -103,7 +103,7 @@ SUITE(request_helper_tests)
             // On Windows, someone along the way (not us!) adds "Accept-Encoding: peerdist"
             found_accept_encoding =
                 p_request->match_header(header_names::accept_encoding, header) && header != _XPLATSTR("peerdist");
-            p_request->reply(200, U("OK"));
+            p_request->reply(200, __U("OK"));
         });
 
         client.request(methods::GET).get();
@@ -118,29 +118,29 @@ SUITE(request_helper_tests)
         http_client client(m_uri);
 
         // Without content type.
-        utility::string_t send_body = U("YES NOW SEND THE TROOPS!");
+        utility::string_t send_body = __U("YES NOW SEND THE TROOPS!");
         p_server->next_request().then([&send_body](test_request* p_request) {
             http_asserts::assert_test_request_equals(
-                p_request, methods::PUT, U("/"), U("text/plain; charset=utf-8"), send_body);
+                p_request, methods::PUT, __U("/"), __U("text/plain; charset=utf-8"), send_body);
             p_request->reply(200);
         });
-        http_asserts::assert_response_equals(client.request(methods::PUT, U(""), send_body).get(), status_codes::OK);
+        http_asserts::assert_response_equals(client.request(methods::PUT, __U(""), send_body).get(), status_codes::OK);
 
         // With content type.
-        utility::string_t content_type = U("custom_content");
+        utility::string_t content_type = __U("custom_content");
         test_server_utilities::verify_request(
-            &client, methods::PUT, U("/"), content_type, send_body, p_server, status_codes::OK, U("OK"));
+            &client, methods::PUT, __U("/"), content_type, send_body, p_server, status_codes::OK, __U("OK"));
 
         // Empty body type
         send_body.clear();
-        content_type = U("haha_type");
+        content_type = __U("haha_type");
         p_server->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, methods::PUT, U("/"), content_type);
+            http_asserts::assert_test_request_equals(p_request, methods::PUT, __U("/"), content_type);
             VERIFY_ARE_EQUAL(0u, p_request->m_body.size());
-            VERIFY_ARE_EQUAL(0u, p_request->reply(status_codes::OK, U("OK")));
+            VERIFY_ARE_EQUAL(0u, p_request->reply(status_codes::OK, __U("OK")));
         });
         http_asserts::assert_response_equals(
-            client.request(methods::PUT, U("/"), send_body, content_type).get(), status_codes::OK, U("OK"));
+            client.request(methods::PUT, __U("/"), send_body, content_type).get(), status_codes::OK, __U("OK"));
     }
 
     TEST_FIXTURE(uri_address, rvalue_bodies)
@@ -150,37 +150,37 @@ SUITE(request_helper_tests)
         http_client client(m_uri);
 
         // Without content type.
-        utility::string_t send_body = U("YES NOW SEND THE TROOPS!");
+        utility::string_t send_body = __U("YES NOW SEND THE TROOPS!");
         utility::string_t move_body = send_body;
         p_server->next_request().then([&send_body](test_request* p_request) {
             http_asserts::assert_test_request_equals(
-                p_request, methods::PUT, U("/"), U("text/plain; charset=utf-8"), send_body);
+                p_request, methods::PUT, __U("/"), __U("text/plain; charset=utf-8"), send_body);
             p_request->reply(200);
         });
-        http_asserts::assert_response_equals(client.request(methods::PUT, U(""), std::move(move_body)).get(),
+        http_asserts::assert_response_equals(client.request(methods::PUT, __U(""), std::move(move_body)).get(),
                                              status_codes::OK);
 
         // With content type.
-        utility::string_t content_type = U("custom_content");
+        utility::string_t content_type = __U("custom_content");
         move_body = send_body;
         p_server->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, methods::PUT, U("/"), content_type, send_body);
+            http_asserts::assert_test_request_equals(p_request, methods::PUT, __U("/"), content_type, send_body);
             p_request->reply(200);
         });
         http_asserts::assert_response_equals(
-            client.request(methods::PUT, U(""), std::move(move_body), content_type).get(), status_codes::OK);
+            client.request(methods::PUT, __U(""), std::move(move_body), content_type).get(), status_codes::OK);
 
         // Empty body.
-        content_type = U("haha_type");
+        content_type = __U("haha_type");
         send_body.clear();
         move_body = send_body;
         p_server->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, methods::PUT, U("/"), content_type);
+            http_asserts::assert_test_request_equals(p_request, methods::PUT, __U("/"), content_type);
             VERIFY_ARE_EQUAL(0u, p_request->m_body.size());
             p_request->reply(200);
         });
         http_asserts::assert_response_equals(
-            client.request(methods::PUT, U(""), std::move(move_body), content_type).get(), status_codes::OK);
+            client.request(methods::PUT, __U(""), std::move(move_body), content_type).get(), status_codes::OK);
     }
 
     TEST_FIXTURE(uri_address, json_bodies)
@@ -193,19 +193,19 @@ SUITE(request_helper_tests)
         json::value bool_value = json::value::boolean(true);
         p_server->next_request().then([&](test_request* p_request) {
             http_asserts::assert_test_request_equals(
-                p_request, methods::PUT, U("/"), U("application/json"), bool_value.serialize());
+                p_request, methods::PUT, __U("/"), __U("application/json"), bool_value.serialize());
             p_request->reply(200);
         });
-        http_asserts::assert_response_equals(client.request(methods::PUT, U("/"), bool_value).get(), status_codes::OK);
+        http_asserts::assert_response_equals(client.request(methods::PUT, __U("/"), bool_value).get(), status_codes::OK);
 
         // JSON null value.
         json::value null_value = json::value::null();
         p_server->next_request().then([&](test_request* p_request) {
             http_asserts::assert_test_request_equals(
-                p_request, methods::PUT, U("/"), U("application/json"), null_value.serialize());
+                p_request, methods::PUT, __U("/"), __U("application/json"), null_value.serialize());
             p_request->reply(200);
         });
-        http_asserts::assert_response_equals(client.request(methods::PUT, U(""), null_value).get(), status_codes::OK);
+        http_asserts::assert_response_equals(client.request(methods::PUT, __U(""), null_value).get(), status_codes::OK);
     }
 
     TEST_FIXTURE(uri_address, non_rvalue_2k_body)
@@ -221,12 +221,12 @@ SUITE(request_helper_tests)
         }
         test_server_utilities::verify_request(&client,
                                               methods::PUT,
-                                              U("/"),
-                                              U("text/plain"),
+                                              __U("/"),
+                                              __U("text/plain"),
                                               ::utility::conversions::to_string_t(body),
                                               p_server,
                                               status_codes::OK,
-                                              U("OK"));
+                                              __U("OK"));
     }
 
     TEST_FIXTURE(uri_address, default_user_agent)
@@ -240,7 +240,7 @@ SUITE(request_helper_tests)
             stream << _XPLATSTR("cpprestsdk/") << CPPREST_VERSION_MAJOR << _XPLATSTR(".") << CPPREST_VERSION_MINOR
                    << _XPLATSTR(".") << CPPREST_VERSION_REVISION;
             utility::string_t foundHeader;
-            p_request->match_header(U("User-Agent"), foundHeader);
+            p_request->match_header(__U("User-Agent"), foundHeader);
             VERIFY_ARE_EQUAL(stream.str(), foundHeader);
 
             p_request->reply(200);
@@ -255,17 +255,17 @@ SUITE(request_helper_tests)
         test_http_server* p_server = scoped.server();
         http_client client(m_uri);
 
-        utility::string_t customUserAgent(U("MyAgent"));
+        utility::string_t customUserAgent(__U("MyAgent"));
         p_server->next_request().then([&](test_request* p_request) {
             utility::string_t foundHeader;
-            p_request->match_header(U("User-Agent"), foundHeader);
+            p_request->match_header(__U("User-Agent"), foundHeader);
             VERIFY_ARE_EQUAL(customUserAgent, foundHeader);
 
             p_request->reply(200);
         });
 
         http_request request(methods::GET);
-        request.headers()[U("User-Agent")] = customUserAgent;
+        request.headers()[__U("User-Agent")] = customUserAgent;
         http_asserts::assert_response_equals(client.request(request).get(), status_codes::OK);
     }
 

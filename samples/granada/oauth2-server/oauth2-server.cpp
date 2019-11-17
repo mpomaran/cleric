@@ -73,7 +73,7 @@ void on_initialize(const string_t& address)
   // User Controller
   // Used for registering users.
   uri_builder user_uri(address);
-  user_uri.append_path(U("user"));
+  user_uri.append_path(__U("user"));
   auto addr = user_uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::UserController> user_controller(new granada::http::controller::UserController(addr,oauth2_factory));
   user_controller->open().wait();
@@ -85,7 +85,7 @@ void on_initialize(const string_t& address)
   // Client Controller
   // Used for registering clients.
   uri_builder client_uri(address);
-  client_uri.append_path(U("client"));
+  client_uri.append_path(__U("client"));
   addr = client_uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::ClientController> client_controller(new granada::http::controller::ClientController(addr,oauth2_factory));
   client_controller->open().wait();
@@ -97,7 +97,7 @@ void on_initialize(const string_t& address)
   // Auth Controller
   //
   uri_builder auth_uri(address);
-  auth_uri.append_path(U("oauth2"));
+  auth_uri.append_path(__U("oauth2"));
   addr = auth_uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::OAuth2Controller> auth_controller(new granada::http::controller::OAuth2Controller(addr,session_factory,oauth2_factory));
   auth_controller->open().wait();
@@ -109,7 +109,7 @@ void on_initialize(const string_t& address)
   // Message Controller
   // Used for listing, inserting, editing, deleting users' messages.
   uri_builder message_uri(address);
-  message_uri.append_path(U("message"));
+  message_uri.append_path(__U("message"));
   addr = message_uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::MessageController> message_controller(new granada::http::controller::MessageController(addr,session_factory,cache_handler));
   message_controller->open().wait();
@@ -121,7 +121,7 @@ void on_initialize(const string_t& address)
   // Application Controller
   // Application for message reading and edition.
   uri_builder application_uri(address);
-  application_uri.append_path(U("application"));
+  application_uri.append_path(__U("application"));
   addr = application_uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::ApplicationController> application_controller(new granada::http::controller::ApplicationController(addr,session_factory));
   application_controller->open().wait();

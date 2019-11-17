@@ -80,8 +80,8 @@ void BrowserController::handle_get(http_request request) {
       response.headers().add(
           header_names::content_encoding,
           utility::conversions::to_string_t(resource.content_encoding));
-      response.headers().add(header_names::server, U("granada"));
-      response.headers().add(header_names::connection, U("keep-alive"));
+      response.headers().add(header_names::server, __U("granada"));
+      response.headers().add(header_names::connection, __U("keep-alive"));
       response.headers().add(
           header_names::last_modified,
           utility::conversions::to_string_t(resource.last_modified));

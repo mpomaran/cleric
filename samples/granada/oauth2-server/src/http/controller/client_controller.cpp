@@ -56,7 +56,7 @@ namespace granada{
         }catch(const std::exception e){}
         web::json::value json;
         if (redirect_uris_str.empty() || application_name.empty() || roles_str.empty()){
-          json = web::json::value::parse(U("{\"error\":\"invalid_request\",\"error_description\":\"Error registering client, a parameter has not been filled.\"}"));
+          json = web::json::value::parse(__U("{\"error\":\"invalid_request\",\"error_description\":\"Error registering client, a parameter has not been filled.\"}"));
         }else{
           
           // create client

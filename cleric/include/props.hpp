@@ -29,6 +29,8 @@ SOFTWARE.
 
 #include <string>
 
+#define THING_NAME "mixbox-bridge"
+
 namespace cleric
 {
 	namespace props {
@@ -40,7 +42,10 @@ namespace cleric
 		extern const std::string STORAGE_ROOT_PROP_DEFAULT;
 		extern const std::string WWW_ROOT_PROP_NAME;
 		extern const std::string WWW_ROOT_PROP_DEFAULT;
+
 	}
 }
+
+
 
 #endif

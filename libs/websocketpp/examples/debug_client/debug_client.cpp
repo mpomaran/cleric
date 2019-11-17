@@ -76,6 +76,7 @@ public:
 
         if (ec) {
             m_endpoint.get_alog().write(websocketpp::log::alevel::app,ec.message());
+            return;
         }
 
         //con->set_proxy("http://humupdates.uchicago.edu:8443");
@@ -156,10 +157,10 @@ int main(int argc, char* argv[]) {
     try {
         perftest endpoint;
         endpoint.start(uri);
-    } catch (const std::exception & e) {
+    } catch (websocketpp::exception const & e) {
         std::cout << e.what() << std::endl;
-    } catch (websocketpp::lib::error_code e) {
-        std::cout << e.message() << std::endl;
+    } catch (std::exception const & e) {
+        std::cout << e.what() << std::endl;
     } catch (...) {
         std::cout << "other exception" << std::endl;
     }

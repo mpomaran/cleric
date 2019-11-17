@@ -161,14 +161,7 @@ typedef lib::function<void(lib::error_code const & ec)> write_frame_handler;
      * @todo Move this to configs to allow compile/runtime disabling or enabling
      * of protocol versions
      */
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4592)
-#endif
     static std::vector<int> const versions_supported = {0,7,8,13};
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 #else
     /// Helper array to get around lack of initializer lists pre C++11
     static int const helper[] = {0,7,8,13};
@@ -221,6 +214,20 @@ namespace internal_state {
         PROCESS_CONNECTION = 7
     };
 } // namespace internal_state
+
+
+namespace http_state {
+    // states to keep track of the progress of http connections
+
+    enum value {
+        init = 0,
+        deferred = 1,
+        headers_written = 2,
+        body_written = 3,
+        closed = 4
+    };
+} // namespace http_state
+
 } // namespace session
 
 /// Represents an individual WebSocket connection
@@ -287,8 +294,8 @@ private:
     };
 public:
 
-    explicit connection(bool p_is_server, std::string const & ua, alog_type& alog,
-        elog_type& elog, rng_type & rng)
+    explicit connection(bool p_is_server, std::string const & ua, const lib::shared_ptr<alog_type>& alog,
+                        const lib::shared_ptr<elog_type>& elog, rng_type & rng)
       : transport_con_type(p_is_server, alog, elog)
       , m_handle_read_frame(lib::bind(
             &type::handle_read_frame,
@@ -319,9 +326,10 @@ public:
       , m_local_close_code(close::status::abnormal_close)
       , m_remote_close_code(close::status::abnormal_close)
       , m_is_http(false)
+      , m_http_state(session::http_state::init)
       , m_was_clean(false)
     {
-        m_alog.write(log::alevel::devel,"connection constructor");
+        m_alog->write(log::alevel::devel,"connection constructor");
     }
 
     /// Get a shared pointer to this component
@@ -541,7 +549,7 @@ public:
 
     /// Get maximum message size
     /**
-     * Get maximum message size. Maximum message size determines the point at
+     * Get maximum message size. Maximum message size determines the point at 
      * which the connection will fail with the message_too_big protocol error.
      *
      * The default is set by the endpoint that creates the connection.
@@ -551,11 +559,11 @@ public:
     size_t get_max_message_size() const {
         return m_max_message_size;
     }
-
+    
     /// Set maximum message size
     /**
-     * Set maximum message size. Maximum message size determines the point at
-     * which the connection will fail with the message_too_big protocol error.
+     * Set maximum message size. Maximum message size determines the point at 
+     * which the connection will fail with the message_too_big protocol error. 
      * This value may be changed during the connection.
      *
      * The default is set by the endpoint that creates the connection.
@@ -570,7 +578,7 @@ public:
             m_processor->set_max_message_size(new_value);
         }
     }
-
+    
     /// Get maximum HTTP message body size
     /**
      * Get maximum HTTP message body size. Maximum message body size determines
@@ -586,7 +594,7 @@ public:
     size_t get_max_http_body_size() const {
         return m_request.get_max_body_size();
     }
-
+    
     /// Set maximum HTTP message body size
     /**
      * Set maximum HTTP message body size. Maximum message body size determines
@@ -620,7 +628,10 @@ public:
      */
     size_t get_buffered_amount() const;
 
-    /// DEPRECATED: use get_buffered_amount instead
+    /// Get the size of the outgoing write buffer (in payload bytes)
+    /**
+     * @deprecated use `get_buffered_amount` instead
+     */
     size_t buffered_amount() const {
         return get_buffered_amount();
     }
@@ -690,14 +701,14 @@ public:
      * @return An error code
      */
     lib::error_code interrupt();
-
+    
     /// Transport inturrupt callback
     void handle_interrupt();
-
+    
     /// Pause reading of new data
     /**
-     * Signals to the connection to halt reading of new data. While reading is paused,
-     * the connection will stop reading from its associated socket. In turn this will
+     * Signals to the connection to halt reading of new data. While reading is paused, 
+     * the connection will stop reading from its associated socket. In turn this will 
      * result in TCP based flow control kicking in and slowing data flow from the remote
      * endpoint.
      *
@@ -709,7 +720,7 @@ public:
      *
      * If supported by the transport this is done asynchronously. As such reading may not
      * stop until the current read operation completes. Typically you can expect to
-     * receive no more bytes after initiating a read pause than the size of the read
+     * receive no more bytes after initiating a read pause than the size of the read 
      * buffer.
      *
      * If reading is paused for this connection already nothing is changed.
@@ -961,6 +972,30 @@ public:
      */
     std::string const & get_response_header(std::string const & key) const;
 
+    /// Get response HTTP status code
+    /**
+     * Gets the response status code 
+     *
+     * @since 0.7.0
+     *
+     * @return The response status code sent
+     */
+    http::status_code::value get_response_code() const {
+        return m_response.get_status_code();
+    }
+
+    /// Get response HTTP status message
+    /**
+     * Gets the response status message 
+     *
+     * @since 0.7.0
+     *
+     * @return The response status message sent
+     */
+    std::string const & get_response_msg() const {
+        return m_response.get_status_msg();
+    }
+    
     /// Set response status code and message
     /**
      * Sets the response status code to `code` and looks up the corresponding
@@ -1067,6 +1102,71 @@ public:
     request_type const & get_request() const {
         return m_request;
     }
+    
+    /// Get response object
+    /**
+     * Direct access to the HTTP response sent or received as a part of the
+     * opening handshake. This can be used to call methods of the response
+     * object that are not part of the standard request API that connection
+     * wraps.
+     *
+     * Note use of this method involves using behavior specific to the
+     * configured HTTP policy. Such behavior may not work with alternate HTTP
+     * policies.
+     *
+     * @since 0.7.0
+     *
+     * @return A const reference to the raw response object
+     */
+    response_type const & get_response() const {
+        return m_response;
+    }
+    
+    /// Defer HTTP Response until later (Exception free)
+    /**
+     * Used in the http handler to defer the HTTP response for this connection
+     * until later. Handshake timers will be canceled and the connection will be
+     * left open until `send_http_response` or an equivalent is called.
+     *
+     * Warning: deferred connections won't time out and as a result can tie up
+     * resources.
+     *
+     * @since 0.6.0
+     *
+     * @return A status code, zero on success, non-zero otherwise
+     */
+    lib::error_code defer_http_response();
+    
+    /// Send deferred HTTP Response (exception free)
+    /**
+     * Sends an http response to an HTTP connection that was deferred. This will
+     * send a complete response including all headers, status line, and body
+     * text. The connection will be closed afterwards.
+     *
+     * @since 0.6.0
+     *
+     * @param ec A status code, zero on success, non-zero otherwise
+     */
+    void send_http_response(lib::error_code & ec);
+    
+    /// Send deferred HTTP Response
+    void send_http_response();
+    
+    // TODO HTTPNBIO: write_headers
+    // function that processes headers + status so far and writes it to the wire
+    // beginning the HTTP response body state. This method will ignore anything
+    // in the response body.
+    
+    // TODO HTTPNBIO: write_body_message
+    // queues the specified message_buffer for async writing
+    
+    // TODO HTTPNBIO: finish connection
+    //
+    
+    // TODO HTTPNBIO: write_response
+    // Writes the whole response, headers + body and closes the connection
+    
+    
 
     /////////////////////////////////////////////////////////////
     // Pass-through access to the other connection information //
@@ -1155,26 +1255,6 @@ public:
         return m_ec;
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    // The remaining public member functions are for internal/policy use  //
-    // only. Do not call from application code unless you understand what //
-    // you are doing.                                                     //
-    ////////////////////////////////////////////////////////////////////////
-
-    /// Set Connection Handle
-    /**
-     * The connection handle is a token that can be shared outside the
-     * WebSocket++ core for the purposes of identifying a connection and
-     * sending it messages.
-     *
-     * @param hdl A connection_hdl that the connection will use to refer
-     * to itself.
-     */
-    void set_handle(connection_hdl hdl) {
-        m_connection_hdl = hdl;
-        transport_con_type::set_handle(hdl);
-    }
-
     /// Get a message buffer
     /**
      * Warning: The API related to directly sending message buffers may change
@@ -1200,7 +1280,13 @@ public:
         return m_msg_manager->get_message(op, size);
     }
 
-    void start();
+    ////////////////////////////////////////////////////////////////////////
+    // The remaining public member functions are for internal/policy use  //
+    // only. Do not call from application code unless you understand what //
+    // you are doing.                                                     //
+    ////////////////////////////////////////////////////////////////////////
+
+    
 
     void read_handshake(size_t num_bytes);
 
@@ -1209,7 +1295,8 @@ public:
     void handle_read_http_response(lib::error_code const & ec,
         size_t bytes_transferred);
 
-    void handle_send_http_response(lib::error_code const & ec);
+    
+    void handle_write_http_response(lib::error_code const & ec);
     void handle_send_http_request(lib::error_code const & ec);
 
     void handle_open_handshake_timeout(lib::error_code const & ec);
@@ -1249,6 +1336,27 @@ public:
      * non-zero otherwise.
      */
     void handle_write_frame(lib::error_code const & ec);
+// protected:
+    // This set of methods would really like to be protected, but doing so 
+    // requires that the endpoint be able to friend the connection. This is 
+    // allowed with C++11, but not prior versions
+
+    /// Start the connection state machine
+    void start();
+
+    /// Set Connection Handle
+    /**
+     * The connection handle is a token that can be shared outside the
+     * WebSocket++ core for the purposes of identifying a connection and
+     * sending it messages.
+     *
+     * @param hdl A connection_hdl that the connection will use to refer
+     * to itself.
+     */
+    void set_handle(connection_hdl hdl) {
+        m_connection_hdl = hdl;
+        transport_con_type::set_handle(hdl);
+    }
 protected:
     void handle_transport_init(lib::error_code const & ec);
 
@@ -1260,14 +1368,16 @@ protected:
     /// set m_response and return an error code indicating status.
     lib::error_code process_handshake_request();
 private:
+    
+
     /// Completes m_response, serializes it, and sends it out on the wire.
-    void send_http_response(lib::error_code const & ec);
+    void write_http_response(lib::error_code const & ec);
 
     /// Sends an opening WebSocket connect request
     void send_http_request();
 
-    /// Alternate path for send_http_response in error conditions
-    void send_http_response_error(lib::error_code const & ec);
+    /// Alternate path for write_http_response in error conditions
+    void write_http_response_error(lib::error_code const & ec);
 
     /// Process control message
     /**
@@ -1287,7 +1397,7 @@ private:
      * @return A status code, zero on success, non-zero otherwise
      */
     lib::error_code send_close_ack(close::status::value code =
-        close::status::blank, std::string const & reason = "");
+        close::status::blank, std::string const & reason = std::string());
 
     /// Send close frame
     /**
@@ -1305,7 +1415,7 @@ private:
      * @return A status code, zero on success, non-zero otherwise
      */
     lib::error_code send_close_frame(close::status::value code =
-        close::status::blank, std::string const & reason = "", bool ack = false,
+        close::status::blank, std::string const & reason = std::string(), bool ack = false,
         bool terminal = false);
 
     /// Get a pointer to a new WebSocket protocol processor for a given version
@@ -1364,7 +1474,7 @@ private:
      * Includes: error code and message for why it was failed
      */
     void log_fail_result();
-
+    
     /// Prints information about HTTP connections
     /**
      * Includes: TODO
@@ -1376,7 +1486,7 @@ private:
     void log_err(log::level l, char const * msg, error_type const & ec) {
         std::stringstream s;
         s << msg << " error: " << ec << " (" << ec.message() << ")";
-        m_elog.write(l, s.str());
+        m_elog->write(l, s.str());
     }
 
     // internal handler functions
@@ -1493,8 +1603,8 @@ private:
     std::vector<std::string> m_requested_subprotocols;
 
     bool const              m_is_server;
-    alog_type& m_alog;
-    elog_type& m_elog;
+    const lib::shared_ptr<alog_type> m_alog;
+    const lib::shared_ptr<elog_type> m_elog;
 
     rng_type & m_rng;
 
@@ -1513,21 +1623,16 @@ private:
 
     /// Detailed internal error code
     lib::error_code m_ec;
-
+    
     /// A flag that gets set once it is determined that the connection is an
     /// HTTP connection and not a WebSocket one.
     bool m_is_http;
+    
+    /// A flag that gets set when the completion of an http connection is
+    /// deferred until later.
+    session::http_state::value m_http_state;
 
     bool m_was_clean;
-
-    /// Whether or not this endpoint initiated the closing handshake.
-    bool                    m_closed_by_me;
-
-    /// ???
-    bool                    m_failed_by_me;
-
-    /// Whether or not this endpoint initiated the drop of the TCP connection
-    bool                    m_dropped_by_me;
 };
 
 } // namespace websocketpp

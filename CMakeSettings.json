@@ -3,8 +3,9 @@
   "environments": [
     {
       "BuildDir": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build",
-      "WWWRoot": "${projectDir}\\cleric\\www",
+      "PropFile": "${projectDir}\\cleric\\test_data\\cleric.properties",
       "StorageRoot": "${projectDir}\\cleric\\test_data",
+      "WWWRoot": "${projectDir}\\cleric\\www\\cleric-front\\dist\\cleric-front"
     }
   ],
 
@@ -23,6 +24,10 @@
         {
           "name": "CMAKE_TOOLCHAIN_FILE",
           "value": "${env.VCPKG_HOME}\\scripts\\buildsystems\\vcpkg.cmake"
+        },
+        {
+          "name": "BOOST_ROOT",
+          "value": "${env.VCPKG_HOME}\\"
         }
       ]
 

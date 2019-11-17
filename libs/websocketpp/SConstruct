@@ -34,6 +34,11 @@ elif os.environ.has_key('BOOST_INCLUDES') and os.environ.has_key('BOOST_LIBS'):
 else:
    raise SCons.Errors.UserError, "Neither BOOST_ROOT, nor BOOST_INCLUDES + BOOST_LIBS was set!"
 
+## Custom OpenSSL
+if os.environ.has_key('OPENSSL_PATH'):
+   env.Append(CPPPATH = os.path.join(os.environ['OPENSSL_PATH'], 'include'))
+   env.Append(LIBPATH = os.environ['OPENSSL_PATH'])
+
 if os.environ.has_key('WSPP_ENABLE_CPP11'):
    env['WSPP_ENABLE_CPP11'] = True
 else:
@@ -93,8 +98,7 @@ if env['PLATFORM'].startswith('win'):
    #env['LIBPATH'] = env['BOOST_LIBS']
    pass
 else:
-   env['LIBPATH'] = ['/usr/lib',
-                     '/usr/local/lib'] #, env['BOOST_LIBS']
+   env.Append(LIBPATH = ['/usr/lib', '/usr/local/lib'])
 
 # Compiler specific warning flags
 if env['CXX'].startswith('g++'):
@@ -125,6 +129,7 @@ elif env['CXX'].startswith('clang++'):
 
    # Wpadded
    # Wsign-conversion
+   #
 
 platform_libs = []
 tls_libs = []
@@ -226,10 +231,17 @@ if not env['PLATFORM'].startswith('win'):
 # echo_server
 echo_server = SConscript('#/examples/echo_server/SConscript',variant_dir = builddir + 'echo_server',duplicate = 0)
 
+# echo_client
+echo_client = SConscript('#/examples/echo_client/SConscript',variant_dir = builddir + 'echo_client',duplicate = 0)
+
+# print_client
+print_client = SConscript('#/examples/print_client/SConscript',variant_dir = builddir + 'print_client',duplicate = 0)
+
 # echo_server_tls
 if tls_build:
     echo_server_tls = SConscript('#/examples/echo_server_tls/SConscript',variant_dir = builddir + 'echo_server_tls',duplicate = 0)
     echo_server_both = SConscript('#/examples/echo_server_both/SConscript',variant_dir = builddir + 'echo_server_both',duplicate = 0)
+    print_client_tls = SConscript('#/examples/print_client_tls/SConscript',variant_dir = builddir + 'print_client_tls',duplicate = 0)
 
 # broadcast_server
 broadcast_server = SConscript('#/examples/broadcast_server/SConscript',variant_dir = builddir + 'broadcast_server',duplicate = 0)
@@ -240,8 +252,12 @@ testee_server = SConscript('#/examples/testee_server/SConscript',variant_dir = b
 # testee_client
 testee_client = SConscript('#/examples/testee_client/SConscript',variant_dir = builddir + 'testee_client',duplicate = 0)
 
-# utility_client
-utility_client = SConscript('#/examples/utility_client/SConscript',variant_dir = builddir + 'utility_client',duplicate = 0)
+# scratch_client
+scratch_client = SConscript('#/examples/scratch_client/SConscript',variant_dir = builddir + 'scratch_client',duplicate = 0)
+
+# scratch_server
+scratch_server = SConscript('#/examples/scratch_server/SConscript',variant_dir = builddir + 'scratch_server',duplicate = 0)
+
 
 # debug_client
 debug_client = SConscript('#/examples/debug_client/SConscript',variant_dir = builddir + 'debug_client',duplicate = 0)
@@ -254,6 +270,9 @@ subprotocol_server = SConscript('#/examples/subprotocol_server/SConscript',varia
 
 # telemetry_server
 telemetry_server = SConscript('#/examples/telemetry_server/SConscript',variant_dir = builddir + 'telemetry_server',duplicate = 0)
+
+# external_io_service
+external_io_service = SConscript('#/examples/external_io_service/SConscript',variant_dir = builddir + 'external_io_service',duplicate = 0)
 
 if not env['PLATFORM'].startswith('win'):
     # iostream_server

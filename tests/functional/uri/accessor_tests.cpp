@@ -26,26 +26,26 @@ SUITE(accessor_tests)
 {
     TEST(authority_string)
     {
-        uri u(U("http://testname.com:81/path?baz"));
+        uri u(__U("http://testname.com:81/path?baz"));
         uri a = u.authority();
 
-        VERIFY_ARE_EQUAL(U("/path"), u.path());
-        VERIFY_ARE_EQUAL(U("http"), a.scheme());
-        VERIFY_ARE_EQUAL(U("testname.com"), a.host());
+        VERIFY_ARE_EQUAL(__U("/path"), u.path());
+        VERIFY_ARE_EQUAL(__U("http"), a.scheme());
+        VERIFY_ARE_EQUAL(__U("testname.com"), a.host());
         VERIFY_ARE_EQUAL(81, a.port());
-        VERIFY_ARE_EQUAL(uri(U("http://testname.com:81")), a);
+        VERIFY_ARE_EQUAL(uri(__U("http://testname.com:81")), a);
     }
 
     TEST(authority_wstring)
     {
-        uri u(U("http://testname.com:81/path?baz"));
+        uri u(__U("http://testname.com:81/path?baz"));
         uri a = u.authority();
 
-        VERIFY_ARE_EQUAL(U("/path"), u.path());
-        VERIFY_ARE_EQUAL(U("http"), a.scheme());
-        VERIFY_ARE_EQUAL(U("testname.com"), a.host());
+        VERIFY_ARE_EQUAL(__U("/path"), u.path());
+        VERIFY_ARE_EQUAL(__U("http"), a.scheme());
+        VERIFY_ARE_EQUAL(__U("testname.com"), a.host());
         VERIFY_ARE_EQUAL(81, a.port());
-        VERIFY_ARE_EQUAL(uri(U("http://testname.com:81")), a);
+        VERIFY_ARE_EQUAL(uri(__U("http://testname.com:81")), a);
     }
 
 } // SUITE(accessor_tests)

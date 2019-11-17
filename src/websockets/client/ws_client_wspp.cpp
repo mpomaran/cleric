@@ -178,7 +178,7 @@ public:
 
     pplx::task<void> connect()
     {
-        if (m_uri.scheme() == U("wss"))
+        if (m_uri.scheme() == __U("wss"))
         {
             m_client = std::unique_ptr<websocketpp_client_base>(new websocketpp_tls_client());
 
@@ -597,7 +597,7 @@ public:
 
     pplx::task<void> close()
     {
-        return close(static_cast<websocket_close_status>(websocketpp::close::status::normal), U("Normal"));
+        return close(static_cast<websocket_close_status>(websocketpp::close::status::normal), __U("Normal"));
     }
 
     pplx::task<void> close(websocket_close_status status, const utility::string_t& reason)

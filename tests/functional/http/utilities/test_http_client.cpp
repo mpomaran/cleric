@@ -24,6 +24,8 @@
 #pragma warning(pop)
 #endif
 
+#define U(x) _XPLATSTR(x)
+
 using namespace web;
 using namespace utility;
 
@@ -41,7 +43,7 @@ utility::string_t flatten_http_headers(const std::map<utility::string_t, utility
     utility::string_t flattened_headers;
     for (auto iter = headers.begin(); iter != headers.end(); ++iter)
     {
-        utility::string_t temp((*iter).first + U(":") + (*iter).second + U("\r\n"));
+        utility::string_t temp((*iter).first + __U(":") + (*iter).second + __U("\r\n"));
         flattened_headers.append(utility::string_t(temp.begin(), temp.end()));
     }
     return flattened_headers;
@@ -115,11 +117,11 @@ static void parse_winhttp_headers(HINTERNET request_handle, utf16char* headersSt
     parse_reason_phrase(request_handle, p_response->m_reason_phrase);
 
     utf16char* context = nullptr;
-    utf16char* line = wcstok_s(headersStr, U("\r\n"), &context);
+    utf16char* line = wcstok_s(headersStr, __U("\r\n"), &context);
     while (line != nullptr)
     {
         const utility::string_t header_line(line);
-        const size_t colonIndex = header_line.find_first_of(U(":"));
+        const size_t colonIndex = header_line.find_first_of(__U(":"));
         if (colonIndex != utility::string_t::npos)
         {
             utility::string_t key = header_line.substr(0, colonIndex);
@@ -128,7 +130,7 @@ static void parse_winhttp_headers(HINTERNET request_handle, utf16char* headersSt
             tests::functional::http::utilities::trim_whitespace(value);
             p_response->m_headers[key] = value;
         }
-        line = wcstok_s(nullptr, U("\r\n"), &context);
+        line = wcstok_s(nullptr, __U("\r\n"), &context);
     }
 }
 
@@ -140,7 +142,7 @@ public:
     unsigned long open()
     {
         // Open session.
-        m_hSession = WinHttpOpen(U("test_http_client"),
+        m_hSession = WinHttpOpen(__U("test_http_client"),
                                  WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                                  WINHTTP_NO_PROXY_NAME,
                                  WINHTTP_NO_PROXY_BYPASS,
@@ -414,7 +416,7 @@ public:
             if (currentValue.empty())
                 currentValue = it->second;
             else
-                currentValue = currentValue + U(", ") + it->second;
+                currentValue = currentValue + __U(", ") + it->second;
         }
         request.set_body(utility::string_t(reinterpret_cast<const char*>(data), data_length));
 
@@ -508,7 +510,7 @@ unsigned long test_http_client::request(const utility::string_t& method,
                                         const std::string& data)
 {
     std::map<utility::string_t, utility::string_t> headers;
-    headers[U("Content-Type")] = content_type;
+    headers[__U("Content-Type")] = content_type;
     return request(method, path, headers, data);
 }
 

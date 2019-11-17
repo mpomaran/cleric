@@ -39,7 +39,6 @@ using namespace websocketpp;
 BOOST_AUTO_TEST_CASE( reserved_values ) {
     BOOST_CHECK( !close::status::reserved(999) );
     BOOST_CHECK( close::status::reserved(1004) );
-    BOOST_CHECK( close::status::reserved(1014) );
     BOOST_CHECK( close::status::reserved(1016) );
     BOOST_CHECK( close::status::reserved(2999) );
     BOOST_CHECK( !close::status::reserved(1000) );
@@ -88,7 +87,7 @@ BOOST_AUTO_TEST_CASE( value_extraction ) {
 
 BOOST_AUTO_TEST_CASE( extract_empty ) {
     lib::error_code ec;
-    std::string payload = "";
+    std::string payload;
 
     BOOST_CHECK( close::extract_code(payload,ec) == close::status::no_status );
     BOOST_CHECK( !ec );
@@ -109,12 +108,12 @@ BOOST_AUTO_TEST_CASE( extract_reason ) {
     BOOST_CHECK( close::extract_reason(payload,ec) == "Foo" );
     BOOST_CHECK( !ec );
 
-    payload = "";
-    BOOST_CHECK( close::extract_reason(payload,ec) == "" );
+    payload.clear();
+    BOOST_CHECK( close::extract_reason(payload,ec).empty() );
     BOOST_CHECK( !ec );
 
     payload = "00";
-    BOOST_CHECK( close::extract_reason(payload,ec) == "" );
+    BOOST_CHECK( close::extract_reason(payload,ec).empty() );
     BOOST_CHECK( !ec );
 
     payload = "000";

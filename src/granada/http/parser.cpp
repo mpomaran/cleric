@@ -209,7 +209,7 @@ namespace granada{
         if (it != headers.end()){
           web::uri uri(it->second);
           const int port = uri.port();
-          return utility::conversions::to_utf8string(uri.scheme() + U("://") + uri.host() + utility::conversions::to_string_t(port > 0 ? ":" + std::to_string(port) : "") + uri.path());
+          return utility::conversions::to_utf8string(uri.scheme() + __U("://") + uri.host() + utility::conversions::to_string_t(port > 0 ? ":" + std::to_string(port) : "") + uri.path());
         }
         return std::string();
       }

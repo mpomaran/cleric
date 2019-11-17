@@ -57,7 +57,7 @@ namespace granada{
         std::string message = "";
 
         if (username.empty() || password.empty() || password2.empty()){
-          response.headers().add(U("Location"), U("?error=invalid_request&error_description=Error creating user, introduce a username and a password."));
+          response.headers().add(__U("Location"), __U("?error=invalid_request&error_description=Error creating user, introduce a username and a password."));
         }else{
           if (password==password2){
             if (username.length() > 5 && username.length() < 16 && password.length() > 5 && password.length() < 16){
@@ -75,15 +75,15 @@ namespace granada{
 				roles = web::json::value::parse(utility::conversions::to_string_t(roles_str));
               }
               if (oauth2_user->Create(username,password,roles)){
-				  response.headers().add(U("Location"), utility::conversions::to_string_t(("/?description=User " + username + " created successfully.")));
+				  response.headers().add(__U("Location"), utility::conversions::to_string_t(("/?description=User " + username + " created successfully.")));
               }else{
-                response.headers().add(U("Location"), U("/?error=invalid_username&error_description=Error creating user, username already exists."));
+                response.headers().add(__U("Location"), __U("/?error=invalid_username&error_description=Error creating user, username already exists."));
               }
             }else{
-              response.headers().add(U("Location"), U("/?error=invalid_field&error_description=Error creating user, username and password lengths have to be at least 6 characters and less than 16."));
+              response.headers().add(__U("Location"), __U("/?error=invalid_field&error_description=Error creating user, username and password lengths have to be at least 6 characters and less than 16."));
             }
           }else{
-            response.headers().add(U("Location"), U("/?error=invalid_request&error_description=Error creating user, the two passwords introduced were different."));
+            response.headers().add(__U("Location"), __U("/?error=invalid_request&error_description=Error creating user, the two passwords introduced were different."));
           }
         }
 

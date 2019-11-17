@@ -46,59 +46,59 @@ namespace details
 /// String values for all HTTP Server API known headers.
 /// NOTE: the order here is important it is from the _HTTP_HEADER_ID enum.
 /// </summary>
-static utility::string_t HttpServerAPIKnownHeaders[] = {U("Cache-Control"),
-                                                        U("Connection"),
-                                                        U("Data"),
-                                                        U("Keep-Alive"),
-                                                        U("Pragma"),
-                                                        U("Trailer"),
-                                                        U("Transfer-Encoding"),
-                                                        U("Upgrade"),
-                                                        U("Via"),
-                                                        U("Warning"),
-                                                        U("Allow"),
-                                                        U("Content-Length"),
-                                                        U("Content-Type"),
-                                                        U("Content-Encoding"),
-                                                        U("Content-Language"),
-                                                        U("Content-Location"),
-                                                        U("Content-Md5"),
-                                                        U("Content-Range"),
-                                                        U("Expires"),
-                                                        U("Last-Modified"),
-                                                        U("Accept"),
-                                                        U("Accept-Charset"),
-                                                        U("Accept-Encoding"),
-                                                        U("Accept-Language"),
-                                                        U("Authorization"),
-                                                        U("Cookie"),
-                                                        U("Expect"),
-                                                        U("From"),
-                                                        U("Host"),
-                                                        U("If-Match"),
-                                                        U("If-Modified-Since"),
-                                                        U("If-None-Match"),
-                                                        U("If-Range"),
-                                                        U("If-Unmodified-Since"),
-                                                        U("Max-Forwards"),
-                                                        U("Proxy-Authorization"),
-                                                        U("Referer"),
-                                                        U("Range"),
-                                                        U("TE"),
-                                                        U("Translate"),
-                                                        U("User-Agent"),
-                                                        U("Request-Maximum"),
-                                                        U("Accept-Ranges"),
-                                                        U("Age"),
-                                                        U("Etag"),
-                                                        U("Location"),
-                                                        U("Proxy-Authenticate"),
-                                                        U("Retry-After"),
-                                                        U("Server"),
-                                                        U("Set-Cookie"),
-                                                        U("Vary"),
-                                                        U("Www-Authenticate"),
-                                                        U("Response-Maximum")};
+static utility::string_t HttpServerAPIKnownHeaders[] = {__U("Cache-Control"),
+                                                        __U("Connection"),
+                                                        __U("Data"),
+                                                        __U("Keep-Alive"),
+                                                        __U("Pragma"),
+                                                        __U("Trailer"),
+                                                        __U("Transfer-Encoding"),
+                                                        __U("Upgrade"),
+                                                        __U("Via"),
+                                                        __U("Warning"),
+                                                        __U("Allow"),
+                                                        __U("Content-Length"),
+                                                        __U("Content-Type"),
+                                                        __U("Content-Encoding"),
+                                                        __U("Content-Language"),
+                                                        __U("Content-Location"),
+                                                        __U("Content-Md5"),
+                                                        __U("Content-Range"),
+                                                        __U("Expires"),
+                                                        __U("Last-Modified"),
+                                                        __U("Accept"),
+                                                        __U("Accept-Charset"),
+                                                        __U("Accept-Encoding"),
+                                                        __U("Accept-Language"),
+                                                        __U("Authorization"),
+                                                        __U("Cookie"),
+                                                        __U("Expect"),
+                                                        __U("From"),
+                                                        __U("Host"),
+                                                        __U("If-Match"),
+                                                        __U("If-Modified-Since"),
+                                                        __U("If-None-Match"),
+                                                        __U("If-Range"),
+                                                        __U("If-Unmodified-Since"),
+                                                        __U("Max-Forwards"),
+                                                        __U("Proxy-Authorization"),
+                                                        __U("Referer"),
+                                                        __U("Range"),
+                                                        __U("TE"),
+                                                        __U("Translate"),
+                                                        __U("User-Agent"),
+                                                        __U("Request-Maximum"),
+                                                        __U("Accept-Ranges"),
+                                                        __U("Age"),
+                                                        __U("Etag"),
+                                                        __U("Location"),
+                                                        __U("Proxy-Authenticate"),
+                                                        __U("Retry-After"),
+                                                        __U("Server"),
+                                                        __U("Set-Cookie"),
+                                                        __U("Vary"),
+                                                        __U("Www-Authenticate"),
+                                                        __U("Response-Maximum")};
 
 static void char_to_wstring(utf16string& dest, const char* src)
 {
@@ -155,7 +155,7 @@ void parse_http_headers(const HTTP_REQUEST_HEADERS& headers, http::http_headers&
         }
         else
         {
-            msgHeaders[unknown_header_name] = U("");
+            msgHeaders[unknown_header_name] = __U("");
         }
     }
     for (int i = 0; i < HttpHeaderMaximum; ++i)
@@ -204,9 +204,9 @@ pplx::task<void> http_windows_server::register_listener(
     // Windows HTTP Server API will not accept a uri with an empty path, it must have a '/'.
     // Windows HTTP Server API will only accept decoded uri strings.
     utility::string_t host_uri = http::uri::decode(u.to_string());
-    if (host_uri.back() != U('/') && u.query().empty() && u.fragment().empty())
+    if (host_uri.back() != __U('/') && u.query().empty() && u.fragment().empty())
     {
-        host_uri.push_back(U('/'));
+        host_uri.push_back(__U('/'));
     }
 
     // inside here we check for a few specific error types that know about

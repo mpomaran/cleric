@@ -33,7 +33,7 @@ namespace cache {
 
 WebResourceCache::WebResourceCache() { Start(); }
 
-granada::cache::Resource WebResourceCache::GetFile(std::string& file_path) {
+granada::cache::Resource WebResourceCache::GetFile(std::string &file_path) {
   if (!files_.empty()) {
     auto it = files_.find(file_path);
     if (it == files_.end()) {
@@ -82,10 +82,10 @@ granada::cache::Resource WebResourceCache::GetFile(std::string& file_path) {
         }
       }
 
-      if (error_paths_.has_field(U("404"))) {
+      if (error_paths_.has_field(__U("404"))) {
         try {
-          const web::json::value& error_404_file_path_json =
-              error_paths_.at(U("404"));
+          const web::json::value &error_404_file_path_json =
+              error_paths_.at(__U("404"));
           std::string error_404_file_path = utility::conversions::to_utf8string(
               error_404_file_path_json.as_string());
           if (file_path == error_404_file_path ||
@@ -111,10 +111,10 @@ granada::cache::Resource WebResourceCache::GetFile(std::string& file_path) {
 
   if (file_path.empty() || !boost::filesystem::exists(file_path)) {
     // return 404 file content if it exists..
-    if (error_paths_.has_field(U("404"))) {
+    if (error_paths_.has_field(__U("404"))) {
       try {
-        const web::json::value& error_404_file_path_json =
-            error_paths_.at(U("404"));
+        const web::json::value &error_404_file_path_json =
+            error_paths_.at(__U("404"));
         std::string error_404_file_path = utility::conversions::to_utf8string(
             error_404_file_path_json.as_string());
         return GetFile(error_404_file_path);
@@ -154,8 +154,8 @@ std::string WebResourceCache::GetContentEncoding() {
   }
 }
 
-void WebResourceCache::CacheRecord(const std::string& resource_path,
-                                   const granada::cache::Resource& resource) {
+void WebResourceCache::CacheRecord(const std::string &resource_path,
+                                   const granada::cache::Resource &resource) {
   files_.insert(std::make_pair(resource_path, resource));
 }
 
@@ -216,9 +216,9 @@ void WebResourceCache::LoadConfig() {
       // loop through the keys of the json. The keys are the content types.
       for (auto it = obj.as_object().cbegin(); it != obj.as_object().cend();
            ++it) {
-        const std::string& content_type =
+        const std::string &content_type =
             utility::conversions::to_utf8string(it->first);
-        const web::json::value& extensions_json = it->second;
+        const web::json::value &extensions_json = it->second;
 
         // loop through the extensions related to the extracted content type.
         for (auto it2 = extensions_json.as_array().cbegin();
@@ -365,8 +365,8 @@ void WebResourceCache::GzipCopy() {
 #endif
 }
 
-bool WebResourceCache::RecursiveLoad(const std::string& relative_path,
-                                     int& maximum_cache_memory) {
+bool WebResourceCache::RecursiveLoad(const std::string &relative_path,
+                                     int &maximum_cache_memory) {
   std::string application_and_relative_path = root_path_ + relative_path;
 
   if (boost::filesystem::exists(application_and_relative_path)) {
@@ -472,8 +472,8 @@ bool WebResourceCache::RecursiveLoad(const std::string& relative_path,
   return true;
 }
 
-std::string WebResourceCache::GetExtensionContentType(
-    const std::string& extension) {
+std::string
+WebResourceCache::GetExtensionContentType(const std::string &extension) {
   auto it = content_types_.find(extension);
   if (it != content_types_.end()) {
     return it->second;
@@ -482,8 +482,8 @@ std::string WebResourceCache::GetExtensionContentType(
   }
 }
 
-std::string WebResourceCache::GetExtensionContentEncoding(
-    const std::string& extension) {
+std::string
+WebResourceCache::GetExtensionContentEncoding(const std::string &extension) {
   if (gzip_content_) {
     for (auto it = gzip_extensions_.as_array().cbegin();
          it != gzip_extensions_.as_array().cend(); ++it) {
@@ -503,7 +503,7 @@ std::string WebResourceCache::FormatLastModified(const std::time_t date) {
   // Format: Tue, 15 Nov 1994 12:45:26 GMT
   std::strftime(buffer, 32, "%a %d %b %Y %H:%M:%S %Z", &ptm);
 #else
-  std::tm* ptm = std::localtime(&date);
+  std::tm *ptm = std::localtime(&date);
   char buffer[32];
   // Format: Tue, 15 Nov 1994 12:45:26 GMT
   std::strftime(buffer, 32, "%a %d %b %Y %H:%M:%S %Z", ptm);
@@ -513,13 +513,13 @@ std::string WebResourceCache::FormatLastModified(const std::time_t date) {
   return buffer;
 }
 
-std::string WebResourceCache::GenerateETag(const std::string& resource_path,
-                                           const std::string& last_modified) {
+std::string WebResourceCache::GenerateETag(const std::string &resource_path,
+                                           const std::string &last_modified) {
   boost::hash<std::string> string_hash;
   std::size_t hash = string_hash(resource_path + last_modified);
   std::stringstream ss;
   ss << hash;
   return ss.str();
 }
-}  // namespace cache
-}  // namespace granada
+} // namespace cache
+} // namespace granada

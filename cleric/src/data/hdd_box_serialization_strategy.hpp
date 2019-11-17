@@ -28,7 +28,7 @@ SOFTWARE.
 #define HDD_BOX_SERIALIZATION_STRATEGY_HPP_HAS_BEEN_INCLUDED
 
 #include "../business/m2m_message.hpp"
-#include "box_serialization_strategy.hpp"
+#include "ibox_serialization_strategy.hpp"
 #include <fstream>
 #include <istream>
 #include <ostream>

@@ -311,11 +311,12 @@ double Box::DataPoint::fromSensorFormatToValue(uint64_t sensorValue,
                                                uint64_t sensorType,
                                                double vcc) {
   switch (sensorType) {
-  case 0: {                         // temparature sensor
-    double t = sensorValue / 512.0; // initially it's divided by 2
+  case 0x1ff: {                         // temparature sensor
+    double t = sensorValue / 512.0; // divided by 2 in the sensor
     t *= vcc;
     t -= 0.5; // substract the offset
     t *= 100; // convert to degrees
+	return t;
   }
   default:
 	  if (sensorType != 509) {		// value used in tests

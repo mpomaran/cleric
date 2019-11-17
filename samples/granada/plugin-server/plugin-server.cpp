@@ -64,7 +64,7 @@ void on_initialize(const string_t& address)
   // Plugin Controller
   //
   uri_builder plugin_uri(address);
-  plugin_uri.append_path(U("plugin"));
+  plugin_uri.append_path(__U("plugin"));
   auto addr = plugin_uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::PluginController> plugin_controller(new granada::http::controller::PluginController(addr,session_factory,plugin_factory));
   plugin_controller->open().wait();

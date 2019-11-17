@@ -53,7 +53,7 @@ namespace atl_headers
 {
 SUITE(header_test1)
 {
-    TEST(HeaderTest) { web::http::client::http_client client(U("http://www.cnn.com")); }
+    TEST(HeaderTest) { web::http::client::http_client client(__U("http://www.cnn.com")); }
 
 } // SUITE(header_test1)
 

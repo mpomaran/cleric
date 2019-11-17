@@ -19,43 +19,43 @@ using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
 
-const utility::string_t casalens_creds::events_url = U("http://api.eventful.com/json/events/search?...&location=");
-const utility::string_t casalens_creds::movies_url = U("http://data.tmsapi.com/v1/movies/showings?");
+const utility::string_t casalens_creds::events_url = __U("http://api.eventful.com/json/events/search?...&location=");
+const utility::string_t casalens_creds::movies_url = __U("http://data.tmsapi.com/v1/movies/showings?");
 const utility::string_t casalens_creds::images_url =
-    U("https://api.datamarket.azure.com/Bing/Search/Image?$format=json");
-const utility::string_t casalens_creds::bmaps_url = U("http://dev.virtualearth.net/REST/v1/Locations");
-const utility::string_t casalens_creds::gmaps_url = U("http://maps.googleapis.com/maps/api/geocode/json");
-const utility::string_t casalens_creds::weather_url = U("http://api.openweathermap.org/data/2.1/find/name?q=");
+    __U("https://api.datamarket.azure.com/Bing/Search/Image?$format=json");
+const utility::string_t casalens_creds::bmaps_url = __U("http://dev.virtualearth.net/REST/v1/Locations");
+const utility::string_t casalens_creds::gmaps_url = __U("http://maps.googleapis.com/maps/api/geocode/json");
+const utility::string_t casalens_creds::weather_url = __U("http://api.openweathermap.org/data/2.1/find/name?q=");
 
 // FILL IN THE API KEYS FOR THE DIFFERENT SERVICES HERE.
 // Refer Readme.txt for details on how to obtain the key for the services.
-const utility::string_t casalens_creds::events_keyname = U("app_key");
-const utility::string_t casalens_creds::events_key = U("");
-const utility::string_t casalens_creds::movies_keyname = U("api_key");
-const utility::string_t casalens_creds::movies_key = U("");
-const utility::string_t casalens_creds::images_keyname = U("username");
-const utility::string_t casalens_creds::images_key = U("");
-const utility::string_t casalens_creds::bmaps_keyname = U("key");
-const utility::string_t casalens_creds::bmaps_key = U("");
+const utility::string_t casalens_creds::events_keyname = __U("app_key");
+const utility::string_t casalens_creds::events_key = __U("");
+const utility::string_t casalens_creds::movies_keyname = __U("api_key");
+const utility::string_t casalens_creds::movies_key = __U("");
+const utility::string_t casalens_creds::images_keyname = __U("username");
+const utility::string_t casalens_creds::images_key = __U("");
+const utility::string_t casalens_creds::bmaps_keyname = __U("key");
+const utility::string_t casalens_creds::bmaps_key = __U("");
 
-const utility::string_t CasaLens::events_json_key = U("events");
-const utility::string_t CasaLens::movies_json_key = U("movies");
-const utility::string_t CasaLens::weather_json_key = U("weather");
-const utility::string_t CasaLens::images_json_key = U("images");
-const utility::string_t CasaLens::error_json_key = U("error");
+const utility::string_t CasaLens::events_json_key = __U("events");
+const utility::string_t CasaLens::movies_json_key = __U("movies");
+const utility::string_t CasaLens::weather_json_key = __U("weather");
+const utility::string_t CasaLens::images_json_key = __U("images");
+const utility::string_t CasaLens::error_json_key = __U("error");
 
 CasaLens::CasaLens(utility::string_t url) : m_listener(url)
 {
     m_listener.support(methods::GET, std::bind(&CasaLens::handle_get, this, std::placeholders::_1));
     m_listener.support(methods::POST, std::bind(&CasaLens::handle_post, this, std::placeholders::_1));
 
-    m_htmlcontentmap[U("/")] = std::make_tuple(U("AppCode.html"), U("text/html"));
-    m_htmlcontentmap[U("/js/default.js")] = std::make_tuple(U("js/default.js"), U("application/javascript"));
-    m_htmlcontentmap[U("/css/default.css")] = std::make_tuple(U("css/default.css"), U("text/css"));
-    m_htmlcontentmap[U("/image/logo.png")] = std::make_tuple(U("image/logo.png"), U("application/octet-stream"));
-    m_htmlcontentmap[U("/image/bing-logo.jpg")] =
-        std::make_tuple(U("image/bing-logo.jpg"), U("application/octet-stream"));
-    m_htmlcontentmap[U("/image/wall.jpg")] = std::make_tuple(U("image/wall.jpg"), U("application/octet-stream"));
+    m_htmlcontentmap[__U("/")] = std::make_tuple(__U("AppCode.html"), __U("text/html"));
+    m_htmlcontentmap[__U("/js/default.js")] = std::make_tuple(__U("js/default.js"), __U("application/javascript"));
+    m_htmlcontentmap[__U("/css/default.css")] = std::make_tuple(__U("css/default.css"), __U("text/css"));
+    m_htmlcontentmap[__U("/image/logo.png")] = std::make_tuple(__U("image/logo.png"), __U("application/octet-stream"));
+    m_htmlcontentmap[__U("/image/bing-logo.jpg")] =
+        std::make_tuple(__U("image/bing-logo.jpg"), __U("application/octet-stream"));
+    m_htmlcontentmap[__U("/image/wall.jpg")] = std::make_tuple(__U("image/wall.jpg"), __U("application/octet-stream"));
 }
 
 void CasaLens::handle_error(pplx::task<void>& t)
@@ -88,7 +88,7 @@ void CasaLens::handle_get(http_request message)
     auto content_data = m_htmlcontentmap.find(path);
     if (content_data == m_htmlcontentmap.end())
     {
-        message.reply(status_codes::NotFound, U("Path not found")).then([](pplx::task<void> t) { handle_error(t); });
+        message.reply(status_codes::NotFound, __U("Path not found")).then([](pplx::task<void> t) { handle_error(t); });
         return;
     }
 
@@ -118,7 +118,7 @@ void CasaLens::handle_get(http_request message)
 void CasaLens::handle_post(http_request message)
 {
     auto path = message.relative_uri().path();
-    if (0 == path.compare(U("/")))
+    if (0 == path.compare(__U("/")))
     {
         message.extract_string()
             .then([=](const utility::string_t& location) { get_data(message, location); })
@@ -126,7 +126,7 @@ void CasaLens::handle_post(http_request message)
     }
     else
     {
-        message.reply(status_codes::NotFound, U("Path not found")).then([](pplx::task<void> t) { handle_error(t); });
+        message.reply(status_codes::NotFound, __U("Path not found")).then([](pplx::task<void> t) { handle_error(t); });
     }
 }
 
@@ -138,20 +138,20 @@ int main(int argc, char* args[])
 {
     if (argc != 2)
     {
-        wprintf(U("Usage: casalens.exe port\n"));
+        wprintf(__U("Usage: casalens.exe port\n"));
         return -1;
     }
 
-    std::wstring address = U("http://localhost:");
+    std::wstring address = __U("http://localhost:");
     address.append(args[1]);
 
     CasaLens listener(address);
     listener.open().wait();
 
-    std::wcout << utility::string_t(U("Listening for requests at: ")) << address << std::endl;
+    std::wcout << utility::string_t(__U("Listening for requests at: ")) << address << std::endl;
 
     std::string line;
-    std::wcout << U("Hit Enter to close the listener.");
+    std::wcout << __U("Hit Enter to close the listener.");
     std::getline(std::cin, line);
 
     listener.close().wait();

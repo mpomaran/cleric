@@ -45,6 +45,8 @@ const size_t MAX_M2M_MESSAGE_SIZE = 128;
 
 namespace cleric {
 
+const int M2MMessage::OFFSET = 1;
+
 M2MMessage::M2MMessage(const BoxId &boxId_, const M2MPayload &p_)
     : boxId(boxId_), payload(p_) {}
 
@@ -64,14 +66,14 @@ static void bufferToSensorData(uint64_t buff, uint32_t &type, uint32_t &value,
 }
 
 M2MMessage M2MMessage::decode(const std::string &message, uint64_t secret) {
-  if (message.size() != 48) {
+  if (message.size() != 49) {
     throw length_error("M2M message out of bounds");
   }
 
-  uint64_t boxId = stringToInt(message.substr(0, 8));
-  uint64_t timestamp = stringToInt(message.substr(8, 8));
-  uint64_t random = stringToInt(message.substr(16, 16));
-  uint64_t payloadRaw = stringToInt(message.substr(32, 16));
+  uint64_t boxId = stringToInt(message.substr(0 + OFFSET, 8));
+  uint64_t timestamp = stringToInt(message.substr(8 + OFFSET, 8));
+  uint64_t random = stringToInt(message.substr(16 + OFFSET, 16));
+  uint64_t payloadRaw = stringToInt(message.substr(32 + OFFSET, 16));
 
   uint64_t decodedPayload = 0;
   auto yrand_generator = yrand_seed(timestamp ^ random, secret);
@@ -86,9 +88,10 @@ M2MMessage M2MMessage::decode(const std::string &message, uint64_t secret) {
   uint32_t c2 = (decodedPayload >> 32) & 0xffffffff;
 
   if (c1 != c2) {
-	  // TODO: potential security flaw, but there is security by obscurity in this solution
-	  // TODO: review once real encryption is in place
-	  throw invalid_argument("Wrong format, CRC fail");
+    // TODO: potential security flaw, but there is security by obscurity in this
+    // solution
+    // TODO: review once real encryption is in place
+    throw invalid_argument("Wrong format, CRC fail");
   }
 
   uint32_t type, reading, vcc;
@@ -108,7 +111,7 @@ BoxId M2MMessage::getBoxId(const ::std::string &message) {
     throw invalid_argument("Message too short");
   }
 
-  return (BoxId)stringToInt(message.substr(0, 8));
+  return (BoxId)stringToInt(message.substr(0+OFFSET, 8));
 }
 
 M2MMessage::M2MMessage(const M2MMessage &&other) {

@@ -30,15 +30,15 @@ SOFTWARE.
 #include <thread>
 
 static std::string createM2MMessage() {
-  return "0000000ABE587DE600000000AE30AFFCD31EA91087E215F4";
+  return "00000000100000000000000003F361CCB02C928BB461DD4EF";
 }
 
 static cleric::data::Box createBoxFromScratch() {
 
   auto retention = std::chrono::hours(24);
   std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer{
-      new cleric::data::HddBoxSerializationStrategy(10, ".")};
-  cleric::data::Box result{10, "dummy", retention, 1000, std::move(serializer)};
+      new cleric::data::HddBoxSerializationStrategy(1, ".")};
+  cleric::data::Box result{1, "dummy", retention, 1000, std::move(serializer)};
 
   return result;
 }
@@ -57,7 +57,7 @@ TEST_CASE("Box can be serialized and deserialized",
   b1.persist();
 
   std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer{
-      new cleric::data::HddBoxSerializationStrategy(10, ".")};
+      new cleric::data::HddBoxSerializationStrategy(1, ".")};
   cleric::data::Box b2{std::move(serializer)};
 
   CHECK(b1 == b2);
@@ -71,7 +71,7 @@ TEST_CASE("Box can be serialized and deserialized",
   b1.persist();
 
   std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer3{
-      new cleric::data::HddBoxSerializationStrategy(10, ".")};
+      new cleric::data::HddBoxSerializationStrategy(1, ".")};
   cleric::data::Box b3{std::move(serializer3)};
 
   CHECK(b1 == b3);

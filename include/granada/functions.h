@@ -299,7 +299,7 @@ namespace granada{
        */
       static web::json::value UndefinedErrorFunction(const web::json::value& data){
         web::json::value response = web::json::value::object();
-		response[U("error")] = web::json::value::string(U("undefined_function"));
+		response[__U("error")] = web::json::value::string(__U("undefined_function"));
 		return response;
       };
 

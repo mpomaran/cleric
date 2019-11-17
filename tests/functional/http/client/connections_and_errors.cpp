@@ -61,7 +61,7 @@ static void pending_requests_after_client_impl(const uri& address)
         for (size_t i = 0; i < num_requests; ++i)
         {
             completed_requests.push_back(requests[i].then([&](test_request* request) {
-                http_asserts::assert_test_request_equals(request, mtd, U("/"));
+                http_asserts::assert_test_request_equals(request, mtd, __U("/"));
                 VERIFY_ARE_EQUAL(0u, request->reply(status_codes::OK));
             }));
         }
@@ -98,7 +98,7 @@ SUITE(connections_and_errors)
 
     TEST_FIXTURE(uri_address, open_failure)
     {
-        http_client client(U("http://localhost323:-1"));
+        http_client client(__U("http://localhost323:-1"));
 
         // This API should not throw. The exception should be surfaced
         // during task.wait/get
@@ -178,13 +178,13 @@ SUITE(connections_and_errors)
 
     TEST_FIXTURE(uri_address, invalid_method)
     {
-        web::http::uri uri(U("http://www.bing.com/"));
+        web::http::uri uri(__U("http://www.bing.com/"));
         http_client client(uri);
-        string_t invalid_chars = U("\a\b\f\v\n\r\t\x20\x7f");
+        string_t invalid_chars = __U("\a\b\f\v\n\r\t\x20\x7f");
 
         for (auto iter = invalid_chars.begin(); iter < invalid_chars.end(); iter++)
         {
-            string_t method = U("my method");
+            string_t method = __U("my method");
             method[2] = *iter;
             VERIFY_THROWS(client.request(method).get(), http_exception);
         }
@@ -193,7 +193,7 @@ SUITE(connections_and_errors)
     // This test sends an SSL request to a non-SSL server and should fail on handshaking
     TEST_FIXTURE(uri_address, handshake_fail)
     {
-        web::http::uri ssl_uri(U("https://localhost:34568/"));
+        web::http::uri ssl_uri(__U("https://localhost:34568/"));
 
         test_http_server::scoped_server scoped(m_uri);
 
@@ -213,8 +213,8 @@ SUITE(connections_and_errors)
 
         listener.support([buf](http_request request) {
             http_response response(200);
-            response.set_body(streams::istream(buf), U("text/plain"));
-            response.headers().add(header_names::connection, U("close"));
+            response.set_body(streams::istream(buf), __U("text/plain"));
+            response.headers().add(header_names::connection, __U("close"));
             request.reply(response);
         });
 
@@ -247,8 +247,8 @@ SUITE(connections_and_errors)
 
         listener.support([buf](http_request request) {
             http_response response(200);
-            response.set_body(streams::istream(buf), U("text/plain"));
-            response.headers().add(header_names::connection, U("close"));
+            response.set_body(streams::istream(buf), __U("text/plain"));
+            response.headers().add(header_names::connection, __U("close"));
             request.reply(response);
         });
 
@@ -281,7 +281,7 @@ SUITE(connections_and_errors)
         pplx::cancellation_token_source source;
         source.cancel();
 
-        auto responseTask = c.request(methods::PUT, U("/"), source.get_token());
+        auto responseTask = c.request(methods::PUT, __U("/"), source.get_token());
         VERIFY_THROWS_HTTP_ERROR_CODE(responseTask.get(), std::errc::operation_canceled);
     }
 
@@ -298,7 +298,7 @@ SUITE(connections_and_errors)
         listener.support([&](http_request request) {
             streams::producer_consumer_buffer<uint8_t> buf;
             http_response response(200);
-            response.set_body(streams::istream(buf), U("text/plain"));
+            response.set_body(streams::istream(buf), __U("text/plain"));
             request.reply(response);
             ev.wait();
             buf.putc('a').wait();
@@ -331,13 +331,13 @@ SUITE(connections_and_errors)
         http_client c(m_uri);
         pplx::cancellation_token_source source;
         std::map<utility::string_t, utility::string_t> headers;
-        headers[U("Content-Type")] = U("text/plain; charset=utf-8");
+        headers[__U("Content-Type")] = __U("text/plain; charset=utf-8");
         std::string bodyData("Hello");
 
         p_server->next_request().then(
-            [&](test_request* r) { VERIFY_ARE_EQUAL(0u, r->reply(status_codes::OK, U("OK"), headers, bodyData)); });
+            [&](test_request* r) { VERIFY_ARE_EQUAL(0u, r->reply(status_codes::OK, __U("OK"), headers, bodyData)); });
 
-        auto response = c.request(methods::PUT, U("/"), U("data"), source.get_token()).get();
+        auto response = c.request(methods::PUT, __U("/"), __U("data"), source.get_token()).get();
         VERIFY_ARE_EQUAL(utility::conversions::to_string_t(bodyData), response.extract_string().get());
         source.cancel();
         response.content_ready().wait();
@@ -351,7 +351,7 @@ SUITE(connections_and_errors)
             test_http_server::scoped_server server(m_uri);
             pplx::cancellation_token_source source;
 
-            responseTask = c.request(methods::GET, U("/"), source.get_token());
+            responseTask = c.request(methods::GET, __U("/"), source.get_token());
             source.cancel();
         }
 
@@ -367,7 +367,7 @@ SUITE(connections_and_errors)
 
         auto buf = streams::producer_consumer_buffer<uint8_t>();
         buf.putc('A').wait();
-        auto responseTask = c.request(methods::PUT, U("/"), buf.create_istream(), 2, source.get_token());
+        auto responseTask = c.request(methods::PUT, __U("/"), buf.create_istream(), 2, source.get_token());
         source.cancel();
         buf.putc('B').wait();
         buf.close(std::ios::out).wait();
@@ -389,7 +389,7 @@ SUITE(connections_and_errors)
         listener.support([&](http_request request) {
             streams::producer_consumer_buffer<uint8_t> buf;
             http_response response(200);
-            response.set_body(streams::istream(buf), U("text/plain"));
+            response.set_body(streams::istream(buf), __U("text/plain"));
             request.reply(response);
             buf.putc('a').wait();
             buf.putc('b').wait();
@@ -429,7 +429,7 @@ SUITE(connections_and_errors)
 
         // We need to connect to a URI for which there are multiple addresses
         // associated (i.e., multiple A records).
-        web::http::uri uri(U("https://microsoft.com:442/"));
+        web::http::uri uri(__U("https://microsoft.com:442/"));
 
         // Send request.
         http_client_config config;

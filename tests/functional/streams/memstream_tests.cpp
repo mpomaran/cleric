@@ -983,7 +983,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_getc)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_getc(buf, v[0]);
@@ -1030,7 +1030,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_sgetc)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_sgetc(buf, v[0]);
@@ -1065,7 +1065,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_bumpc)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_bumpc(buf, v);
@@ -1102,7 +1102,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_sbumpc)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_sbumpc(buf, v);
@@ -1138,7 +1138,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_nextc)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_nextc(buf, v);
@@ -1174,7 +1174,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_ungetc)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_ungetc(buf, v);
@@ -1203,7 +1203,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_getn)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_getn(buf, v);
@@ -1239,7 +1239,7 @@ SUITE(memstream_tests)
     }
     TEST(wstring_buffer_acquire_release)
     {
-        utility::string_t s(U("Hello World"));
+        utility::string_t s(__U("Hello World"));
         std::vector<utility::char_t> v(std::begin(s), std::end(s));
         streams::wstringstreambuf buf(s);
         streambuf_acquire_release(buf, v);

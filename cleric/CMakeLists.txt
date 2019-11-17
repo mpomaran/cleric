@@ -1,5 +1,24 @@
 set(GRANADA_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/granada")
 
+FIND_PACKAGE(Boost 1.69 COMPONENTS program_options filesystem REQUIRED)
+FIND_PACKAGE(OpenSSL REQUIRED)
+
+message("Found boost in:'${Boost_INCLUDE_DIRS}' ")
+
+find_path(EASYLOGGINGPP_INCLUDE easylogging++.h PATHS "${THIRD_PARTY_ROOT_DIR}/easyloggingpp-master/src")
+if("${EASYLOGGINGPP_INCLUDE}" STREQUAL "EASYLOGGINGPP_INCLUDE-NOTFOUND")
+	message(SEND_ERROR "Could not found easylogging++.h, please specify CMAKE_PREFIX_PATH")
+else()
+	message("Found easylogging++.h in:'${EASYLOGGINGPP_INCLUDE}' ")
+endif()
+
+#find_package(msgpack CONFIG REQUIRED)
+
+#The package msgpack:x64-windows provides CMake targets:
+#
+#    find_package(msgpack CONFIG REQUIRED)
+#    target_link_libraries(main PRIVATE msgpackc msgpackc msgpackc-cxx)
+
 if (UNIX)
   add_definitions(-Wno-sign-compare -Wno-enum-compare)
 endif()
@@ -10,20 +29,17 @@ endif()
 
 add_definitions(-DELPP_THREAD_SAFE -DELPP_NO_DEFAULT_LOG_FILE)
 
-IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
-set (SSL_LIBS "ssl -lcrypto")
-set (EXTRA_LIBRARIES "-lboost_program_options")
-ELSE()
-set (SSL_LIBS "libeay32.lib ssleay32.lib")
-set (EXTRA_LIBRARIES "")
-ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${EASYLOGGINGPP_INCLUDE_DIRS})
+include_directories(${OPENSSL_INCLUDE_DIRS})
+#include_directories(${PICOJSON_INCLUDE_DIRS})
+include_directories(${MSGPACK_INCLUDE_DIRS})
+include_directories(${EASYLOGGINGPP_INCLUDE})
 
 include_directories(include)
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/easyloggingpp-master/src")
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0")
 
 add_executable(cleric-server
-  ${CMAKE_SOURCE_DIR}/thirdparty/easyloggingpp-master/src/easylogging++.cc
+  ${EASYLOGGINGPP_INCLUDE}/easylogging++.cc
   src/main.cpp
   src/cleric_app.cpp
   src/props.cpp
@@ -46,6 +62,14 @@ add_executable(cleric-server
   src/controller/m2m_controller_test.cpp
   src/controller/boxes_controller.cpp
   src/controller/boxes_controller_test.cpp
+  src/controller/things_controller.cpp
+  src/controller/things_controller_test.cpp
+  src/network/libmdnsd/1035.c
+  src/network/libmdnsd/mdnsd.c
+  src/network/libmdnsd/sdtxt.c
+  src/network/libmdnsd/xht.c
+  src/network/host_info.cpp
+  src/network/mdns_responder.cpp
   ${GRANADA_SOURCE_DIR}/cache/redis_cache_driver.cpp
   ${GRANADA_SOURCE_DIR}/cache/shared_map_cache_driver.cpp
   ${GRANADA_SOURCE_DIR}/cache/web_resource_cache.cpp
@@ -66,12 +90,17 @@ add_executable(cleric-server
   ${GRANADA_SOURCE_DIR}/util/file.cpp
   )
 
-target_link_libraries(cleric-server ${Casablanca_LIBRARIES} ${SSL_LIBS} ${Boost_LIBS} ${EXTRA_LIBRARIES}) 
+target_link_libraries(cleric-server ${Casablanca_LIBRARIES} ${OPENSSL_LIBS}
+	${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto) 
 
-set(UNIT_TEST cleric-server)
-add_custom_command(
-     TARGET ${UNIT_TEST}
-     COMMENT "Run tests"
-     POST_BUILD 
-     COMMAND ${UNIT_TEST} --tests-only
-)
+if(WIN32 OR MINGW)
+  target_link_libraries(cleric-server wsock32 ws2_32)
+endif()
+
+#set(UNIT_TEST cleric-server)
+#add_custom_command(
+#     TARGET ${UNIT_TEST}
+#     COMMENT "Run tests"
+#     POST_BUILD 
+#     COMMAND ${UNIT_TEST} --tests-only
+#)

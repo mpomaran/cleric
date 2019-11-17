@@ -35,7 +35,7 @@ SUITE(http_methods_tests)
 
         // Don't include 'CONNECT' it has a special meaning.
         utility::string_t send_methods[] = {methods::GET,
-                                            U("GET"),
+                                            __U("GET"),
                                             methods::DEL,
                                             methods::HEAD,
 #ifdef _WIN32 // -  this is never passed to the listener with http_listener
@@ -50,30 +50,30 @@ SUITE(http_methods_tests)
 #endif
 #endif
 
-                                            U("CUstomMETHOD")};
-        utility::string_t recv_methods[] = {U("GET"),
-                                            U("GET"),
-                                            U("DELETE"),
-                                            U("HEAD"),
+                                            __U("CUstomMETHOD")};
+        utility::string_t recv_methods[] = {__U("GET"),
+                                            __U("GET"),
+                                            __U("DELETE"),
+                                            __U("HEAD"),
 #ifdef _WIN32
-                                            U("OPTIONS"),
+                                            __U("OPTIONS"),
 #endif
-                                            U("POST"),
-                                            U("PUT"),
-                                            U("PATCH"),
+                                            __U("POST"),
+                                            __U("PUT"),
+                                            __U("PATCH"),
 #ifndef __cplusplus_winrt
 #ifdef _WIN32
-                                            U("TRACE"),
+                                            __U("TRACE"),
 #endif
 #endif
 
-                                            U("CUstomMETHOD")};
+                                            __U("CUstomMETHOD")};
         const size_t num_methods = sizeof(send_methods) / sizeof(send_methods[0]);
 
         for (int i = 0; i < num_methods; ++i)
         {
             p_server->next_request().then([i, &recv_methods](test_request* p_request) {
-                http_asserts::assert_test_request_equals(p_request, recv_methods[i], U("/"));
+                http_asserts::assert_test_request_equals(p_request, recv_methods[i], __U("/"));
                 VERIFY_ARE_EQUAL(0u, p_request->reply(200));
             });
             http_asserts::assert_response_equals(client.request(send_methods[i]).get(), status_codes::OK);
@@ -88,13 +88,13 @@ SUITE(http_methods_tests)
     }
 #endif
 
-    TEST(http_request_empty_method) { VERIFY_THROWS(http_request(U("")), std::invalid_argument); }
+    TEST(http_request_empty_method) { VERIFY_THROWS(http_request(__U("")), std::invalid_argument); }
 
     TEST_FIXTURE(uri_address, empty_method)
     {
         test_http_server::scoped_server scoped(m_uri);
         http_client client(m_uri);
-        VERIFY_THROWS(client.request(U("")), std::invalid_argument);
+        VERIFY_THROWS(client.request(__U("")), std::invalid_argument);
     }
 }
 

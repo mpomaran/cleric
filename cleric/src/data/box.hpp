@@ -24,12 +24,12 @@ SOFTWARE.
 
 */
 
-#ifndef BOX_HPP_HAS_BEEN_INCLUDED
-#define BOX_HPP_HAS_BEEN_INCLUDED
+#pragma once
 
 #include "../business/m2m_message.hpp"
-#include "box_serialization_strategy.hpp"
+#include "ibox_serialization_strategy.hpp"
 #include "iserializable.hpp"
+#include "smart_enum.hpp"
 #include <chrono>
 #include <deque>
 #include <exception>
@@ -37,6 +37,9 @@ SOFTWARE.
 #include <mutex>
 #include <ostream>
 #include <string>
+#include <boost/variant.hpp>
+
+using string = ::std::string;
 
 namespace cleric {
 
@@ -74,7 +77,7 @@ public:
   void setRetention(const ::std::chrono::hours &retention) {
     this->retention = retention;
   }
-  int getMaxEntries() const { return maxEntries; }
+  int getMaxEntries() const { return (int)maxEntries; }
   void setMaxEntries(int maxEntries) { this->maxEntries = maxEntries; }
 
   ::std::chrono::milliseconds getHowLongIsDirty();
@@ -133,5 +136,3 @@ private:
 };
 } // namespace data
 } // namespace cleric
-
-#endif

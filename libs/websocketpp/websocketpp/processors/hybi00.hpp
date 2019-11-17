@@ -29,6 +29,8 @@
 #define WEBSOCKETPP_PROCESSOR_HYBI00_HPP
 
 #include <websocketpp/frame.hpp>
+#include <websocketpp/http/constants.hpp>
+
 #include <websocketpp/utf8_validator.hpp>
 #include <websocketpp/common/network.hpp>
 #include <websocketpp/common/md5.hpp>
@@ -85,9 +87,9 @@ public:
         // Host is required by HTTP/1.1
         // Connection is required by is_websocket_handshake
         // Upgrade is required by is_websocket_handshake
-        if (r.get_header("Sec-WebSocket-Key1") == "" ||
-            r.get_header("Sec-WebSocket-Key2") == "" ||
-            r.get_header("Sec-WebSocket-Key3") == "")
+        if (r.get_header("Sec-WebSocket-Key1").empty() ||
+            r.get_header("Sec-WebSocket-Key2").empty() ||
+            r.get_header("Sec-WebSocket-Key3").empty())
         {
             return make_error_code(error::missing_required_header);
         }
@@ -98,7 +100,7 @@ public:
     lib::error_code process_handshake(request_type const & req,
         std::string const & subprotocol, response_type & res) const
     {
-        std::array<char, 16> key_final;
+        char key_final[16];
 
         // copy key1 into final key
         decode_client_key(req.get_header("Sec-WebSocket-Key1"), &key_final[0]);
@@ -112,13 +114,13 @@ public:
         // TODO: decide if it is best to silently fail here or produce some sort
         //       of warning or exception.
         std::string const & key3 = req.get_header("Sec-WebSocket-Key3");
-        std::copy(key3.begin(),
-                  key3.begin() + std::min(size_t(8), key3.size()),
-                  key_final.begin() + 8);
+        std::copy(key3.c_str(),
+                  key3.c_str()+(std::min)(static_cast<size_t>(8), key3.size()),
+                  &key_final[8]);
 
         res.append_header(
             "Sec-WebSocket-Key3",
-            md5::md5_hash_string(std::string(key_final.begin(), key_final.end()))
+            md5::md5_hash_string(std::string(key_final,16))
         );
 
         res.append_header("Upgrade","WebSocket");
@@ -126,18 +128,18 @@ public:
 
         // Echo back client's origin unless our local application set a
         // more restrictive one.
-        if (res.get_header("Sec-WebSocket-Origin") == "") {
+        if (res.get_header("Sec-WebSocket-Origin").empty()) {
             res.append_header("Sec-WebSocket-Origin",req.get_header("Origin"));
         }
 
         // Echo back the client's request host unless our local application
         // set a different one.
-        if (res.get_header("Sec-WebSocket-Location") == "") {
+        if (res.get_header("Sec-WebSocket-Location").empty()) {
             uri_ptr uri = get_uri(req);
             res.append_header("Sec-WebSocket-Location",uri->str());
         }
 
-        if (subprotocol != "") {
+        if (!subprotocol.empty()) {
             res.replace_header("Sec-WebSocket-Protocol",subprotocol);
         }
 
@@ -186,15 +188,29 @@ public:
 
     /// Extracts requested subprotocols from a handshake request
     /**
-     * hybi00 doesn't support subprotocols so there never will be any requested
+     * hybi00 does support subprotocols
+     * https://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00#section-1.9
      *
      * @param [in] req The request to extract from
      * @param [out] subprotocol_list A reference to a vector of strings to store
      * the results in.
      */
-    lib::error_code extract_subprotocols(request_type const &, 
-        std::vector<std::string> &)
+    lib::error_code extract_subprotocols(request_type const & req,
+        std::vector<std::string> & subprotocol_list)
     {
+        if (!req.get_header("Sec-WebSocket-Protocol").empty()) {
+            http::parameter_list p;
+
+             if (!req.get_header_as_plist("Sec-WebSocket-Protocol",p)) {
+                 http::parameter_list::const_iterator it;
+
+                 for (it = p.begin(); it != p.end(); ++it) {
+                     subprotocol_list.push_back(it->first);
+                 }
+             } else {
+                 return error::make_error_code(error::subprotocol_parse_error);
+             }
+        }
         return lib::error_code();
     }
 
@@ -400,7 +416,7 @@ public:
 private:
     void decode_client_key(std::string const & key, char * result) const {
         unsigned int spaces = 0;
-        std::string digits = "";
+        std::string digits;
         uint32_t num;
 
         // key2
@@ -415,13 +431,11 @@ private:
         num = static_cast<uint32_t>(strtoul(digits.c_str(), NULL, 10));
         if (spaces > 0 && num > 0) {
             num = htonl(num/spaces);
-#ifdef _MS_WINDOWS
-            memcpy_s(result, 4, reinterpret_cast<char*>(&num), 4);
-#else
-            memcpy(result, reinterpret_cast<char*>(&num), 4);
-#endif
+            std::copy(reinterpret_cast<char*>(&num),
+                      reinterpret_cast<char*>(&num)+4,
+                      result);
         } else {
-            std::fill(result,result+4, static_cast<char>(0));
+            std::fill(result,result+4,0);
         }
     }
 

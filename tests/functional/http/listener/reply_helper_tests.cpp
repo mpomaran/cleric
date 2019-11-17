@@ -40,12 +40,12 @@ SUITE(reply_helper_tests)
         test_http_client* p_client = client.client();
 
         listener.support(
-            [](http_request request) { request.reply(status_codes::OK, json::value::parse(U("true"))).wait(); });
-        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, U("")));
+            [](http_request request) { request.reply(status_codes::OK, json::value::parse(__U("true"))).wait(); });
+        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, __U("")));
         p_client->next_response()
             .then([&](test_response* p_response) {
                 http_asserts::assert_test_response_equals(
-                    p_response, status_codes::OK, U("application/json"), U("true"));
+                    p_response, status_codes::OK, __U("application/json"), __U("true"));
             })
             .wait();
 
@@ -63,34 +63,34 @@ SUITE(reply_helper_tests)
             std::string body("test str");
             request.reply(status_codes::OK, body).wait();
         });
-        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, U("")));
+        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, __U("")));
         p_client->next_response()
             .then([&](test_response* p_response) {
                 http_asserts::assert_test_response_equals(
-                    p_response, status_codes::OK, U("text/plain; charset=utf-8"), U("test str"));
+                    p_response, status_codes::OK, __U("text/plain; charset=utf-8"), __U("test str"));
             })
             .wait();
 
         // content type and string body
         listener.support([](http_request request) {
-            utility::string_t s(U("test str"));
-            request.reply(status_codes::OK, s, U("custom content")).wait();
+            utility::string_t s(__U("test str"));
+            request.reply(status_codes::OK, s, __U("custom content")).wait();
         });
-        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, U("")));
+        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, __U("")));
         p_client->next_response()
             .then([&](test_response* p_response) {
                 http_asserts::assert_test_response_equals(
-                    p_response, status_codes::OK, U("custom content"), U("test str"));
+                    p_response, status_codes::OK, __U("custom content"), __U("test str"));
             })
             .wait();
 
         // content type and rvalue reference string body
         listener.support(
             [](http_request request) { request.reply(status_codes::OK, "test str", "text/plain").wait(); });
-        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, U("")));
+        VERIFY_ARE_EQUAL(0, p_client->request(methods::POST, __U("")));
         p_client->next_response()
             .then([&](test_response* p_response) {
-                http_asserts::assert_test_response_equals(p_response, status_codes::OK, U("text/plain"), U("test str"));
+                http_asserts::assert_test_response_equals(p_response, status_codes::OK, __U("text/plain"), __U("test str"));
             })
             .wait();
 

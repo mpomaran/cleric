@@ -1,29 +1,28 @@
 {
-  "version": "0.2.1",
-  "defaults": {},
-  "configurations": [
-    {
-      "type": "default",
-      "project": "CMakeLists.txt",
-      "projectTarget": "cleric-server.exe (Binaries\\cleric-server.exe)",
-      "name": "cleric-server.exe - run server",
-      "args": [
-        "--www-root=${env.WWWRoot} --storage-root=${env.StorageRoot} --storage-strategy=hdd -v"
-      ]
-    },
-    {
-      "type": "tests",
-      "project": "CMakeLists.txt",
-      "projectTarget": "cleric-server.exe (Binaries\\cleric-server.exe)",
-      "name": "cleric-server.exe - run tests",
-      "args": [
-        "--tests-only"
-      ]
-    },
-    {
-      "type": "native",
-      "name": "C:\\workspace\\Repos\\arcticpanther\\Cleric",
-      "project": ""
-    }
-  ]
+    "version": "0.2.1",
+    "defaults": {},
+    "configurations": [{
+            "type": "default",
+            "project": "CMakeLists.txt",
+            "projectTarget": "cleric-server.exe (Binaries\\cleric-server.exe)",
+            "name": "cleric-server.exe - run server",
+            "args": [
+                "--root_path=${env.WWWRoot} --storage-root=${env.StorageRoot} --storage-strategy=hdd --prop-file=${env.PropFile} -v"
+            ]
+        },
+        {
+            "type": "tests",
+            "project": "CMakeLists.txt",
+            "projectTarget": "cleric-server.exe (Binaries\\cleric-server.exe)",
+            "name": "cleric-server.exe - run tests",
+            "args": [
+                "--tests-only"
+            ]
+        },
+        {
+            "type": "native",
+            "name": "C:\\workspace\\Repos\\arcticpanther\\Cleric",
+            "project": ""
+        }
+    ]
 }

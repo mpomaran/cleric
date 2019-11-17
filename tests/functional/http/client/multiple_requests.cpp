@@ -79,7 +79,7 @@ SUITE(multiple_requests)
         {
             auto request = requestTask.get();
             http_asserts::assert_test_request_equals(
-                request, method, U("/"), U("text/plain"), to_string_t(request_body));
+                request, method, __U("/"), __U("text/plain"), to_string_t(request_body));
             VERIFY_ARE_EQUAL(0u, request->reply(code));
         }
 
@@ -109,7 +109,7 @@ SUITE(multiple_requests)
         const method method = methods::PUT;
         const web::http::status_code code = status_codes::OK;
         std::map<utility::string_t, utility::string_t> headers;
-        headers[U("Content-Type")] = U("text/plain");
+        headers[__U("Content-Type")] = __U("text/plain");
 
         // response to requests
         auto requestTasks = scoped.server()->next_requests(num_requests);
@@ -125,8 +125,8 @@ SUITE(multiple_requests)
         for (size_t i = 0; i < num_requests; ++i)
         {
             test_request* request = requestTasks[i].get();
-            http_asserts::assert_test_request_equals(request, method, U("/"));
-            VERIFY_ARE_EQUAL(0u, request->reply(code, U(""), headers, request_body));
+            http_asserts::assert_test_request_equals(request, method, __U("/"));
+            VERIFY_ARE_EQUAL(0u, request->reply(code, __U(""), headers, request_body));
         }
 
         // wait for requests.

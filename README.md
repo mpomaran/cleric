@@ -1,31 +1,42 @@
-# cleric
-Backend service for the IoT devices (intended to cooperate with this one: https://github.com/mpomaran/arctic) based on the Granada framework.
-
-Based on following:
- - Granada (https://github.com/webappsdk/granada)
- - CppRestSdk (https://github.com/Microsoft/cpprestsdk
- - boost libraries
- - msgpack
-
-Current state:
- - compiles under VS 2017 community 
- - uses cmake as a build system for linux portability
- - compiles and runs on Raspberry PI
- - one endpoint with serialisation to disk working
-
-Beware: I did not clear licence stuff yet, files LICENSE and CONTRIBUTE are combined Granada and CppRestSdk files, so please read those.
-
-Cleric is MIT license.
-
-Windows build instructions:
+Build instructions (Windows 64bit)
 -------------------------------------------------------------------------------------------
-Decompress thirdparty.7z.
-set following environment variables:
+1. Install VCPKG (https://github.com/Microsoft/vcpkg)
+2. Make sure environment variables are set:
+
 VCPKG_HOME to the root of the vcpkg directory (so that %VCPKG_HOME%/scripts/buildsystems/vcpkg.cmake is a path to the existing file)
 VCPKG_DEFAULT_TRIPLET to x64-windows
-Open project in Visual Studio Express 2017 and compile using cmake tools.
+
+4. Go into VCPKG and grab dependencies:
+
+> vcpkg install boost boost-program-options boost-any boost-asio boost-filesystem boost-functional zlib openssl easyloggingpp picojson msgpack mdnsresponder
+
 
 Rasperry PI build instructions:
 -------------------------------------------------------------------------------------------
-Decompress thirdparty.7z.
-Run cmake
+
+Install following libraries
+ - OpenSSL (sudo apt install libssl-dev)
+ 
+In order to build the software:
+1. Create build directory (eg. build)
+2. Configure (cd build && cmake ..) 
+	if CMAKE complains about missing libraries set CMAKE_MODULE_PATH, if not you can try: export CMAKE_MODULE_PATH=`find /usr -iname "FindOpenSSL.cmake" -exec dirname {} \;`
+3. Build (make)
+
+If there are issues with boost - please download and recompile for your platform (check src/CMakeList.txt to make sure the correct one will be used).
+
+Third party libraries:
+
+CPP REST SDK
+GRANADA
+REDIS CLIENT https://github.com/nekipelov/redisclient
+BOOST https://www.boost.org
+OPEN SSL
+ZLIB
+EASYLOGGER C++
+CATCH2
+https://github.com/jevinskie/mDNSResponder
+https://www.freshports.org/dns/mdnsd/
+hg clone https://bitbucket.org/geekman/tinysvcmdns
+
+Uses MDNSd by originlly written by Jeremie Miller (see cleric/src/network/mdsnd directory for license)

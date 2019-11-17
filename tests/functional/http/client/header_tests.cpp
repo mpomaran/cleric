@@ -40,25 +40,25 @@ SUITE(outside_tests)
         // The WinRT-based HTTP stack does not support headers that have no
         // value, which means that there is no point in making this particular
         // header test, it is an unsupported feature on WinRT.
-        msg.headers().add(U("HEHE"), U(""));
+        msg.headers().add(__U("HEHE"), __U(""));
 #endif
 
-        msg.headers().add(U("MyHeader"), U("hehe;blach"));
-        msg.headers().add(U("Yo1"), U("You, Too"));
-        msg.headers().add(U("Yo2"), U("You2"));
-        msg.headers().add(U("Yo3"), U("You3"));
-        msg.headers().add(U("Yo4"), U("You4"));
-        msg.headers().add(U("Yo5"), U("You5"));
-        msg.headers().add(U("Yo6"), U("You6"));
-        msg.headers().add(U("Yo7"), U("You7"));
-        msg.headers().add(U("Yo8"), U("You8"));
-        msg.headers().add(U("Yo9"), U("You9"));
-        msg.headers().add(U("Yo10"), U("You10"));
-        msg.headers().add(U("Yo11"), U("You11"));
-        msg.headers().add(U("Accept"), U("text/plain"));
-        VERIFY_ARE_EQUAL(U("You5"), msg.headers()[U("Yo5")]);
+        msg.headers().add(__U("MyHeader"), __U("hehe;blach"));
+        msg.headers().add(__U("Yo1"), __U("You, Too"));
+        msg.headers().add(__U("Yo2"), __U("You2"));
+        msg.headers().add(__U("Yo3"), __U("You3"));
+        msg.headers().add(__U("Yo4"), __U("You4"));
+        msg.headers().add(__U("Yo5"), __U("You5"));
+        msg.headers().add(__U("Yo6"), __U("You6"));
+        msg.headers().add(__U("Yo7"), __U("You7"));
+        msg.headers().add(__U("Yo8"), __U("You8"));
+        msg.headers().add(__U("Yo9"), __U("You9"));
+        msg.headers().add(__U("Yo10"), __U("You10"));
+        msg.headers().add(__U("Yo11"), __U("You11"));
+        msg.headers().add(__U("Accept"), __U("text/plain"));
+        VERIFY_ARE_EQUAL(__U("You5"), msg.headers()[__U("Yo5")]);
         p_server->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, methods::POST, U("/"));
+            http_asserts::assert_test_request_equals(p_request, methods::POST, __U("/"));
             http_asserts::assert_test_request_contains_headers(p_request, msg.headers());
             p_request->reply(200);
         });
@@ -70,21 +70,21 @@ SUITE(outside_tests)
         test_http_server::scoped_server scoped(m_uri);
         http_client client(m_uri);
         const method mtd = methods::GET;
-        const utility::string_t field_name1 = U("CustomHeader");
-        const utility::string_t field_name2 = U("CUSTOMHEADER");
-        const utility::string_t field_name3 = U("CuSTomHEAdeR");
-        const utility::string_t value1 = U("value1");
-        const utility::string_t value2 = U("value2");
-        const utility::string_t value3 = U("value3");
+        const utility::string_t field_name1 = __U("CustomHeader");
+        const utility::string_t field_name2 = __U("CUSTOMHEADER");
+        const utility::string_t field_name3 = __U("CuSTomHEAdeR");
+        const utility::string_t value1 = __U("value1");
+        const utility::string_t value2 = __U("value2");
+        const utility::string_t value3 = __U("value3");
 
         http_request msg(mtd);
         msg.headers()[field_name1] = value1;
-        msg.headers()[field_name2].append(U(", ") + value2);
-        msg.headers()[field_name3].append(U(", ") + value3);
+        msg.headers()[field_name2].append(__U(", ") + value2);
+        msg.headers()[field_name3].append(__U(", ") + value3);
         scoped.server()->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, mtd, U("/"));
+            http_asserts::assert_test_request_equals(p_request, mtd, __U("/"));
             std::map<utility::string_t, utility::string_t> expected_headers;
-            expected_headers[field_name1] = value1 + U(", ") + value2 + U(", ") + value3;
+            expected_headers[field_name1] = value1 + __U(", ") + value2 + __U(", ") + value3;
             http_asserts::assert_test_request_contains_headers(p_request, expected_headers);
             p_request->reply(200);
         });
@@ -96,17 +96,17 @@ SUITE(outside_tests)
         test_http_server::scoped_server scoped(m_uri);
         http_client client(m_uri);
         const method mtd = methods::GET;
-        const utility::string_t field_name1 = U("CUSTOMHEADER");
-        const utility::string_t value1 = U("value1");
-        const utility::string_t value2 = U("value2");
+        const utility::string_t field_name1 = __U("CUSTOMHEADER");
+        const utility::string_t value1 = __U("value1");
+        const utility::string_t value2 = __U("value2");
 
         http_request msg(mtd);
         msg.headers().add(field_name1, value1);
         msg.headers().add(field_name1, value2);
         scoped.server()->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, mtd, U("/"));
+            http_asserts::assert_test_request_equals(p_request, mtd, __U("/"));
             std::map<utility::string_t, utility::string_t> expected_headers;
-            expected_headers[field_name1] = value1 + U(", ") + value2;
+            expected_headers[field_name1] = value1 + __U(", ") + value2;
             http_asserts::assert_test_request_contains_headers(p_request, expected_headers);
             p_request->reply(200);
         });
@@ -125,9 +125,9 @@ SUITE(outside_tests)
         msg.headers().set_content_type(web::http::details::mime_types::application_json);
 
         scoped.server()->next_request().then([&](test_request* p_request) {
-            http_asserts::assert_test_request_equals(p_request, mtd, U("/"));
+            http_asserts::assert_test_request_equals(p_request, mtd, __U("/"));
             std::map<utility::string_t, utility::string_t> expected_headers;
-            expected_headers[U("Content-Type")] = web::http::details::mime_types::application_json;
+            expected_headers[__U("Content-Type")] = web::http::details::mime_types::application_json;
             http_asserts::assert_test_request_contains_headers(p_request, expected_headers);
             p_request->reply(200);
         });
@@ -137,51 +137,51 @@ SUITE(outside_tests)
     {
         // copy constructor
         http_headers h1;
-        h1.add(U("key1"), U("key2"));
+        h1.add(__U("key1"), __U("key2"));
         http_headers h2(h1);
         http_asserts::assert_http_headers_equals(h1, h2);
 
         // move constructor
         http_headers h3(std::move(h1));
         VERIFY_ARE_EQUAL(1u, h3.size());
-        VERIFY_ARE_EQUAL(U("key2"), h3[U("key1")]);
+        VERIFY_ARE_EQUAL(__U("key2"), h3[__U("key1")]);
 
         // assignment operator
         h1 = h3;
         VERIFY_ARE_EQUAL(1u, h1.size());
-        VERIFY_ARE_EQUAL(U("key2"), h1[U("key1")]);
+        VERIFY_ARE_EQUAL(__U("key2"), h1[__U("key1")]);
         http_asserts::assert_http_headers_equals(h1, h3);
 
         // move assignment operator
         h1 = http_headers();
         h1 = std::move(h2);
         VERIFY_ARE_EQUAL(1u, h1.size());
-        VERIFY_ARE_EQUAL(U("key2"), h1[U("key1")]);
+        VERIFY_ARE_EQUAL(__U("key2"), h1[__U("key1")]);
     }
 
     TEST_FIXTURE(uri_address, match_types)
     {
         // wchar
         http_headers h1;
-        h1[U("key1")] = U("string");
+        h1[__U("key1")] = __U("string");
         utility::char_t buf[12];
-        VERIFY_IS_TRUE(h1.match(U("key1"), buf));
-        VERIFY_ARE_EQUAL(U("string"), utility::string_t(buf));
+        VERIFY_IS_TRUE(h1.match(__U("key1"), buf));
+        VERIFY_ARE_EQUAL(__U("string"), utility::string_t(buf));
 
         // utility::string_t
         utility::string_t wstr;
-        VERIFY_IS_TRUE(h1.match(U("key1"), wstr));
-        VERIFY_ARE_EQUAL(U("string"), wstr);
+        VERIFY_IS_TRUE(h1.match(__U("key1"), wstr));
+        VERIFY_ARE_EQUAL(__U("string"), wstr);
 
         // int
-        h1[U("key2")] = U("22");
+        h1[__U("key2")] = __U("22");
         int i;
-        VERIFY_IS_TRUE(h1.match(U("key2"), i));
+        VERIFY_IS_TRUE(h1.match(__U("key2"), i));
         VERIFY_ARE_EQUAL(22, i);
 
         // unsigned long
         unsigned long l;
-        VERIFY_IS_TRUE(h1.match(U("key2"), l));
+        VERIFY_IS_TRUE(h1.match(__U("key2"), l));
         VERIFY_ARE_EQUAL(22ul, l);
     }
 
@@ -189,56 +189,56 @@ SUITE(outside_tests)
     {
         // match with empty string
         http_headers h;
-        h[U("here")] = U("");
-        utility::string_t value(U("k"));
-        VERIFY_IS_TRUE(h.match(U("HeRE"), value));
-        VERIFY_ARE_EQUAL(U(""), value);
+        h[__U("here")] = __U("");
+        utility::string_t value(__U("k"));
+        VERIFY_IS_TRUE(h.match(__U("HeRE"), value));
+        VERIFY_ARE_EQUAL(__U(""), value);
 
         // match with string containing spaces
-        h.add(U("blah"), U("spaces ss"));
-        VERIFY_IS_TRUE(h.match(U("blah"), value));
-        VERIFY_ARE_EQUAL(U("spaces ss"), value);
+        h.add(__U("blah"), __U("spaces ss"));
+        VERIFY_IS_TRUE(h.match(__U("blah"), value));
+        VERIFY_ARE_EQUAL(__U("spaces ss"), value);
 
         // match failing
         value = utility::string_t();
-        VERIFY_IS_FALSE(h.match(U("hahah"), value));
-        VERIFY_ARE_EQUAL(U(""), value);
+        VERIFY_IS_FALSE(h.match(__U("hahah"), value));
+        VERIFY_ARE_EQUAL(__U(""), value);
     }
 
     TEST_FIXTURE(uri_address, headers_find)
     {
         // Find when empty.
         http_headers h;
-        VERIFY_ARE_EQUAL(h.end(), h.find(U("key1")));
+        VERIFY_ARE_EQUAL(h.end(), h.find(__U("key1")));
 
         // Find that exists.
-        h[U("key1")] = U("yes");
-        VERIFY_ARE_EQUAL(U("yes"), h.find(U("key1"))->second);
+        h[__U("key1")] = __U("yes");
+        VERIFY_ARE_EQUAL(__U("yes"), h.find(__U("key1"))->second);
 
         // Find that doesn't exist.
-        VERIFY_ARE_EQUAL(h.end(), h.find(U("key2")));
+        VERIFY_ARE_EQUAL(h.end(), h.find(__U("key2")));
     }
 
     TEST_FIXTURE(uri_address, headers_add)
     {
         // Add multiple
         http_headers h;
-        h.add(U("key1"), 22);
-        h.add(U("key2"), U("str2"));
-        VERIFY_ARE_EQUAL(U("22"), h[U("key1")]);
-        VERIFY_ARE_EQUAL(U("str2"), h[U("key2")]);
+        h.add(__U("key1"), 22);
+        h.add(__U("key2"), __U("str2"));
+        VERIFY_ARE_EQUAL(__U("22"), h[__U("key1")]);
+        VERIFY_ARE_EQUAL(__U("str2"), h[__U("key2")]);
 
         // Add one that already exists
-        h.add(U("key2"), U("str3"));
-        VERIFY_ARE_EQUAL(U("str2, str3"), h[U("key2")]);
+        h.add(__U("key2"), __U("str3"));
+        VERIFY_ARE_EQUAL(__U("str2, str3"), h[__U("key2")]);
 
         // Add with different case
-        h.add(U("KEY2"), U("str4"));
-        VERIFY_ARE_EQUAL(U("str2, str3, str4"), h[U("keY2")]);
+        h.add(__U("KEY2"), __U("str4"));
+        VERIFY_ARE_EQUAL(__U("str2, str3, str4"), h[__U("keY2")]);
 
         // Add with spaces in string
-        h.add(U("key3"), U("value with spaces"));
-        VERIFY_ARE_EQUAL(U("value with spaces"), h[U("key3")]);
+        h.add(__U("key3"), __U("value with spaces"));
+        VERIFY_ARE_EQUAL(__U("value with spaces"), h[__U("key3")]);
     }
 
     TEST_FIXTURE(uri_address, headers_iterators)
@@ -248,15 +248,15 @@ SUITE(outside_tests)
         VERIFY_ARE_EQUAL(h.begin(), h.end());
 
         // with some values.
-        h.add(U("key1"), U("value1"));
-        h.add(U("key2"), U("value2"));
-        h.add(U("key3"), U("value3"));
+        h.add(__U("key1"), __U("value1"));
+        h.add(__U("key2"), __U("value2"));
+        h.add(__U("key3"), __U("value3"));
         http_headers::const_iterator iter = h.begin();
-        VERIFY_ARE_EQUAL(U("value1"), iter->second);
+        VERIFY_ARE_EQUAL(__U("value1"), iter->second);
         ++iter;
-        VERIFY_ARE_EQUAL(U("value2"), iter->second);
+        VERIFY_ARE_EQUAL(__U("value2"), iter->second);
         ++iter;
-        VERIFY_ARE_EQUAL(U("value3"), iter->second);
+        VERIFY_ARE_EQUAL(__U("value3"), iter->second);
         ++iter;
         VERIFY_ARE_EQUAL(h.end(), iter);
     }
@@ -268,16 +268,16 @@ SUITE(outside_tests)
         VERIFY_ARE_EQUAL(h.begin(), h.end());
 
         // with some values.
-        h.add(U("key1"), U("value"));
-        h.add(U("key2"), U("value"));
-        h.add(U("key3"), U("value"));
+        h.add(__U("key1"), __U("value"));
+        h.add(__U("key2"), __U("value"));
+        h.add(__U("key3"), __U("value"));
 
         std::for_each(std::begin(h), std::end(h), [=](http_headers::const_reference kv) {
-            VERIFY_ARE_EQUAL(U("value"), kv.second);
+            VERIFY_ARE_EQUAL(__U("value"), kv.second);
         });
 
         std::for_each(
-            std::begin(h), std::end(h), [=](http_headers::reference kv) { VERIFY_ARE_EQUAL(U("value"), kv.second); });
+            std::begin(h), std::end(h), [=](http_headers::reference kv) { VERIFY_ARE_EQUAL(__U("value"), kv.second); });
     }
 
     TEST_FIXTURE(uri_address, response_headers)
@@ -286,25 +286,25 @@ SUITE(outside_tests)
         http_client client(m_uri);
 
         std::map<utility::string_t, utility::string_t> headers;
-        headers[U("H1")] = U("");
-        headers[U("H2")] = U("hah");
-        headers[U("H3")] = U("es");
-        headers[U("H4")] = U("es;kjr");
-        headers[U("H5")] = U("asb");
-        headers[U("H6")] = U("abc");
-        headers[U("H7")] = U("eds");
-        headers[U("H8")] = U("blue");
-        headers[U("H9")] = U("sd");
-        headers[U("H10")] = U("res");
+        headers[__U("H1")] = __U("");
+        headers[__U("H2")] = __U("hah");
+        headers[__U("H3")] = __U("es");
+        headers[__U("H4")] = __U("es;kjr");
+        headers[__U("H5")] = __U("asb");
+        headers[__U("H6")] = __U("abc");
+        headers[__U("H7")] = __U("eds");
+        headers[__U("H8")] = __U("blue");
+        headers[__U("H9")] = __U("sd");
+        headers[__U("H10")] = __U("res");
         test_server_utilities::verify_request(
-            &client, methods::GET, U("/"), scoped.server(), status_codes::OK, headers);
+            &client, methods::GET, __U("/"), scoped.server(), status_codes::OK, headers);
     }
 
     TEST_FIXTURE(uri_address, cache_control_header)
     {
         http_headers headers;
-        VERIFY_ARE_EQUAL(headers.cache_control(), U(""));
-        const utility::string_t value(U("custom value"));
+        VERIFY_ARE_EQUAL(headers.cache_control(), __U(""));
+        const utility::string_t value(__U("custom value"));
         headers.set_cache_control(value);
         VERIFY_ARE_EQUAL(headers.cache_control(), value);
         utility::string_t foundValue;
@@ -327,7 +327,7 @@ SUITE(outside_tests)
     TEST_FIXTURE(uri_address, date_header)
     {
         http_headers headers;
-        VERIFY_ARE_EQUAL(headers.date(), U(""));
+        VERIFY_ARE_EQUAL(headers.date(), __U(""));
         const utility::datetime value(utility::datetime::utc_now());
         headers.set_date(value);
         VERIFY_ARE_EQUAL(headers.date(), value.to_string());
@@ -339,12 +339,12 @@ SUITE(outside_tests)
     TEST_FIXTURE(uri_address, parsing_content_type_redundantsemicolon_json)
     {
         test_http_server::scoped_server scoped(m_uri);
-        web::json::value body = web::json::value::string(U("Json body"));
+        web::json::value body = web::json::value::string(__U("Json body"));
 
         scoped.server()->next_request().then([&](test_request* p_request) {
             std::map<utility::string_t, utility::string_t> headers;
-            headers[header_names::content_type] = U("application/json; charset=utf-8;;;;");
-            p_request->reply(200, U("OK"), headers, utility::conversions::to_utf8string(body.serialize()));
+            headers[header_names::content_type] = __U("application/json; charset=utf-8;;;;");
+            p_request->reply(200, __U("OK"), headers, utility::conversions::to_utf8string(body.serialize()));
         });
 
         http_client client(m_uri);
@@ -358,8 +358,8 @@ SUITE(outside_tests)
         std::string body("Body");
         scoped.server()->next_request().then([&](test_request* p_request) {
             std::map<utility::string_t, utility::string_t> headers;
-            headers[header_names::content_type] = U("text/plain; charset  =  UTF-8;;;; ");
-            p_request->reply(200, U("OK"), headers, body);
+            headers[header_names::content_type] = __U("text/plain; charset  =  UTF-8;;;; ");
+            p_request->reply(200, __U("OK"), headers, body);
         });
 
         http_client client(m_uri);
@@ -375,7 +375,7 @@ SUITE(outside_tests)
         // Test default case of cpprestsdk setting host header as host:port
         auto& host = m_uri.host();
         int port = m_uri.port();
-        utility::string_t expected_default_header = host + U(":") + utility::conversions::details::to_string_t(port);
+        utility::string_t expected_default_header = host + __U(":") + utility::conversions::details::to_string_t(port);
         http_request default_host_headers_request(methods::GET);
         scoped.server()->next_request().then([&](test_request* p_request) {
             auto headers = p_request->m_headers;
@@ -388,7 +388,7 @@ SUITE(outside_tests)
 #ifndef __cplusplus_winrt
         // Test case where we overwrite the host header
         http_request overwritten_host_headers_request(methods::GET);
-        overwritten_host_headers_request.headers().add(U("Host"), host);
+        overwritten_host_headers_request.headers().add(__U("Host"), host);
         scoped.server()->next_request().then([&](test_request* p_request) {
             auto headers = p_request->m_headers;
             VERIFY_ARE_EQUAL(host, headers[header_names::host]);

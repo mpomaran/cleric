@@ -51,13 +51,13 @@ SUITE(client_construction)
 
     TEST_FIXTURE(uri_address, client_construction_error_cases)
     {
-        uri address(U("notws://localhost:34567/"));
+        uri address(__U("notws://localhost:34567/"));
 
         // Invalid scheme.
         verify_client_invalid_argument(address);
 
         // empty host.
-        address = uri(U("ws://:34567/"));
+        address = uri(__U("ws://:34567/"));
         verify_client_invalid_argument(address);
     }
 
@@ -66,7 +66,7 @@ SUITE(client_construction)
     {
         websocket_client_config config;
 
-        web::credentials cred(U("username"), U("password"));
+        web::credentials cred(__U("username"), __U("password"));
         config.set_credentials(cred);
         websocket_client client(config);
 
@@ -79,7 +79,7 @@ SUITE(client_construction)
     {
         websocket_client_config config;
 
-        web::credentials cred(U("username"), U("password"));
+        web::credentials cred(__U("username"), __U("password"));
         config.set_credentials(cred);
         websocket_callback_client client(config);
 
@@ -91,7 +91,7 @@ SUITE(client_construction)
     TEST_FIXTURE(uri_address, uri_test)
     {
         websocket_client client1;
-        VERIFY_ARE_EQUAL(client1.uri(), U("/"));
+        VERIFY_ARE_EQUAL(client1.uri(), __U("/"));
 
         test_websocket_server server;
         client1.connect(m_uri).wait();
@@ -100,7 +100,7 @@ SUITE(client_construction)
 
         websocket_client_config config;
         websocket_client client2(config);
-        VERIFY_ARE_EQUAL(client2.uri(), U("/"));
+        VERIFY_ARE_EQUAL(client2.uri(), __U("/"));
 
         client2.connect(m_uri).wait();
         VERIFY_ARE_EQUAL(client2.uri(), m_uri);
@@ -174,7 +174,7 @@ SUITE(client_construction)
     void header_test_impl(const uri& address,
                           const utility::string_t& headerName,
                           const utility::string_t& headerValue,
-                          const utility::string_t& expectedHeaderValue = U(""))
+                          const utility::string_t& expectedHeaderValue = __U(""))
     {
         test_websocket_server server;
         websocket_client_config config;
@@ -201,17 +201,17 @@ SUITE(client_construction)
 
     TEST_FIXTURE(uri_address, connect_with_headers)
     {
-        header_test_impl(m_uri, U("HeaderTest"), U("ConnectSuccessfully"));
+        header_test_impl(m_uri, __U("HeaderTest"), __U("ConnectSuccessfully"));
     }
 
     TEST_FIXTURE(uri_address, manually_set_protocol_header)
     {
-        utility::string_t headerName(U("Sec-WebSocket-Protocol"));
-        header_test_impl(m_uri, headerName, U("myprotocol"));
-        header_test_impl(m_uri, headerName, U("myprotocol2,"), U("myprotocol2"));
-        header_test_impl(m_uri, headerName, U("myprotocol2,protocol3"), U("myprotocol2, protocol3"));
+        utility::string_t headerName(__U("Sec-WebSocket-Protocol"));
+        header_test_impl(m_uri, headerName, __U("myprotocol"));
+        header_test_impl(m_uri, headerName, __U("myprotocol2,"), __U("myprotocol2"));
+        header_test_impl(m_uri, headerName, __U("myprotocol2,protocol3"), __U("myprotocol2, protocol3"));
         header_test_impl(
-            m_uri, headerName, U("myprotocol2, protocol3, protocol6,,"), U("myprotocol2, protocol3, protocol6"));
+            m_uri, headerName, __U("myprotocol2, protocol3, protocol6,,"), __U("myprotocol2, protocol3, protocol6"));
     }
 
     TEST_FIXTURE(uri_address, set_subprotocol)
@@ -219,12 +219,12 @@ SUITE(client_construction)
         test_websocket_server server;
         websocket_client_config config;
 
-        utility::string_t expected1(U("pro1"));
+        utility::string_t expected1(__U("pro1"));
         config.add_subprotocol(expected1);
         VERIFY_ARE_EQUAL(1, config.subprotocols().size());
         VERIFY_ARE_EQUAL(expected1, config.subprotocols()[0]);
 
-        utility::string_t expected2(U("second"));
+        utility::string_t expected2(__U("second"));
         config.add_subprotocol(expected2);
         VERIFY_ARE_EQUAL(2, config.subprotocols().size());
         VERIFY_ARE_EQUAL(expected1, config.subprotocols()[0]);
@@ -233,8 +233,8 @@ SUITE(client_construction)
         websocket_client client(config);
         server.set_http_handler([&](test_http_request request) {
             test_http_response resp;
-            if (request->get_header_val(utility::conversions::to_utf8string(U("Sec-WebSocket-Protocol")))
-                    .compare(utility::conversions::to_utf8string(expected1 + U(", ") + expected2)) == 0)
+            if (request->get_header_val(utility::conversions::to_utf8string(__U("Sec-WebSocket-Protocol")))
+                    .compare(utility::conversions::to_utf8string(expected1 + __U(", ") + expected2)) == 0)
                 resp.set_status_code(200); // Handshake request will be completed only if header match succeeds.
             else
                 resp.set_status_code(400); // Else fail the handshake, websocket client connect will fail in this case.

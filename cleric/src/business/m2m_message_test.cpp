@@ -99,15 +99,45 @@ uint64_t payload, ymessage_cb message_ready_cb)
         return Y_OK;
 }
 
+
+pi@whale:~/repos/arcticpanther/Cleric/build/Binaries $ sudo ./cleric-server --prop-file=/home/pi/repos/arcticpanther/Cleric/build/cleric.properties --storage-strategy=hdd --storage-root=/home/pi/storage --root_path=/home/pi/repos/arcticpanther/Cleric/cleric/www/cleric-front/dist/cleric-front -v
+2019-02-22 22:16:42,853 INFO [default] [main] {prop-file} {/home/pi/repos/arcticpanther/Cleric/build/cleric.properties}
+2019-02-22 22:16:42,854 INFO [default] [main] {root_path} {/home/pi/repos/arcticpanther/Cleric/cleric/www/cleric-front/dist/cleric-front}
+2019-02-22 22:16:42,854 INFO [default] [main] {storage-root} {/home/pi/storage}
+2019-02-22 22:16:42,854 INFO [default] [main] {storage-strategy} {hdd}
+2019-02-22 22:16:42,862 INFO [default] [ClericApp] {browser_controller_initialized} {http://0.0.0.0:8081/}
+2019-02-22 22:16:42,863 INFO [default] [M2MController] {/m2m conroller created}
+2019-02-22 22:16:42,864 INFO [default] [ClericApp] {m2m_controller initialized} {http://0.0.0.0:8081/m2m/1/}
+2019-02-22 22:16:42,864 INFO [default] [BoxesController::BoxesController] {/api/boxes controller created}
+2019-02-22 22:16:42,865 INFO [default] [ClericApp] {boxes_controller initialized} {http://0.0.0.0:8081/api/boxes}
+Press RETURN to exit
+2019-02-22 22:17:45,172 VERBOSE-1 [default] [M2MController] {m2m_controller_handle_get}
+2019-02-22 22:17:45,173 VERBOSE-2 [default] [M2MController] {m2m_controller_handle_get} {m2mString=00000000100000000000000003F361CCB02C928BB461DD4EF}
+2019-02-22 22:17:45,173 INFO [default] [BoxServer::delayedWriteThread] {thread_started}
+2019-02-22 22:17:45,174 INFO [default] [BoxServer@0x66689c@1952724048::getBoxById] {createBox} {boxId='0' name='0' storageStrategy='hdd' retentionPeriod='8760' maxEntries='1000'}
+2019-02-22 22:17:45,174 INFO [default] [HddBoxSerializationStrategy::HddBoxSerializationStrategy] {set_paths} {filename=/home/pi/storage/box_0.dat}
+2019-02-22 22:17:45,174 WARNING [default] [HddBoxSerializationStrategy::get] {cannot open file for reading} {file='/home/pi/storage/box_0.dat'} {message='No such file or directory'} { errno=2}
+2019-02-22 22:17:45,174 INFO [default] [BoxServer::getBoxById] {createBox} {new_box}
+2019-02-22 22:17:45,175 ERROR [default] [M2MController] {exception} {std::length_error} {M2M message out of bounds}
+2019-02-22 22:21:20,220 VERBOSE-1 [default] [M2MController] {m2m_controller_handle_get}
+2019-02-22 22:21:20,220 VERBOSE-2 [default] [M2MController] {m2m_controller_handle_get} {m2mString=000000001000000D9000000009707DD8C565774E872CBB09C}
+2019-02-22 22:21:20,220 ERROR [default] [M2MController] {exception} {std::length_error} {M2M message out of bounds}
+
+2019-02-22 22:43:41,072 INFO [default] [ClericApp] {controllers_destroyed}
+2019-02-22 22:43:41,073 INFO [default] [BoxServer::delayedWriteThread] {thread_stopped}
+2019-02-22 22:43:41,074 INFO [default] [BoxServer::BoxServer] {desytoying}
+
+0cccccccccccccccc00112233445566778899aabbccddeeff
+00000000100000000000000003F361CCB02C928BB461DD4EF
 */
 
 TEST_CASE("M2MMessage from box can be decoded", "[M2MMessage]") {
-  const auto MESSAGE = "0000000ABE587DE600000000AE30AFFCD31EA91087E215F4";
-  const auto BOX_ID = 10;
-  const auto READING = 999;
-  const auto TYPE = 509;
+  const auto MESSAGE = "00000000100000000000000003F361CCB02C928BB461DD4EF";
+  const auto BOX_ID = 1;
+  const auto READING = 0x3ff;
+  const auto TYPE = 0x1ff;
   const uint64_t SECRET = 0x474996006560796aUL;
-  const auto VCC = 1000;
+  const auto VCC = 0x3ff;
 
   auto decodedBoxId = M2MMessage::getBoxId(MESSAGE);
   CHECK(decodedBoxId == BOX_ID);

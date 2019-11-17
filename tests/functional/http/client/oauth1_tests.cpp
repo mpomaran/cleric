@@ -37,10 +37,10 @@ SUITE(oauth1_tests)
     struct oauth1_test_config
     {
         oauth1_test_config()
-            : m_server_uri(U("http://localhost:17778/"))
-            , m_test_token(U("test_token"), U("test_token_secret"))
-            , m_oauth1_config(U("test_key"),
-                              U("test_secret"),
+            : m_server_uri(__U("http://localhost:17778/"))
+            , m_test_token(__U("test_token"), __U("test_token_secret"))
+            , m_oauth1_config(__U("test_key"),
+                              __U("test_secret"),
                               m_server_uri,
                               m_server_uri,
                               m_server_uri,
@@ -75,16 +75,16 @@ SUITE(oauth1_tests)
 
     TEST(oauth1_token_accessors)
     {
-        oauth1_token t(U(""), U(""));
-        TEST_ACCESSOR(U("a%123"), access_token)
-        TEST_ACCESSOR(U("b%20456"), secret)
+        oauth1_token t(__U(""), __U(""));
+        TEST_ACCESSOR(__U("a%123"), access_token)
+        TEST_ACCESSOR(__U("b%20456"), secret)
 
-        const auto key1 = U("abc");
-        const auto value1 = U("123");
-        const auto key2 = U("xyz");
-        const auto value2 = U("456");
+        const auto key1 = __U("abc");
+        const auto value1 = __U("123");
+        const auto key2 = __U("xyz");
+        const auto value2 = __U("456");
         t.set_additional_parameter(key1, value1);
-        t.set_additional_parameter(U("xyz"), U("456"));
+        t.set_additional_parameter(__U("xyz"), __U("456"));
         const auto& parameters = t.additional_parameters();
         VERIFY_ARE_EQUAL(parameters.at(key1), value1);
         VERIFY_ARE_EQUAL(parameters.at(key2), value2);
@@ -94,22 +94,22 @@ SUITE(oauth1_tests)
 
     TEST(oauth1_config_accessors)
     {
-        oauth1_config t(U(""), U(""), U(""), U(""), U(""), U(""), oauth1_methods::hmac_sha1);
-        TEST_ACCESSOR(U("Test123"), consumer_key)
-        TEST_ACCESSOR(U("bar456"), consumer_secret)
-        TEST_ACCESSOR(U("file:///123?123=a&1="), temp_endpoint)
-        TEST_ACCESSOR(U("x:yxw#0"), auth_endpoint)
-        TEST_ACCESSOR(U("baz:"), token_endpoint)
-        TEST_ACCESSOR(U("/xyzzy=2"), callback_uri)
+        oauth1_config t(__U(""), __U(""), __U(""), __U(""), __U(""), __U(""), oauth1_methods::hmac_sha1);
+        TEST_ACCESSOR(__U("Test123"), consumer_key)
+        TEST_ACCESSOR(__U("bar456"), consumer_secret)
+        TEST_ACCESSOR(__U("file:///123?123=a&1="), temp_endpoint)
+        TEST_ACCESSOR(__U("x:yxw#0"), auth_endpoint)
+        TEST_ACCESSOR(__U("baz:"), token_endpoint)
+        TEST_ACCESSOR(__U("/xyzzy=2"), callback_uri)
         TEST_ACCESSOR(oauth1_methods::plaintext, method)
-        TEST_ACCESSOR(U("wally.world x"), realm)
+        TEST_ACCESSOR(__U("wally.world x"), realm)
 
-        const auto key1 = U("abc");
-        const auto value1 = U("123");
-        const auto key2 = U("xyz");
-        const auto value2 = U("456");
+        const auto key1 = __U("abc");
+        const auto value1 = __U("123");
+        const auto key2 = __U("xyz");
+        const auto value2 = __U("456");
         t.add_parameter(key1, value1);
-        t.add_parameter(U("xyz"), U("456"));
+        t.add_parameter(__U("xyz"), __U("456"));
         const auto parameters = t.parameters();
         VERIFY_ARE_EQUAL(parameters.at(key1), value1);
         VERIFY_ARE_EQUAL(parameters.at(key2), value2);
@@ -129,15 +129,15 @@ SUITE(oauth1_tests)
         {
             http_request r;
             r.set_method(methods::POST);
-            r.set_request_uri(U("http://example.com:80/request?a=b&c=d")); // Port set to avoid default.
+            r.set_request_uri(__U("http://example.com:80/request?a=b&c=d")); // Port set to avoid default.
 
             auto state = m_oauth1_config._generate_auth_state();
-            state.set_timestamp(U("12345678"));
-            state.set_nonce(U("ABCDEFGH"));
+            state.set_timestamp(__U("12345678"));
+            state.set_nonce(__U("ABCDEFGH"));
 
             utility::string_t base_string = m_oauth1_config._build_signature_base_string(r, state);
             utility::string_t correct_base_string(
-                U("POST&http%3A%2F%2Fexample.com%2Frequest&a%3Db%26c%3Dd%26oauth_consumer_key%3Dtest_key%26oauth_nonce%"
+                __U("POST&http%3A%2F%2Fexample.com%2Frequest&a%3Db%26c%3Dd%26oauth_consumer_key%3Dtest_key%26oauth_nonce%"
                   "3DABCDEFGH%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D12345678%26oauth_token%3Dtest_"
                   "token%26oauth_version%3D1.0"));
             VERIFY_ARE_EQUAL(correct_base_string, base_string);
@@ -147,15 +147,15 @@ SUITE(oauth1_tests)
         {
             http_request r;
             r.set_method(methods::POST);
-            r.set_request_uri(U("http://example.com:80/request?a=b&c=d"));
+            r.set_request_uri(__U("http://example.com:80/request?a=b&c=d"));
 
-            auto state = m_oauth1_config._generate_auth_state(U("oauth_test"), U("xyzzy"));
-            state.set_timestamp(U("12345678"));
-            state.set_nonce(U("ABCDEFGH"));
+            auto state = m_oauth1_config._generate_auth_state(__U("oauth_test"), __U("xyzzy"));
+            state.set_timestamp(__U("12345678"));
+            state.set_nonce(__U("ABCDEFGH"));
 
             utility::string_t base_string = m_oauth1_config._build_signature_base_string(r, state);
             utility::string_t correct_base_string(
-                U("POST&http%3A%2F%2Fexample.com%2Frequest&a%3Db%26c%3Dd%26oauth_consumer_key%3Dtest_key%26oauth_nonce%"
+                __U("POST&http%3A%2F%2Fexample.com%2Frequest&a%3Db%26c%3Dd%26oauth_consumer_key%3Dtest_key%26oauth_nonce%"
                   "3DABCDEFGH%26oauth_signature_method%3DHMAC-SHA1%26oauth_test%3Dxyzzy%26oauth_timestamp%3D12345678%"
                   "26oauth_token%3Dtest_token%26oauth_version%3D1.0"));
             VERIFY_ARE_EQUAL(correct_base_string, base_string);
@@ -164,16 +164,16 @@ SUITE(oauth1_tests)
         // Use application/x-www-form-urlencoded with parameters in body
         {
             http_request r(methods::POST);
-            r.set_request_uri(U("http://example.com:80/request?a=b&c=d")); // Port set to avoid default.
+            r.set_request_uri(__U("http://example.com:80/request?a=b&c=d")); // Port set to avoid default.
             r.set_body("MyVariableOne=ValueOne&MyVariableTwo=ValueTwo", "application/x-www-form-urlencoded");
 
             auto state = m_oauth1_config._generate_auth_state();
-            state.set_timestamp(U("12345678"));
-            state.set_nonce(U("ABCDEFGH"));
+            state.set_timestamp(__U("12345678"));
+            state.set_nonce(__U("ABCDEFGH"));
 
             utility::string_t base_string = m_oauth1_config._build_signature_base_string(r, state);
             utility::string_t correct_base_string(
-                U("POST&http%3A%2F%2Fexample.com%2Frequest&a%3Db%26c%3Dd%26MyVariableOne%3DValueOne%26%26MyVariableTwo%"
+                __U("POST&http%3A%2F%2Fexample.com%2Frequest&a%3Db%26c%3Dd%26MyVariableOne%3DValueOne%26%26MyVariableTwo%"
                   "3DValueTwo%26oauth_consumer_key%3Dtest_key%26oauth_nonce%3DABCDEFGH%26oauth_signature_method%3DHMAC-"
                   "SHA1%26oauth_timestamp%3D12345678%26oauth_token%3Dtest_token%26oauth_version%3D1.0"));
         }
@@ -183,22 +183,22 @@ SUITE(oauth1_tests)
     {
         http_request r;
         r.set_method(methods::POST);
-        r.set_request_uri(U("http://example.com:80/request?a=b&c=d")); // Port set to avoid default.
+        r.set_request_uri(__U("http://example.com:80/request?a=b&c=d")); // Port set to avoid default.
 
         auto state = m_oauth1_config._generate_auth_state();
-        state.set_timestamp(U("12345678"));
-        state.set_nonce(U("ABCDEFGH"));
+        state.set_timestamp(__U("12345678"));
+        state.set_nonce(__U("ABCDEFGH"));
 
         utility::string_t signature = m_oauth1_config._build_hmac_sha1_signature(r, state);
 
-        utility::string_t correct_signature(U("iUq3VlP39UNXoJHXlKjgSTmjEs8="));
+        utility::string_t correct_signature(__U("iUq3VlP39UNXoJHXlKjgSTmjEs8="));
         VERIFY_ARE_EQUAL(correct_signature, signature);
     }
 
     TEST_FIXTURE(oauth1_token_setup, oauth1_plaintext_method)
     {
         utility::string_t signature(m_oauth1_config._build_plaintext_signature());
-        utility::string_t correct_signature(U("test_secret&test_token_secret"));
+        utility::string_t correct_signature(__U("test_secret&test_token_secret"));
         VERIFY_ARE_EQUAL(correct_signature, signature);
     }
 
@@ -214,7 +214,7 @@ SUITE(oauth1_tests)
         m_server.server()->next_request().then([](test_request* request) {
             const utility::string_t header_authorization(request->m_headers[header_names::authorization]);
             const utility::string_t prefix(
-                U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", oauth_token=\"test_token\", "
+                __U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", oauth_token=\"test_token\", "
                   "oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\""));
             VERIFY_ARE_EQUAL(0, header_authorization.find(prefix));
             request->reply(status_codes::OK);
@@ -237,7 +237,7 @@ SUITE(oauth1_tests)
         m_server.server()->next_request().then([](test_request* request) {
             const utility::string_t header_authorization(request->m_headers[header_names::authorization]);
             const utility::string_t prefix(
-                U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", oauth_token=\"test_token\", "
+                __U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", oauth_token=\"test_token\", "
                   "oauth_signature_method=\"PLAINTEXT\", oauth_timestamp=\""));
             VERIFY_ARE_EQUAL(0, header_authorization.find(prefix));
             request->reply(status_codes::OK);
@@ -254,26 +254,26 @@ SUITE(oauth1_tests)
             const utility::string_t header_authorization(request->m_headers[header_names::authorization]);
 
             // Verify prefix, and without 'oauth_token'.
-            const utility::string_t prefix(U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", "
+            const utility::string_t prefix(__U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", "
                                              "oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\""));
             VERIFY_ARE_EQUAL(0, header_authorization.find(prefix));
 
             // Verify suffix with proper 'oauth_callback'.
-            const utility::string_t suffix(U(", oauth_callback=\"http%3A%2F%2Flocalhost%3A17778%2F\""));
+            const utility::string_t suffix(__U(", oauth_callback=\"http%3A%2F%2Flocalhost%3A17778%2F\""));
             VERIFY_IS_TRUE(std::equal(suffix.rbegin(), suffix.rend(), header_authorization.rbegin()));
 
             // Reply with temporary token and secret.
             std::map<utility::string_t, utility::string_t> headers;
             headers[header_names::content_type] = mime_types::application_x_www_form_urlencoded;
             request->reply(status_codes::OK,
-                           U(""),
+                           __U(""),
                            headers,
                            "oauth_token=testbar&oauth_token_secret=xyzzy&oauth_callback_confirmed=true");
         });
 
         VERIFY_IS_FALSE(m_oauth1_config.token().is_valid_access_token());
         utility::string_t auth_uri = m_oauth1_config.build_authorization_uri().get();
-        VERIFY_ARE_EQUAL(auth_uri, U("http://localhost:17778/?oauth_token=testbar"));
+        VERIFY_ARE_EQUAL(auth_uri, __U("http://localhost:17778/?oauth_token=testbar"));
         VERIFY_IS_FALSE(m_oauth1_config.token().is_valid_access_token());
     }
 
@@ -285,32 +285,32 @@ SUITE(oauth1_tests)
 
             // Verify temporary token prefix.
             const utility::string_t prefix(
-                U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", oauth_token=\"xyzzy\", "
+                __U("OAuth oauth_version=\"1.0\", oauth_consumer_key=\"test_key\", oauth_token=\"xyzzy\", "
                   "oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\""));
             VERIFY_ARE_EQUAL(0, header_authorization.find(prefix));
 
             // Verify suffix with 'oauth_verifier'.
-            const utility::string_t suffix(U(", oauth_verifier=\"simsalabim\""));
+            const utility::string_t suffix(__U(", oauth_verifier=\"simsalabim\""));
             VERIFY_IS_TRUE(std::equal(suffix.rbegin(), suffix.rend(), header_authorization.rbegin()));
 
             // Verify we have 'oauth_nonce' and 'oauth_signature'.
-            VERIFY_ARE_NOT_EQUAL(utility::string_t::npos, header_authorization.find(U("oauth_nonce")));
-            VERIFY_ARE_NOT_EQUAL(utility::string_t::npos, header_authorization.find(U("oauth_signature")));
+            VERIFY_ARE_NOT_EQUAL(utility::string_t::npos, header_authorization.find(__U("oauth_nonce")));
+            VERIFY_ARE_NOT_EQUAL(utility::string_t::npos, header_authorization.find(__U("oauth_signature")));
 
             // Reply with access token and secret.
             std::map<utility::string_t, utility::string_t> headers;
             headers[header_names::content_type] = mime_types::application_x_www_form_urlencoded;
-            request->reply(status_codes::OK, U(""), headers, "oauth_token=test&oauth_token_secret=bar");
+            request->reply(status_codes::OK, __U(""), headers, "oauth_token=test&oauth_token_secret=bar");
         });
 
-        m_oauth1_config.set_token(oauth1_token(U("xyzzy"), U(""))); // Simulate temporary token.
+        m_oauth1_config.set_token(oauth1_token(__U("xyzzy"), __U(""))); // Simulate temporary token.
 
-        const web::http::uri redirected_uri(U("http://localhost:17778/?oauth_token=xyzzy&oauth_verifier=simsalabim"));
+        const web::http::uri redirected_uri(__U("http://localhost:17778/?oauth_token=xyzzy&oauth_verifier=simsalabim"));
         m_oauth1_config.token_from_redirected_uri(redirected_uri).wait();
 
         VERIFY_IS_TRUE(m_oauth1_config.token().is_valid_access_token());
-        VERIFY_ARE_EQUAL(m_oauth1_config.token().access_token(), U("test"));
-        VERIFY_ARE_EQUAL(m_oauth1_config.token().secret(), U("bar"));
+        VERIFY_ARE_EQUAL(m_oauth1_config.token().access_token(), __U("test"));
+        VERIFY_ARE_EQUAL(m_oauth1_config.token().secret(), __U("bar"));
     }
 
 } // SUITE(oauth1_tests)

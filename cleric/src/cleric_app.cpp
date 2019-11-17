@@ -27,6 +27,7 @@ SOFTWARE.
 #include "cleric_app.hpp"
 #include "controller/m2m_controller.hpp"
 #include "controller/boxes_controller.hpp"
+#include "controller/things_controller.hpp"
 #include "cpprest/details/basic_types.h"
 #include "granada/cache/redis_cache_driver.h"
 #include "granada/defaults.h"
@@ -117,4 +118,18 @@ void ClericApp::go() {
 	  LOG(INFO) << "[ClericApp] {boxes_controller initialized} {" << addr << "}";
 
   }
+
+  {
+	  uri_builder webthings_uri(address);
+	  webthings_uri.append_path(__U("things"));
+	  auto addr = webthings_uri.to_uri().to_string();
+	  std::unique_ptr<granada::http::controller::Controller> webthings_controller(
+		  new cleric::http::controller::ThingsController(addr,
+			  map_simple_session_factory));
+	  webthings_controller->open().wait();
+	  controllers.push_back(std::move(webthings_controller));
+	  LOG(INFO) << "[ClericApp] {webthings_controller initialized} {" << addr << "}";
+
+  }
+
 }

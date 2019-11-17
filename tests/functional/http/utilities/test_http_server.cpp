@@ -82,14 +82,14 @@ static utility::string_t parse_verb(const HTTP_REQUEST* p_http_request)
     std::string temp;
     switch (p_http_request->Verb)
     {
-        case HttpVerbGET: method = U("GET"); break;
-        case HttpVerbPOST: method = U("POST"); break;
-        case HttpVerbPUT: method = U("PUT"); break;
-        case HttpVerbDELETE: method = U("DELETE"); break;
-        case HttpVerbHEAD: method = U("HEAD"); break;
-        case HttpVerbOPTIONS: method = U("OPTIONS"); break;
-        case HttpVerbTRACE: method = U("TRACE"); break;
-        case HttpVerbCONNECT: method = U("CONNECT"); break;
+        case HttpVerbGET: method = __U("GET"); break;
+        case HttpVerbPOST: method = __U("POST"); break;
+        case HttpVerbPUT: method = __U("PUT"); break;
+        case HttpVerbDELETE: method = __U("DELETE"); break;
+        case HttpVerbHEAD: method = __U("HEAD"); break;
+        case HttpVerbOPTIONS: method = __U("OPTIONS"); break;
+        case HttpVerbTRACE: method = __U("TRACE"); break;
+        case HttpVerbCONNECT: method = __U("CONNECT"); break;
         case HttpVerbUnknown: temp = p_http_request->pUnknownVerb; method = utility::string_t(temp.begin(), temp.end());
         default: break;
     }
@@ -100,59 +100,59 @@ static utility::string_t parse_verb(const HTTP_REQUEST* p_http_request)
 /// String values for all HTTP Server API known headers.
 /// NOTE: the order here is important it is from the _HTTP_HEADER_ID enum.
 /// </summary>
-static utility::string_t HttpServerAPIKnownHeaders[] = {U("Cache-Control"),
-                                                        U("Connection"),
-                                                        U("Data"),
-                                                        U("Keep-Alive"),
-                                                        U("Pragma"),
-                                                        U("Trailer"),
-                                                        U("Transfer-Encoding"),
-                                                        U("Upgrade"),
-                                                        U("Via"),
-                                                        U("Warning"),
-                                                        U("Allow"),
-                                                        U("Content-Length"),
-                                                        U("Content-Type"),
-                                                        U("Content-Encoding"),
-                                                        U("Content-Language"),
-                                                        U("Content-Location"),
-                                                        U("Content-Md5"),
-                                                        U("Content-Range"),
-                                                        U("Expires"),
-                                                        U("Last-Modified"),
-                                                        U("Accept"),
-                                                        U("Accept-Charset"),
-                                                        U("Accept-Encoding"),
-                                                        U("Accept-Language"),
-                                                        U("Authorization"),
-                                                        U("Cookie"),
-                                                        U("Expect"),
-                                                        U("From"),
-                                                        U("Host"),
-                                                        U("If-Match"),
-                                                        U("If-Modified-Since"),
-                                                        U("If-None-Match"),
-                                                        U("If-Range"),
-                                                        U("If-Unmodified-Since"),
-                                                        U("Max-Forwards"),
-                                                        U("Proxy-Authorization"),
-                                                        U("Referer"),
-                                                        U("Range"),
-                                                        U("TE"),
-                                                        U("Translate"),
-                                                        U("User-Agent"),
-                                                        U("Request-Maximum"),
-                                                        U("Accept-Ranges"),
-                                                        U("Age"),
-                                                        U("Etag"),
-                                                        U("Location"),
-                                                        U("Proxy-Authenticate"),
-                                                        U("Retry-After"),
-                                                        U("Server"),
-                                                        U("Set-Cookie"),
-                                                        U("Vary"),
-                                                        U("Www-Authenticate"),
-                                                        U("Response-Maximum")};
+static utility::string_t HttpServerAPIKnownHeaders[] = {__U("Cache-Control"),
+                                                        __U("Connection"),
+                                                        __U("Data"),
+                                                        __U("Keep-Alive"),
+                                                        __U("Pragma"),
+                                                        __U("Trailer"),
+                                                        __U("Transfer-Encoding"),
+                                                        __U("Upgrade"),
+                                                        __U("Via"),
+                                                        __U("Warning"),
+                                                        __U("Allow"),
+                                                        __U("Content-Length"),
+                                                        __U("Content-Type"),
+                                                        __U("Content-Encoding"),
+                                                        __U("Content-Language"),
+                                                        __U("Content-Location"),
+                                                        __U("Content-Md5"),
+                                                        __U("Content-Range"),
+                                                        __U("Expires"),
+                                                        __U("Last-Modified"),
+                                                        __U("Accept"),
+                                                        __U("Accept-Charset"),
+                                                        __U("Accept-Encoding"),
+                                                        __U("Accept-Language"),
+                                                        __U("Authorization"),
+                                                        __U("Cookie"),
+                                                        __U("Expect"),
+                                                        __U("From"),
+                                                        __U("Host"),
+                                                        __U("If-Match"),
+                                                        __U("If-Modified-Since"),
+                                                        __U("If-None-Match"),
+                                                        __U("If-Range"),
+                                                        __U("If-Unmodified-Since"),
+                                                        __U("Max-Forwards"),
+                                                        __U("Proxy-Authorization"),
+                                                        __U("Referer"),
+                                                        __U("Range"),
+                                                        __U("TE"),
+                                                        __U("Translate"),
+                                                        __U("User-Agent"),
+                                                        __U("Request-Maximum"),
+                                                        __U("Accept-Ranges"),
+                                                        __U("Age"),
+                                                        __U("Etag"),
+                                                        __U("Location"),
+                                                        __U("Proxy-Authenticate"),
+                                                        __U("Retry-After"),
+                                                        __U("Server"),
+                                                        __U("Set-Cookie"),
+                                                        __U("Vary"),
+                                                        __U("Www-Authenticate"),
+                                                        __U("Response-Maximum")};
 
 static utility::string_t char_to_wstring(const char* src)
 {
@@ -226,7 +226,7 @@ public:
         }
 
         // Create request queue.
-        error_code = HttpCreateRequestQueue(httpApiVersion, U("test_http_server"), NULL, NULL, &m_request_queue);
+        error_code = HttpCreateRequestQueue(httpApiVersion, __U("test_http_server"), NULL, NULL, &m_request_queue);
         if (error_code)
         {
             throw std::runtime_error("error code: " + std::to_string(error_code));
@@ -237,7 +237,7 @@ public:
         if (uri.is_path_empty() && host_uri[host_uri.length() - 1] != '/' && uri.query().empty() &&
             uri.fragment().empty())
         {
-            host_uri.append(U("/"));
+            host_uri.append(__U("/"));
         }
 
         // Add Url.
@@ -305,7 +305,7 @@ public:
 
         // Read in request body.
         ULONG content_length;
-        const bool has_content_length = p_test_request->match_header(U("Content-Length"), content_length);
+        const bool has_content_length = p_test_request->match_header(__U("Content-Length"), content_length);
         if (has_content_length && content_length > 0)
         {
             p_test_request->m_body.resize(content_length);
@@ -320,8 +320,8 @@ public:
         }
 
         utility::string_t transfer_encoding;
-        const bool has_transfer_encoding = p_test_request->match_header(U("Transfer-Encoding"), transfer_encoding);
-        if (has_transfer_encoding && transfer_encoding.find(U("chunked")) != std::string::npos)
+        const bool has_transfer_encoding = p_test_request->match_header(__U("Transfer-Encoding"), transfer_encoding);
+        if (has_transfer_encoding && transfer_encoding.find(__U("chunked")) != std::string::npos)
         {
             content_length = 0;
             char buf[4096];
@@ -366,7 +366,7 @@ public:
         if (m_uri.is_path_empty() && host_uri[host_uri.length() - 1] != '/' && m_uri.query().empty() &&
             m_uri.fragment().empty())
         {
-            host_uri.append(U("/"));
+            host_uri.append(__U("/"));
         }
 
         // Remove Url.
@@ -512,7 +512,7 @@ public:
             auto tr = std::unique_ptr<test_request>(new test_request(this->m_last_request_id++, this));
             tr->m_method = result.method();
             tr->m_path = result.request_uri().resource().to_string();
-            if (tr->m_path.empty()) tr->m_path = U("/");
+            if (tr->m_path.empty()) tr->m_path = __U("/");
 
             for (auto it = result.headers().begin(); it != result.headers().end(); ++it)
                 tr->m_headers[it->first] = it->second;

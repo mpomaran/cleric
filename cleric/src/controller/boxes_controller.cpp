@@ -65,7 +65,7 @@ void BoxesController::handleGet(http_request request) {
       // get all possible boxes
 
       // TODO lookup for server based on user, etc - currently I know we have
-      // only one server, so I can ask for anythong fix before the firt release
+      // only one server, so I can ask for anythong fix before the first release
       auto &boxServer = BoxServerLocator::getBoxServerByBoxId(0);
 
       auto allBoxes = boxServer.getAllBoxes();

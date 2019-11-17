@@ -66,7 +66,7 @@ void cleric::http::controller::test::RestControllerTester::callPost() {
   M2MController controller(addr, session_factory);
 
   http_request msg(methods::POST);
-  msg.set_request_uri(uri_builder(U(VALID_M2M_MESSAGE_URI))
+  msg.set_request_uri(uri_builder(__U(VALID_M2M_MESSAGE_URI))
                           .to_string());
 
   controller.handlePost(msg);
@@ -81,7 +81,7 @@ void cleric::http::controller::test::RestControllerTester::callGet() {
   M2MController controller(addr, session_factory);
 
   http_request msg(methods::GET);
-  msg.set_request_uri(uri_builder(U(VALID_M2M_MESSAGE_URI))
+  msg.set_request_uri(uri_builder(__U(VALID_M2M_MESSAGE_URI))
                           .to_string());
 
   controller.handleGet(msg);

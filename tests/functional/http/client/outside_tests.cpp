@@ -46,7 +46,7 @@ SUITE(outside_tests)
         handle_timeout([] {
             // http://www.cnn.com redirects users from countries outside of the US to the "http://edition.cnn.com/" drop
             // location
-            http_client client(U("http://edition.cnn.com"));
+            http_client client(__U("http://edition.cnn.com"));
 
             // CNN's main page doesn't use chunked transfer encoding.
             http_response response = client.request(methods::GET).get();
@@ -55,7 +55,7 @@ SUITE(outside_tests)
             response.content_ready().wait();
 
             // CNN's other pages do use chunked transfer encoding.
-            response = client.request(methods::GET, U("us")).get();
+            response = client.request(methods::GET, __U("us")).get();
             code = response.status_code();
             VERIFY_IS_TRUE(code == status_codes::OK || code == status_codes::MovedPermanently);
             response.content_ready().wait();
@@ -72,7 +72,7 @@ SUITE(outside_tests)
         http_client_config config;
         config.set_request_compressed_response(true);
 
-        http_client client(U("https://en.wikipedia.org/wiki/HTTP_compression"), config);
+        http_client client(__U("https://en.wikipedia.org/wiki/HTTP_compression"), config);
         http_request httpRequest(methods::GET);
 
         http_response response = client.request(httpRequest).get();
@@ -85,13 +85,13 @@ SUITE(outside_tests)
         utility::string_t encoding;
         VERIFY_IS_TRUE(response.headers().match(web::http::header_names::content_encoding, encoding));
 
-        VERIFY_ARE_EQUAL(encoding, U("gzip"));
+        VERIFY_ARE_EQUAL(encoding, __U("gzip"));
     }
 
     TEST_FIXTURE(uri_address, outside_google_dot_com)
     {
         // Use code.google.com instead of www.google.com, which redirects
-        http_client client(U("http://code.google.com"));
+        http_client client(__U("http://code.google.com"));
         http_request request(methods::GET);
         for (int i = 0; i < 2; ++i)
         {
@@ -104,7 +104,7 @@ SUITE(outside_tests)
     {
         handle_timeout([&] {
             // Use code.google.com instead of www.google.com, which redirects
-            http_client client(U("https://code.google.com"));
+            http_client client(__U("https://code.google.com"));
 
             http_response response;
             for (int i = 0; i < 5; ++i)
@@ -134,7 +134,7 @@ SUITE(outside_tests)
 
         handle_timeout([&] {
             // Use code.google.com instead of www.google.com, which redirects
-            http_client client(U("https://code.google.com"));
+            http_client client(__U("https://code.google.com"));
 
             http_response response;
             for (int i = 0; i < 5; ++i)
@@ -154,7 +154,7 @@ SUITE(outside_tests)
     {
         handle_timeout([&] {
             // Use code.google.com instead of www.google.com, which redirects
-            http_client simpleclient(U("http://code.google.com"));
+            http_client simpleclient(__U("http://code.google.com"));
             utility::string_t path = m_uri.query();
             http_response response = simpleclient.request(::http::methods::GET).get();
 
@@ -176,7 +176,7 @@ SUITE(outside_tests)
     {
         handle_timeout([] {
             http_client client(
-                U("http://ws.audioscrobbler.com/2.0/"
+                __U("http://ws.audioscrobbler.com/2.0/"
                   "?method=artist.gettoptracks&artist=cher&api_key=6fcd59047568e89b1615975081258990&format=json"));
 
             client.request(methods::GET)
@@ -221,33 +221,33 @@ SUITE(outside_tests)
     }
 #endif // !defined(__cplusplus_winrt)
 
-    TEST(server_selfsigned_cert) { test_failed_ssl_cert(U("https://self-signed.badssl.com/")); }
+    TEST(server_selfsigned_cert) { test_failed_ssl_cert(__U("https://self-signed.badssl.com/")); }
 
 #if !defined(__cplusplus_winrt)
-    TEST(server_selfsigned_cert_ignored) { test_ignored_ssl_cert(U("https://self-signed.badssl.com/")); }
+    TEST(server_selfsigned_cert_ignored) { test_ignored_ssl_cert(__U("https://self-signed.badssl.com/")); }
 #endif // !defined(__cplusplus_winrt)
 
-    TEST(server_hostname_mismatch) { test_failed_ssl_cert(U("https://wrong.host.badssl.com/")); }
+    TEST(server_hostname_mismatch) { test_failed_ssl_cert(__U("https://wrong.host.badssl.com/")); }
 
 #if !defined(__cplusplus_winrt)
     TEST(server_hostname_host_override)
     {
         handle_timeout([] {
-            http_client client(U("https://wrong.host.badssl.com/"));
+            http_client client(__U("https://wrong.host.badssl.com/"));
             http_request req(methods::GET);
-            req.headers().add(U("Host"), U("badssl.com"));
+            req.headers().add(__U("Host"), __U("badssl.com"));
             auto response = client.request(req).get();
             VERIFY_ARE_EQUAL(status_codes::OK, response.status_code());
         });
     }
 
-    TEST(server_hostname_mismatch_ignored) { test_ignored_ssl_cert(U("https://wrong.host.badssl.com/")); }
+    TEST(server_hostname_mismatch_ignored) { test_ignored_ssl_cert(__U("https://wrong.host.badssl.com/")); }
 
     TEST(server_hostname_host_override_after_upgrade)
     {
-        http_client client(U("http://198.35.26.96/"));
+        http_client client(__U("http://198.35.26.96/"));
         http_request req(methods::GET);
-        req.headers().add(U("Host"), U("en.wikipedia.org"));
+        req.headers().add(__U("Host"), __U("en.wikipedia.org"));
         auto response = client.request(req).get();
         // WinHTTP will transparently follow the HTTP 301 upgrade request redirect,
         // ASIO does not and will return the 301 directly.
@@ -256,25 +256,25 @@ SUITE(outside_tests)
     }
 #endif // !defined(__cplusplus_winrt)
 
-    TEST(server_cert_expired) { test_failed_ssl_cert(U("https://expired.badssl.com/")); }
+    TEST(server_cert_expired) { test_failed_ssl_cert(__U("https://expired.badssl.com/")); }
 
 #if !defined(__cplusplus_winrt)
-    TEST(server_cert_expired_ignored) { test_ignored_ssl_cert(U("https://expired.badssl.com/")); }
+    TEST(server_cert_expired_ignored) { test_ignored_ssl_cert(__U("https://expired.badssl.com/")); }
 #endif // !defined(__cplusplus_winrt)
 
     TEST(server_cert_revoked, "Ignore:Android", "229", "Ignore:Apple", "229", "Ignore:Linux", "229")
     {
-        test_failed_ssl_cert(U("https://revoked.badssl.com/"));
+        test_failed_ssl_cert(__U("https://revoked.badssl.com/"));
     }
 
 #if !defined(__cplusplus_winrt)
-    TEST(server_cert_revoked_ignored) { test_ignored_ssl_cert(U("https://revoked.badssl.com/")); }
+    TEST(server_cert_revoked_ignored) { test_ignored_ssl_cert(__U("https://revoked.badssl.com/")); }
 #endif // !defined(__cplusplus_winrt)
 
-    TEST(server_cert_untrusted) { test_failed_ssl_cert(U("https://untrusted-root.badssl.com/")); }
+    TEST(server_cert_untrusted) { test_failed_ssl_cert(__U("https://untrusted-root.badssl.com/")); }
 
 #if !defined(__cplusplus_winrt)
-    TEST(server_cert_untrusted_ignored) { test_ignored_ssl_cert(U("https://untrusted-root.badssl.com/")); }
+    TEST(server_cert_untrusted_ignored) { test_ignored_ssl_cert(__U("https://untrusted-root.badssl.com/")); }
 #endif // !defined(__cplusplus_winrt)
 
 #if !defined(__cplusplus_winrt)
@@ -284,7 +284,7 @@ SUITE(outside_tests)
             http_client_config config;
             config.set_validate_certificates(false);
             config.set_timeout(std::chrono::seconds(1));
-            http_client client(U("https://expired.badssl.com/"), config);
+            http_client client(__U("https://expired.badssl.com/"), config);
 
             auto request = client.request(methods::GET).get();
             VERIFY_ARE_EQUAL(status_codes::OK, request.status_code());
@@ -296,10 +296,10 @@ SUITE(outside_tests)
     {
         // Create URI for:
         // https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=UUF1hMUVwlrvlVMjUGOZExgg&key=AIzaSyAviHxf_y0SzNoAq3iKqvWVE4KQ0yylsnk
-        uri_builder playlistUri(U("https://www.googleapis.com/youtube/v3/playlistItems?"));
-        playlistUri.append_query(U("part"), U("snippet"));
-        playlistUri.append_query(U("playlistId"), U("UUF1hMUVwlrvlVMjUGOZExgg"));
-        playlistUri.append_query(U("key"), U("AIzaSyAviHxf_y0SzNoAq3iKqvWVE4KQ0yylsnk"));
+        uri_builder playlistUri(__U("https://www.googleapis.com/youtube/v3/playlistItems?"));
+        playlistUri.append_query(__U("part"), __U("snippet"));
+        playlistUri.append_query(__U("playlistId"), __U("UUF1hMUVwlrvlVMjUGOZExgg"));
+        playlistUri.append_query(__U("key"), __U("AIzaSyAviHxf_y0SzNoAq3iKqvWVE4KQ0yylsnk"));
 
         // Send request
         web::http::client::http_client playlistClient(playlistUri.to_uri());
@@ -318,20 +318,20 @@ SUITE(outside_tests)
                             int count = 0;
                             auto& obj = v.as_object();
 
-                            VERIFY_ARE_NOT_EQUAL(obj.find(U("pageInfo")), obj.end());
-                            VERIFY_ARE_NOT_EQUAL(obj.find(U("items")), obj.end());
+                            VERIFY_ARE_NOT_EQUAL(obj.find(__U("pageInfo")), obj.end());
+                            VERIFY_ARE_NOT_EQUAL(obj.find(__U("items")), obj.end());
 
-                            auto& items = obj[U("items")];
+                            auto& items = obj[__U("items")];
 
                             for (auto iter = items.as_array().cbegin(); iter != items.as_array().cend(); ++iter)
                             {
                                 const auto& item = *iter;
-                                auto iSnippet = item.as_object().find(U("snippet"));
+                                auto iSnippet = item.as_object().find(__U("snippet"));
                                 if (iSnippet == item.as_object().end())
                                 {
                                     throw std::runtime_error("snippet key not found");
                                 }
-                                auto iTitle = iSnippet->second.as_object().find(U("title"));
+                                auto iTitle = iSnippet->second.as_object().find(__U("title"));
                                 if (iTitle == iSnippet->second.as_object().end())
                                 {
                                     throw std::runtime_error("title key not found");

@@ -33,8 +33,8 @@ SUITE(authentication_tests)
 // Authorization not implemented in non WinRT websocket_client yet - CodePlex 254
 #if defined(__cplusplus_winrt)
     void auth_helper(test_websocket_server & server,
-                     const utility::string_t& username = U(""),
-                     const utility::string_t& password = U(""))
+                     const utility::string_t& username = __U(""),
+                     const utility::string_t& password = __U(""))
     {
         server.set_http_handler([username, password](test_http_request request) {
             test_http_response resp;
@@ -70,11 +70,11 @@ SUITE(authentication_tests)
     {
         test_websocket_server server;
         websocket_client_config config;
-        web::credentials cred(U("user"), U("password"));
+        web::credentials cred(__U("user"), __U("password"));
         config.set_credentials(cred);
         websocket_client client(config);
 
-        auth_helper(server, cred.username(), U("password"));
+        auth_helper(server, cred.username(), __U("password"));
         client.connect(m_uri).wait();
         client.close().wait();
     }
@@ -100,7 +100,7 @@ SUITE(authentication_tests)
 
         try
         {
-            client.connect(U("wss://echo.websocket.org/")).wait();
+            client.connect(__U("wss://echo.websocket.org/")).wait();
             auto receive_task = client.receive().then([body_str](websocket_incoming_message ret_msg) {
                 VERIFY_ARE_EQUAL(ret_msg.length(), body_str.length());
                 auto ret_str = ret_msg.extract_string().get();
@@ -135,7 +135,7 @@ SUITE(authentication_tests)
     {
         try
         {
-            client.connect(U("wss://swordsoftruth.com")).wait();
+            client.connect(__U("wss://swordsoftruth.com")).wait();
 
             // Should never be reached.
             VERIFY_IS_TRUE(false);
@@ -178,7 +178,7 @@ SUITE(authentication_tests)
 
         try
         {
-            client.connect(U("wss://badssl.com")).wait();
+            client.connect(__U("wss://badssl.com")).wait();
 
             // Should never be reached.
             VERIFY_IS_TRUE(false);
@@ -225,11 +225,11 @@ SUITE(authentication_tests)
         }
     }
 
-    TEST(self_signed_cert) { handshake_error_test_impl(U("wss://self-signed.badssl.com/")); }
+    TEST(self_signed_cert) { handshake_error_test_impl(__U("wss://self-signed.badssl.com/")); }
 
-    TEST(hostname_mismatch) { handshake_error_test_impl(U("wss://wrong.host.badssl.com/")); }
+    TEST(hostname_mismatch) { handshake_error_test_impl(__U("wss://wrong.host.badssl.com/")); }
 
-    TEST(cert_expired) { handshake_error_test_impl(U("wss://expired.badssl.com/")); }
+    TEST(cert_expired) { handshake_error_test_impl(__U("wss://expired.badssl.com/")); }
 
 #endif
 

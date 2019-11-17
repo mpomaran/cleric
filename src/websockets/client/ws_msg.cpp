@@ -51,7 +51,7 @@ std::vector<::utility::string_t> websocket_client_config::subprotocols() const
     {
         utility::istringstream_t header(subprotocolHeader->second);
         utility::string_t token;
-        while (std::getline(header, token, U(',')))
+        while (std::getline(header, token, __U(',')))
         {
             http::details::trim_whitespace(token);
             if (!token.empty())

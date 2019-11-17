@@ -36,19 +36,19 @@ SUITE(client_construction)
         // The goal of this test case is to make sure we can compile,
         // if the URI class doesn't have the proper constructors it won't.
         // So we don't need to actually do a request.
-        http_client c1(U("http://localhost:4567/"));
-        http_client c3(utility::string_t(U("http://localhost:4567/")));
+        http_client c1(__U("http://localhost:4567/"));
+        http_client c3(utility::string_t(__U("http://localhost:4567/")));
     }
 
     // Tests different variations on specifying the URI in http_client constructor.
     TEST_FIXTURE(uri_address, different_uris)
     {
-        const utility::string_t paths[] = {U(""), U("/"), U("/toplevel/nested"), U("/toplevel/nested/")};
-        const utility::string_t expected_paths[] = {U("/"), U("/"), U("/toplevel/nested"), U("/toplevel/nested/")};
+        const utility::string_t paths[] = {__U(""), __U("/"), __U("/toplevel/nested"), __U("/toplevel/nested/")};
+        const utility::string_t expected_paths[] = {__U("/"), __U("/"), __U("/toplevel/nested"), __U("/toplevel/nested/")};
         const size_t num_paths = sizeof(paths) / sizeof(paths[0]);
         for (size_t i = 0; i < num_paths; ++i)
         {
-            uri address(U("http://localhost:55678") + paths[i]);
+            uri address(__U("http://localhost:55678") + paths[i]);
             test_http_server::scoped_server scoped(address);
             http_client client(address);
             test_connection(scoped.server(), &client, expected_paths[i]);
@@ -72,23 +72,23 @@ SUITE(client_construction)
 
     TEST_FIXTURE(uri_address, client_construction_error_cases)
     {
-        uri address(U("nothttp://localhost:34567/"));
+        uri address(__U("nothttp://localhost:34567/"));
 
         // Invalid scheme.
         verify_client_invalid_argument(address);
 
         // empty host.
-        address = uri(U("http://:34567/"));
+        address = uri(__U("http://:34567/"));
         verify_client_invalid_argument(address);
     }
 
     TEST_FIXTURE(uri_address, client_construction_no_scheme)
     {
-        uri address(U("//localhost:34568/p/g"));
+        uri address(__U("//localhost:34568/p/g"));
         test_http_server::scoped_server scoped(m_uri);
 
         http_client client(address);
-        test_connection(scoped.server(), &client, U("/p/g"));
+        test_connection(scoped.server(), &client, __U("/p/g"));
     }
 
     TEST_FIXTURE(uri_address, copy_assignment)
@@ -98,14 +98,14 @@ SUITE(client_construction)
         // copy constructor
         http_client original(m_uri);
         http_client new_client(original);
-        test_connection(scoped.server(), &new_client, U("/"));
-        test_connection(scoped.server(), &original, U("/"));
+        test_connection(scoped.server(), &new_client, __U("/"));
+        test_connection(scoped.server(), &original, __U("/"));
 
         // assignment
-        http_client new_client2(U("http://bad:-1"));
+        http_client new_client2(__U("http://bad:-1"));
         new_client2 = original;
-        test_connection(scoped.server(), &new_client2, U("/"));
-        test_connection(scoped.server(), &original, U("/"));
+        test_connection(scoped.server(), &new_client2, __U("/"));
+        test_connection(scoped.server(), &original, __U("/"));
     }
 
     TEST_FIXTURE(uri_address, move_not_init)
@@ -115,11 +115,11 @@ SUITE(client_construction)
         // move constructor
         http_client original(m_uri);
         http_client new_client = std::move(original);
-        test_connection(scoped.server(), &new_client, U("/"));
+        test_connection(scoped.server(), &new_client, __U("/"));
 
         // move assignment
         original = http_client(m_uri);
-        test_connection(scoped.server(), &original, U("/"));
+        test_connection(scoped.server(), &original, __U("/"));
     }
 
     TEST_FIXTURE(uri_address, move_init)
@@ -128,13 +128,13 @@ SUITE(client_construction)
 
         // move constructor
         http_client original(m_uri);
-        test_connection(scoped.server(), &original, U("/"));
+        test_connection(scoped.server(), &original, __U("/"));
         http_client new_client = std::move(original);
-        test_connection(scoped.server(), &new_client, U("/"));
+        test_connection(scoped.server(), &new_client, __U("/"));
 
         // move assignment
         original = http_client(m_uri);
-        test_connection(scoped.server(), &original, U("/"));
+        test_connection(scoped.server(), &original, __U("/"));
     }
 
     // Verify that we can read the config from the http_client
@@ -187,7 +187,7 @@ SUITE(client_construction)
 
         try
         {
-            client.request(methods::GET, U("/")).get();
+            client.request(methods::GET, __U("/")).get();
         }
         catch (...)
         {
@@ -208,7 +208,7 @@ SUITE(client_construction)
 
         try
         {
-            client.request(methods::GET, U("/")).get();
+            client.request(methods::GET, __U("/")).get();
         }
         catch (...)
         {

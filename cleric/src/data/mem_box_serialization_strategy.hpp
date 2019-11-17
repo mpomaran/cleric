@@ -27,7 +27,7 @@ SOFTWARE.
 #ifndef MEM_BOX_SERIALIZATION_STRATEGY_HPP_HAS_BEEN_INCLUDED
 #define MEM_BOX_SERIALIZATION_STRATEGY_HPP_HAS_BEEN_INCLUDED
 
-#include "box_serialization_strategy.hpp"
+#include "ibox_serialization_strategy.hpp"
 #include <easylogging++.h>
 #include <istream>
 #include <ostream>

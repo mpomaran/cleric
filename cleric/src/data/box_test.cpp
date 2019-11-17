@@ -25,7 +25,7 @@ SOFTWARE.
 */
 
 #include "box.hpp"
-#include "box_serialization_strategy.hpp"
+#include "ibox_serialization_strategy.hpp"
 #include <catch/catch.hpp>
 #include <iostream>
 #include <picojson.h>
@@ -55,7 +55,7 @@ private:
 };
 
 static std::string createM2MMessage() {
-  return "0000000ABE587DE600000000AE30AFFCD31EA91087E215F4";
+  return "00000000100000000000000003F361CCB02C928BB461DD4EF";
 }
 
 std::vector<uint8_t> sharedData;
@@ -65,7 +65,7 @@ static cleric::data::Box createBoxFromScratch() {
   auto retention = std::chrono::hours(24);
   std::unique_ptr<cleric::data::IBoxSerializationStrategy> serializer{
       new SharedMemBoxSerializationStrategy(sharedData)};
-  cleric::data::Box result{10, "dummy", retention, 3, std::move(serializer)};
+  cleric::data::Box result{1, "dummy", retention, 3, std::move(serializer)};
 
   return result;
 }

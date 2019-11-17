@@ -59,7 +59,7 @@ void on_initialize(const string_t& address)
   }
 
   uri_builder uri(address);
-  uri.append_path(U("cart"));
+  uri.append_path(__U("cart"));
   auto addr = uri.to_uri().to_string();
   std::unique_ptr<granada::http::controller::CartController> cart_controller(new granada::http::controller::CartController(addr));
   try {
@@ -69,7 +69,7 @@ void on_initialize(const string_t& address)
 
 
 	  uri_builder auth_uri(address);
-	  auth_uri.append_path(U("auth"));
+	  auth_uri.append_path(__U("auth"));
 	  addr = auth_uri.to_uri().to_string();
 	  std::unique_ptr<granada::http::controller::AuthController> auth_controller(new granada::http::controller::AuthController(addr));
 	  auth_controller->open().wait();
