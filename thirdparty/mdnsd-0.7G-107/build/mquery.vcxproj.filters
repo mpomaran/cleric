@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\workspace\Repos\arcticpanther\Cleric\thirdparty\mdnsd-0.7G-107\mquery.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\workspace\Repos\arcticpanther\Cleric\thirdparty\mdnsd-0.7G-107\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4F62F4FA-DBC8-3951-8CE7-55F245E44BDA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+﻿  Building Custom Rule C:/workspace/Repos/arcticpanther/Cleric/thirdparty/mdnsd-0.7G-107/libmdnsd/CMakeLists.txt
+  CMake does not need to re-run because C:/workspace/Repos/arcticpanther/Cleric/thirdparty/mdnsd-0.7G-107/build/libmdnsd/CMakeFiles/generate.stamp is up-to-date.
+  mdnsd.c
+  1035.c
+  sdtxt.c
+  xht.c
+  Generating Code...
+     Creating library C:/workspace/Repos/arcticpanther/Cleric/thirdparty/mdnsd-0.7G-107/build/libmdnsd/Debug/libmdnsd.lib and object C:/workspace/Repos/arcticpanther/Cleric/thirdparty/mdnsd-0.7G-107/build/libmdnsd/Debug/libmdnsd.exp
+  libmdnsd.vcxproj -> C:\workspace\Repos\arcticpanther\Cleric\thirdparty\mdnsd-0.7G-107\build\libmdnsd\Debug\libmdnsd.dll

@@ -1,0 +1,5 @@
+﻿  Building Custom Rule C:/workspace/Repos/arcticpanther/Cleric/thirdparty/mdnsd-0.7G-107/CMakeLists.txt
+  CMake does not need to re-run because C:/workspace/Repos/arcticpanther/Cleric/thirdparty/mdnsd-0.7G-107/build/CMakeFiles/generate.stamp is up-to-date.
+  mdnsd.c
+c:\workspace\repos\arcticpanther\cleric\thirdparty\mdnsd-0.7g-107\mdnsd.c(125): warning C4013: 'write' undefined; assuming extern returning int
+  mdnsd.vcxproj -> C:\workspace\Repos\arcticpanther\Cleric\thirdparty\mdnsd-0.7G-107\build\Debug\mdnsd.exe
