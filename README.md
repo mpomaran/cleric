@@ -1,3 +1,8 @@
+Current state
+-------------------------------------------------------------------------------------------
+This is still work in progress, cleric does not talk to arctic yet, controllers are not
+finished, but there is not much left for MVP. I expect the first release soon.
+
 Build instructions (Windows 64bit)
 -------------------------------------------------------------------------------------------
 1. Install VCPKG (https://github.com/Microsoft/vcpkg)
