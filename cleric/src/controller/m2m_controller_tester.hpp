@@ -24,54 +24,28 @@ SOFTWARE.
 
 */
 
-#ifndef M2M_CONTROLLER_HPP_HAS_BEEN_INCLUDED
-#define M2M_CONTROLLER_HPP_HAS_BEEN_INCLUDED
+#pragma once
 
-#include "cpprest/details/basic_types.h"
-#include "granada/http/controller/controller.h"
-#include "granada/http/parser.h"
-#include "granada/http/session/session.h"
-#include <unordered_map>
+#include <stddef.h>
+#include <string>
 
 namespace cleric {
-namespace http {
-namespace controller {
+	namespace http {
+		namespace controller {
+			namespace test {
+				class M2MControllerTester {
+				public:
+					static void callPost();
+					static void callPost(uint32_t boxId, uint32_t sensorType, uint32_t sensor_value, uint32_t vcc);
+					static void callGet();
+					static void callGet(uint32_t boxId, uint32_t sensorType, uint32_t sensor_value, uint32_t vcc);
+				private:
+					static void callPost(const ::std::string &messageUri);
+					static void callGet(const ::std::string &messageUri);
 
-namespace test {
-class M2MControllerTester;
-extern bool isGetInvoked;
-extern bool isPostInvoked;
+				};
 
-} // namespace test
-
-class M2MController : public granada::http::controller::Controller {
-public:
-  /**
-   * Constructor
-   */
-  M2MController(
-      utility::string_t url,
-      std::shared_ptr<granada::http::session::SessionFactory> &session_factory);
-
-private:
-  /**
-   * Handles HTTP GET requests.
-   * @param request HTTP request.
-   */
-  void handleGet(http_request request);
-
-  /**
-   * Handles HTTP POST requests.
-   * @param request HTTP request.
-   */
-  void handlePost(http_request request);
-
-  std::shared_ptr<granada::http::session::SessionFactory> sessionFactory;
-
-  friend class test::M2MControllerTester;
-};
-} // namespace controller
-} // namespace http
+			} // namespace test
+		} // namespace controller
+	} // namespace http
 } // namespace cleric
-
-#endif

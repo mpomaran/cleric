@@ -24,6 +24,9 @@ SOFTWARE.
 
 */
 
+#include "things_controller.hpp"
+#include "m2m_controller_tester.hpp"
+#include "../data/box_server_locator.hpp"
 #include "granada/http/session/map_session.h"
 #include "cpprest/details/basic_types.h"
 #include "things_controller.hpp"
@@ -40,6 +43,7 @@ using namespace concurrency::streams;
 
 using namespace std;
 using namespace cleric::http::controller;
+using namespace cleric::data;
 using namespace web;
 using namespace utility;
 
@@ -97,7 +101,6 @@ string cleric::http::controller::test::WebThingControllerTester::callGet(string 
 	controller.handleGet(msg);
 	if (msg.get_response().get().status_code() == status_codes::OK) {
 		auto wresult = msg.get_response().get().extract_string().get();
-		// TODO convert wstring to string if needed
 		std::string result(wresult.begin(), wresult.end());
 		return result;
 	}
@@ -106,33 +109,125 @@ string cleric::http::controller::test::WebThingControllerTester::callGet(string 
 	}
 }
 
-
-TEST_CASE("Sensor value sent by sensor is accessible on /things endpoint [thins_controller]") {
-	// TODO
-}
-
-TEST_CASE("After sending a value sensor is present as property in the thing description [things_controller]") {
-	// TODO
-}
-
-TEST_CASE("If device does not have any value the descriptor does not have any properties [things_controller]") {
-	cleric::http::controller::test::WebThingControllerTester client;
-
-	auto resultJson = client.callGet("https://localhost/things/mixbox-bridge");
-
-	// decode json
-	// check against doc: https://iot.mozilla.org/wot/#thing-resource
+static picojson::value::object parseJson(const std::string &json)
+{
 	picojson::value v;
 
-	std::string err = picojson::parse(v, resultJson);
+	std::string err = picojson::parse(v, json);
 	REQUIRE(err.empty());
 
 	// check if the type of the value is "object"
 	REQUIRE(v.is<picojson::object>());
 
-	// obtain a const reference to the map, and print the contents
-	int c = 0;
+	// obtain a const reference to the map
 	const picojson::value::object& obj = v.get<picojson::object>();
+
+	return obj;
+
+}
+
+TEST_CASE("After sending value they are presented in /things endpoint as properties [thins_controller]") {
+
+	// mocked sensor values
+	auto BOX_ID = 10;
+	auto SENSOR_TYPE = 43;
+	auto SENSOR_VALUE = 332;
+	auto VCC = 200;
+
+	// send sensor value though m2m interface
+	cleric::http::controller::test::M2MControllerTester::callGet(BOX_ID, SENSOR_TYPE, SENSOR_VALUE, VCC);
+
+	// check the endpoind
+	cleric::http::controller::test::WebThingControllerTester client;
+	auto jsonString = client.callGet("https://localhost/things/mixbox-bridge");
+
+	auto json = parseJson(jsonString);
+
+	REQUIRE(json.find("properties") != json.end());
+
+	auto vcc_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_vcc";
+	REQUIRE(json["properties"].get<picojson::object>().count(vcc_key) == 1);
+
+	auto value_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value";
+	REQUIRE(json["properties"].get<picojson::object>().count(value_key) == 1);
+
+	auto type_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value_type";
+	REQUIRE(json["properties"].get<picojson::object>().count(type_key) == 1);
+
+	BoxServerLocator::clearAllServers();
+}
+
+TEST_CASE("Sensor value sent by sensor is accessible on /things/mixbox-bridge/property endpoint [things_controller]") {
+	auto BOX_ID = 10;
+	auto SENSOR_TYPE = 43;
+	auto SENSOR_VALUE = 332;
+	auto VCC = 200;
+
+	BoxServerLocator::clearAllServers();
+	cleric::http::controller::test::M2MControllerTester::callGet(BOX_ID, SENSOR_TYPE, SENSOR_VALUE, VCC);
+
+	cleric::http::controller::test::WebThingControllerTester client;
+	auto jsonString = client.callGet("https://localhost/things/mixbox-bridge/properties/10_value");
+	const auto json = parseJson(jsonString);
+
+	// TODO expand test before final release or any refactoring
+
+	BoxServerLocator::clearAllServers();
+}
+
+
+TEST_CASE("Sensor value sent by sensor is accessible on /things/mixbox-bridge/properties endpoint [things_controller]") {
+
+	// mocked sensor values
+	auto BOX_ID = 10;
+	auto SENSOR_TYPE = 43;
+	auto SENSOR_VALUE = 332;
+	auto VCC = 200;
+
+	// send sensor value though m2m interface
+	BoxServerLocator::clearAllServers();
+	cleric::http::controller::test::M2MControllerTester::callGet(BOX_ID, SENSOR_TYPE, SENSOR_VALUE, VCC);
+
+	// check the endpoind
+	cleric::http::controller::test::WebThingControllerTester client;
+	auto jsonString = client.callGet("https://localhost/things/mixbox-bridge/properties");
+
+	// decode json
+	// check against doc: https://iot.mozilla.org/wot/#properties-resource
+	const auto json = parseJson(jsonString);
+
+	auto vcc_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_vcc";
+	auto value_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value";
+	auto type_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value_type";
+	auto vcc = json.find(vcc_key);
+	auto value = json.find(value_key);
+	auto type = json.find(type_key);
+
+	REQUIRE(value != json.end());
+	REQUIRE(type != json.end());
+	REQUIRE(vcc != json.end());
+
+	REQUIRE(vcc->second.is<double>());
+	REQUIRE(value->second.is<double>());
+	REQUIRE(type->second.is<double>());
+
+	REQUIRE(value->second.get<double>() == SENSOR_VALUE);
+	REQUIRE(type->second.get<double>() == SENSOR_TYPE);
+
+	BoxServerLocator::clearAllServers();
+}
+
+TEST_CASE("If device does not have any value the descriptor does not have any properties [things_controller]") {
+
+	BoxServerLocator::clearAllServers();
+
+	cleric::http::controller::test::WebThingControllerTester client;
+
+	auto json = client.callGet("https://localhost/things/mixbox-bridge");
+
+	// obtain a const reference to the map, and check the contents
+	const auto obj = parseJson(json);
+	int c = 0;
 	for (picojson::value::object::const_iterator i = obj.begin();
 		i != obj.end();
 		++i) {
@@ -153,4 +248,5 @@ TEST_CASE("If device does not have any value the descriptor does not have any pr
 			REQUIRE(o.size() == 0);
 		}
 	}
+	BoxServerLocator::clearAllServers();
 }

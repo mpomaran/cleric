@@ -40,6 +40,8 @@ typedef struct {
 uint64_t yrand_rand(yrand_generator *generator);
 yrand_generator yrand_seed(uint64_t a, uint64_t b);
 
+uint8_t uint64_to_bytes(char *buff, uint64_t number);
+
 //#ifdef __cplusplus
 //}
 //#endif

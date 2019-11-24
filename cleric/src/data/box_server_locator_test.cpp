@@ -38,3 +38,8 @@ TEST_CASE("Box server locator can locate box by id, [box server locator]") {
 		FAIL("Excepion thrown");
 	}
 }
+
+TEST_CASE("Box server locator get give all servers, [box server locator]") {
+		auto servers = BoxServerLocator::getAllServers();
+		REQUIRE(servers.size() == 1);
+}

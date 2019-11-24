@@ -36,6 +36,8 @@ namespace cleric {
 
 using BoxId = uint16_t;
 
+extern const uint64_t M2M_SECRET;
+
 struct M2MPayload {
   uint32_t type;
   uint32_t reading;
@@ -49,6 +51,8 @@ public:
   M2MMessage(const M2MMessage &&other);
 
   static M2MMessage decode(const std::string &message, uint64_t secret);
+
+  static std::string encode(const BoxId &boxId, uint64_t vcc, uint64_t measurement, uint64_t sensorType, uint64_t secret);
 
   /*
   Side channel data, not included in payload

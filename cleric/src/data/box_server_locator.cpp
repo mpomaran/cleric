@@ -27,11 +27,24 @@ SOFTWARE.
 #include "box_server_locator.hpp"
 #include "box_server.hpp"
 
-cleric::data::BoxServer &cleric::data::BoxServerLocator::getBoxServerByBoxId(
-    const ::cleric::BoxId &boxId) {
-  static cleric::data::BoxServer
-      boxServer; // TODO MPP - do the threadsafe singleton; before the stable
+using namespace cleric::data;
+using namespace std;
+
+static cleric::data::BoxServer boxServer; // TODO MPP - do the threadsafe singleton; before the stable
                  // release
 
+cleric::data::BoxServer &cleric::data::BoxServerLocator::getBoxServerByBoxId(
+    const ::cleric::BoxId &boxId) {
+
   return boxServer;
+}
+
+::std::vector<BoxServerPtr> cleric::data::BoxServerLocator::getAllServers()
+{
+	return vector< BoxServerPtr > { &boxServer };
+}
+
+void cleric::data::BoxServerLocator::clearAllServers()
+{
+	boxServer.eraseAllData();
 }

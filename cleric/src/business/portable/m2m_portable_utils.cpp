@@ -40,3 +40,30 @@ yrand_generator yrand_seed(uint64_t a, uint64_t b) {
 
   return result;
 }
+
+uint8_t nibble_to_char(uint8_t nibble)
+{
+	if (nibble < 10)
+		return '0' + nibble;
+	else
+		return 'A' + nibble - 10;
+}
+
+/*
+output always 17 = 16 bytes + 1 (zero) byte
+*/
+uint8_t uint64_to_bytes(char *buff, uint64_t number)
+{
+	uint8_t i;
+	for (i = 0; i < sizeof(uint64_t); i++)
+	{
+		uint8_t b = 0xff & (number >> ((sizeof(uint64_t) - i - 1) * 8));
+
+		buff[i * 2 + 1] = nibble_to_char(b & 0xf);
+		buff[i * 2] = nibble_to_char((b >> 4) & 0xf);
+	}
+	buff[sizeof(uint64_t) * 2] = 0;
+
+	return sizeof(uint64_t) * 2 + 1;
+}
+

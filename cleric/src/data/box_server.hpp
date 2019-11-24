@@ -42,6 +42,7 @@ public:
 
   ::std::shared_ptr<cleric::data::Box> getBoxById(const ::cleric::BoxId &boxId);
   ::std::vector<::cleric::BoxId> getAllBoxes() const;
+  void eraseAllData();
 
 private:
   ::std::unordered_map<::cleric::BoxId, ::std::shared_ptr<cleric::data::Box>>

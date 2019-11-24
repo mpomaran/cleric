@@ -92,10 +92,12 @@ int main(int argc, char *argv[]) {
 		if (vm.count("help")) {
 			cout << desc << "\n";
 			result = 0;
-		} else if (vm.count("tests-only")) {
+		}
+		else if (vm.count("tests-only")) {
 			exposeProperty(cleric::props::STORAGE_STRATEGY_PROP_NAME, cleric::props::STORAGE_STRATEGY_PROP_MEMORY, vm);
 			result = runTests();
-		} else {
+		}
+		else {
 			// read property file if exists
 			string propFile = "cleric.properties";
 			if (vm.count("prop-file"))

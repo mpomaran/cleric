@@ -29,15 +29,22 @@ SOFTWARE.
 
 #include "../business/m2m_message.hpp" // for BoxId definition
 
+#include <memory>
+#include <vector>
+
 namespace cleric {
 namespace data {
 
 class BoxServer;
+using BoxServerPtr = cleric::data::BoxServer *;
 
 class BoxServerLocator {
 public:
   static cleric::data::BoxServer &
   getBoxServerByBoxId(const ::cleric::BoxId &boxId);
+
+  static ::std::vector< BoxServerPtr > getAllServers();
+  static void clearAllServers();
 };
 } // namespace data
 } // namespace cleric

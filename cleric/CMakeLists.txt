@@ -64,6 +64,7 @@ add_executable(cleric-server
   src/controller/boxes_controller_test.cpp
   src/controller/things_controller.cpp
   src/controller/things_controller_test.cpp
+  src/controller/m2m_controller_tester.cpp
   src/network/libmdnsd/1035.c
   src/network/libmdnsd/mdnsd.c
   src/network/libmdnsd/sdtxt.c

@@ -209,6 +209,28 @@ void Box::persist() {
   }
 }
 
+int Box::size()
+{
+	return dataPoints.size();
+}
+
+Box::Reading Box::operator[](int i) const
+{
+	if (i < 0 || i >= dataPoints.size()) {
+		throw out_of_range("Reading from illegal index");
+	}
+
+	Reading result;
+	auto d = dataPoints[i];
+
+	result.rcvTimeInMsSinceEpoch = d.rcvTimeInMsSinceEpoch;
+	result.sensorType = d.sensorType;
+	result.value = DataPoint::fromSensorFormatToValue (d.value, d.sensorType, d.vcc);
+	result.vcc = DataPoint::fromSensorFormatToVolts (d.vcc);
+
+	return result;
+}
+
 void Box::purgeOldData() {
   while (dataPoints.size() > maxEntries) {
     dataPoints.pop_front();

@@ -39,53 +39,59 @@ bool cleric::http::controller::test::isPostInvoked = false;
 bool cleric::http::controller::test::isGetInvoked = false;
 
 cleric::http::controller::M2MController::M2MController(
-    utility::string_t url,
-    std::shared_ptr<granada::http::session::SessionFactory> &session_factory) {
+	utility::string_t url,
+	std::shared_ptr<granada::http::session::SessionFactory> &session_factory) {
 
-  m_listener_ = std::unique_ptr<http_listener>(new http_listener(url));
-  m_listener_->support(methods::GET, std::bind(&M2MController::handleGet, this,
-                                               std::placeholders::_1));
+	m_listener_ = std::unique_ptr<http_listener>(new http_listener(url));
+	m_listener_->support(methods::GET, std::bind(&M2MController::handleGet, this,
+		std::placeholders::_1));
 
-  LOG(INFO) << "[M2MController] {/m2m conroller created}";
+	LOG(INFO) << "[M2MController] {/m2m conroller created}";
 }
 
 void cleric::http::controller::M2MController::handleGet(http_request request) {
-  try {
-    cleric::http::controller::test::isGetInvoked = true;
+	try {
+		cleric::http::controller::test::isGetInvoked = true;
 
-    web::http::http_response response;
-    response.set_status_code(status_codes::NotAcceptable);
+		web::http::http_response response;
+		response.set_status_code(status_codes::NotFound);
 
-    VLOG(1) << "[M2MController] {m2m_controller_handle_get}";
+		VLOG(1) << "[M2MController] {m2m_controller_handle_get}";
+		VLOG(2) << "[M2MController] {m2m_controller_handle_get} {request="
+			<< request.relative_uri().path() << "}";
 
-    auto paths = uri::split_path(uri::decode(request.relative_uri().path()));
-    if (!paths.empty()) {
-      auto m2mString = utility::conversions::to_utf8string(paths[0]);
+		auto paths = uri::split_path(uri::decode(request.relative_uri().path()));
+		if (paths.size() == 1) {
 
-      VLOG(2) << "[M2MController] {m2m_controller_handle_get} {m2mString="
-              << m2mString << "}";
+			auto m2mString = utility::conversions::to_utf8string(paths[0]);
 
-      auto boxId = M2MMessage::getBoxId(m2mString);
-      auto & boxServer = BoxServerLocator::getBoxServerByBoxId(boxId);
+			VLOG(3) << "[M2MController] {m2m_controller_handle_get} {m2mString="
+				<< m2mString << "}";
 
-      auto box = boxServer.getBoxById(boxId);
-      if (!box) {
-        LOG(ERROR) << "[M2MController] {unknown_box} {" << boxId << "}";
-      } else {
-        response.set_body(box->process(m2mString));
-        response.set_status_code(status_codes::OK);
-      }
-    }
-    request.reply(response);
-  } catch (std::exception &e) {
-    LOG(ERROR) << "[M2MController] {exception} {"
-               << boost::typeindex::type_id_runtime(e) << "} {" << e.what()
-               << "}";
-  } catch (...) {
-    LOG(ERROR) << "[M2MController] {unhandled_exception}";
-  }
+			auto boxId = M2MMessage::getBoxId(m2mString);
+			auto & boxServer = BoxServerLocator::getBoxServerByBoxId(boxId);
+
+			auto box = boxServer.getBoxById(boxId);
+			if (!box) {
+				LOG(ERROR) << "[M2MController] {unknown_box} {" << boxId << "}";
+			}
+			else {
+				response.set_body(box->process(m2mString));
+				response.set_status_code(status_codes::OK);
+			}
+		}
+		request.reply(response);
+	}
+	catch (std::exception &e) {
+		LOG(ERROR) << "[M2MController] {exception} {"
+			<< boost::typeindex::type_id_runtime(e) << "} {" << e.what()
+			<< "}";
+	}
+	catch (...) {
+		LOG(ERROR) << "[M2MController] {unhandled_exception}";
+	}
 }
 
 void cleric::http::controller::M2MController::handlePost(http_request request) {
-  cleric::http::controller::test::isPostInvoked = true;
+	cleric::http::controller::test::isPostInvoked = true;
 }

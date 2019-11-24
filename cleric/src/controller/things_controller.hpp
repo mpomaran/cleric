@@ -31,6 +31,7 @@ SOFTWARE.
 #include "granada/http/controller/controller.h"
 #include "granada/http/parser.h"
 #include "granada/http/session/session.h"
+#include <picojson.h>
 #include <unordered_map>
 
 namespace cleric {
@@ -49,6 +50,7 @@ namespace cleric {
 				ThingsController(
 					utility::string_t url,
 					std::shared_ptr<granada::http::session::SessionFactory> &session_factory);
+
 
 			private:
 				/**
@@ -92,6 +94,20 @@ namespace cleric {
 				* Creates JSON payload for description of a thing (https://iot.mozilla.org/wot/#thing-resource)
 				*/
 				std::string getThingResource() const;
+
+				::std::unique_ptr<::picojson::value::object> getThingPropertiesResource() const;
+
+
+				/**
+				* Creates JSON payload for thing properties (https://iot.mozilla.org/wot/#properties-resource)
+				*/
+				std::string getPropertiesResource() const;
+
+				std::string getPropertyResource(const BoxId &boxId, const std::string &param) const;
+
+				static std::string getSensorVccPropertyKey(const BoxId &id);
+				static std::string getSensorTypePropertyKey(const BoxId &id);
+				static std::string getSensorValuePropertyKey(const BoxId &id);
 
 				friend class test::WebThingControllerTester;
 

@@ -151,7 +151,12 @@ vector<::cleric::BoxId> cleric::data::BoxServer::getAllBoxes() const {
   return keys;
 }
 
-// delayed write of the box tada
+void cleric::data::BoxServer::eraseAllData()
+{
+	boxCache.clear();
+}
+
+// delayed write of the box data
 void cleric::data::BoxServer::delayedWriteOnce() {
   try {
     vector<shared_ptr<cleric::data::Box>>

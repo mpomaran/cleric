@@ -131,18 +131,37 @@ Press RETURN to exit
 00000000100000000000000003F361CCB02C928BB461DD4EF
 */
 
+TEST_CASE("M2MMessage from box can be encoded and decoded properlly", "[M2MMessage]") {
+	const auto BOX_ID = 1;
+	const auto READING = 0x3ff;
+	const auto TYPE = 0x1ff;
+	const auto VCC = 0x3ff;
+
+	auto encoded = M2MMessage::encode(BOX_ID, VCC, READING, TYPE, M2M_SECRET);
+
+	auto decodedBoxId = M2MMessage::getBoxId(encoded);
+	CHECK(decodedBoxId == BOX_ID);
+
+	M2MMessage m2m = M2MMessage::decode(encoded, M2M_SECRET);
+	CHECK(m2m.getBoxId() == BOX_ID);
+	CHECK(m2m.getMeasurement() == READING);
+	CHECK(m2m.getSensorPowerSupplyVoltage() == VCC);
+	CHECK(m2m.getSensorType() == TYPE);
+}
+
+
+
 TEST_CASE("M2MMessage from box can be decoded", "[M2MMessage]") {
   const auto MESSAGE = "00000000100000000000000003F361CCB02C928BB461DD4EF";
   const auto BOX_ID = 1;
   const auto READING = 0x3ff;
   const auto TYPE = 0x1ff;
-  const uint64_t SECRET = 0x474996006560796aUL;
   const auto VCC = 0x3ff;
 
   auto decodedBoxId = M2MMessage::getBoxId(MESSAGE);
   CHECK(decodedBoxId == BOX_ID);
 
-  M2MMessage m2m = M2MMessage::decode(MESSAGE, SECRET);
+  M2MMessage m2m = M2MMessage::decode(MESSAGE, M2M_SECRET);
   CHECK(m2m.getBoxId() == BOX_ID);
   CHECK(m2m.getMeasurement() == READING);
   CHECK(m2m.getSensorPowerSupplyVoltage() == VCC);

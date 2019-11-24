@@ -1,3 +1,10 @@
+TODO:
+ - integration tests with Arctic & WebThing gateway
+ - better encryption for Arctic - grep for "secret"
+ - healthcheck page
+ - modification (not only read) for properties
+ - figureout zeroconf way for setting the MixBox up
+
 Build instructions (Windows 64bit)
 -------------------------------------------------------------------------------------------
 1. Install VCPKG (https://github.com/Microsoft/vcpkg)
@@ -23,7 +30,8 @@ In order to build the software:
 	if CMAKE complains about missing libraries set CMAKE_MODULE_PATH, if not you can try: export CMAKE_MODULE_PATH=`find /usr -iname "FindOpenSSL.cmake" -exec dirname {} \;`
 3. Build (make)
 
-If there are issues with boost - please download and recompile for your platform (check src/CMakeList.txt to make sure the correct one will be used).
+Precompiled third party dependencies are provided for convinience, you will get the same results if you recompile them yourself.
+
 
 Third party libraries:
 
