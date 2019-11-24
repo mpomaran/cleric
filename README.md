@@ -1,9 +1,22 @@
-TODO:
+Current state
+-------------------------------------------------------------------------------------------
+This is still work in progress, cleric does not talk to arctic yet, controllers are not
+finished, but there is not much left for MVP. I expect the first release soon.
+
+MVP is:
+ - possibility for MixBox to store sensor values at the Bridge
+ - Bridge is visible by WebThings gateway
+ - sensor readings from MixBox are exposed by the Bridge
+ - real-life setup works and is accessible trough Mozilla IoT website
+
+Next steps to complete MVP
  - integration tests with Arctic & WebThing gateway
- - better encryption for Arctic - grep for "secret"
  - healthcheck page
+
+Nice to haves:
  - modification (not only read) for properties
  - figureout zeroconf way for setting the MixBox up
+ - better encryption for Arctic - grep for "secret"
 
 Build instructions (Windows 64bit)
 -------------------------------------------------------------------------------------------
@@ -31,7 +44,6 @@ In order to build the software:
 3. Build (make)
 
 Precompiled third party dependencies are provided for convinience, you will get the same results if you recompile them yourself.
-
 
 Third party libraries:
 
