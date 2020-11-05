@@ -205,7 +205,7 @@ namespace cleric {
 						prop[ThingsController::getSensorVccPropertyKey(boxId)] = value((double)data.vcc);
 					}
 					else if (param == "value") {
-						prop[ThingsController::getSensorVccPropertyKey(boxId)] = value((double)data.value);
+						prop[ThingsController::getSensorValuePropertyKey(boxId)] = value((double)data.value);
 					}
 					else if (param == "type") {
 						prop[ThingsController::getSensorTypePropertyKey(boxId)] = value((double)data.sensorType);
@@ -219,7 +219,7 @@ namespace cleric {
 			}
 
 			void ThingsController::handleGet(http_request request) {
-				// TODO rewrite before beta
+				// TODO refactor
 
 				try {
 					web::http::http_response response;
@@ -231,7 +231,7 @@ namespace cleric {
 					auto paths = uri::split_path(uri::decode(uri));
 
 					if (paths.size() < 2) {
-						// wrong request, return with 404
+						// wrongs request, return with 404
 						LOG(TRACE) << "[ThingsController::handleGet] {response='NotFound', details='request too short'}";
 						reply(request, status_codes::NotFound);
 						return;
@@ -272,28 +272,33 @@ namespace cleric {
 					else if (paths.size() == 4) {	// handle single property
 						auto p1 = utility::conversions::to_utf8string(paths[2]);
 						if (p1 == PROPERTIES_URL) {
-							auto p2 = utility::conversions::to_utf8string(paths[3]);
-							
-							boost::char_separator<char> sep("_");
-							boost::tokenizer<boost::char_separator<char>> tokens(p2, sep);
-							auto it = tokens.begin();
+							try {
+								auto p2 = utility::conversions::to_utf8string(paths[3]);
+								p2.erase(0, std::string("mix_box_").size());	// TODO make more efficient
 
-							if (it != tokens.end()) {
-								auto boxIdStr = *it;
-								BoxId boxId = std::stoi(boxIdStr);
-								it++;
+								boost::char_separator<char> sep("_");
+								boost::tokenizer<boost::char_separator<char>> tokens(p2, sep);
+								auto it = tokens.begin();
+
 								if (it != tokens.end()) {
-									auto param = *it;
+									auto boxIdStr = *it;
+									BoxId boxId = std::stoi(boxIdStr);
+									it++;
+									if (it != tokens.end()) {
+										auto param = *it;
 
-									if (param == "value" || param == "vcc" || param == "type") {
+										if (param == "value" || param == "vcc" || param == "type") {
 
-										auto responseJson = getPropertyResource(boxId, param);
-										LOG(TRACE) << "[ThingsController::handleGet] {response='" << responseJson << "'}";
-										reply(request, status_codes::OK, responseJson);
-										return;
-
+											auto responseJson = getPropertyResource(boxId, param);
+											LOG(TRACE) << "[ThingsController::handleGet] {response='" << responseJson << "'}";
+											reply(request, status_codes::OK, responseJson);
+											return;
+										}
 									}
 								}
+							}
+							catch (const std::exception &e) {
+								LOG(ERROR) << "[ThingsController::handleGet] {exception='" << e.what() << "'}";
 							}
 
 							reply(request, status_codes::NotFound);

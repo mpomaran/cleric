@@ -104,9 +104,7 @@ namespace cleric {
 		uint32_t c2 = (decodedPayload >> 32) & 0xffffffff;
 
 		if (c1 != c2) {
-			// TODO: potential security flaw, but there is security by obscurity in this
-			// solution
-			// TODO: review once real encryption is in place
+			// TODO: security by obscurity
 			throw invalid_argument("Wrong format, CRC fail");
 		}
 

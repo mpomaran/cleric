@@ -1,22 +1,9 @@
-Current state
--------------------------------------------------------------------------------------------
-This is still work in progress, cleric does not talk to arctic yet, controllers are not
-finished, but there is not much left for MVP. I expect the first release soon.
-
-MVP is:
- - possibility for MixBox to store sensor values at the Bridge
- - Bridge is visible by WebThings gateway
- - sensor readings from MixBox are exposed by the Bridge
- - real-life setup works and is accessible trough Mozilla IoT website
-
-Next steps to complete MVP
+TODO:
  - integration tests with Arctic & WebThing gateway
+ - better encryption for Arctic - grep for "secret"
  - healthcheck page
-
-Nice to haves:
  - modification (not only read) for properties
  - figureout zeroconf way for setting the MixBox up
- - better encryption for Arctic - grep for "secret"
 
 Build instructions (Windows 64bit)
 -------------------------------------------------------------------------------------------
@@ -45,6 +32,7 @@ In order to build the software:
 
 Precompiled third party dependencies are provided for convinience, you will get the same results if you recompile them yourself.
 
+
 Third party libraries:
 
 CPP REST SDK
@@ -60,3 +48,8 @@ https://www.freshports.org/dns/mdnsd/
 hg clone https://bitbucket.org/geekman/tinysvcmdns
 
 Uses MDNSd by originlly written by Jeremie Miller (see cleric/src/network/mdsnd directory for license)
+
+Google Cloud Platform builds
+------------
+Scripts for Jenkins build on can be found in devops directory. For detais on how to setup builds in GCP you can look here: https://cloud.google.com/solutions/using-jenkins-for-distributed-builds-on-compute-engine. 
+Example job configuration is stored in devops/config.xml (no DSL yet). Replace "TODO" with proper repo location and credentials.

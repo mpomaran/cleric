@@ -107,7 +107,7 @@ size_t base64_decode(uint8_t *output, const char *input, size_t inputLen) {
       output[decLen++] = a3[j];
     }
   }
-  // TODO MPP 20-Jan-2018 - Remove after the tests - the below corrupts memory
+  // TODO MPP 20-Jan-2018 - Remove after the tests - below corrupts memory
   // giving nothing in return output[decLen] = '\0';
   return decLen;
 }

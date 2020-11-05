@@ -157,7 +157,7 @@ TEST_CASE("After sending value they are presented in /things endpoint as propert
 	BoxServerLocator::clearAllServers();
 }
 
-TEST_CASE("Sensor value sent by sensor is accessible on /things/mixbox-bridge/property endpoint [things_controller]") {
+TEST_CASE("Sensor value sent by sensor is accessible on /things/mixbox-bridge/properties/property endpoint [things_controller]") {
 	auto BOX_ID = 10;
 	auto SENSOR_TYPE = 43;
 	auto SENSOR_VALUE = 332;
@@ -167,10 +167,21 @@ TEST_CASE("Sensor value sent by sensor is accessible on /things/mixbox-bridge/pr
 	cleric::http::controller::test::M2MControllerTester::callGet(BOX_ID, SENSOR_TYPE, SENSOR_VALUE, VCC);
 
 	cleric::http::controller::test::WebThingControllerTester client;
-	auto jsonString = client.callGet("https://localhost/things/mixbox-bridge/properties/10_value");
+	auto value_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value";
+	auto url = std::string("https://localhost/things/mixbox-bridge/properties/") + value_key;
+	auto jsonString = client.callGet(url);
+
+	REQUIRE(!jsonString.empty());
 	const auto json = parseJson(jsonString);
 
-	// TODO expand test before final release or any refactoring
+	// decode json
+	// check against doc: https://iot.mozilla.org/wot/#properties-resource
+	auto value = json.find(value_key);
+
+	REQUIRE(value != json.end());
+	REQUIRE(value->second.is<double>());
+
+	REQUIRE(value->second.get<double>() == SENSOR_VALUE);
 
 	BoxServerLocator::clearAllServers();
 }

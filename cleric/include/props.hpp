@@ -30,6 +30,7 @@ SOFTWARE.
 #include <string>
 
 #define THING_NAME "mixbox-bridge"
+#define PROPERTIES_URL "properties"
 
 namespace cleric
 {
