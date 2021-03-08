@@ -6,3 +6,4 @@ CMakeCache.txt
 CTestTestfile.cmake
 cmake_install.cmake
 src/stdafx.pch
+.vs/
