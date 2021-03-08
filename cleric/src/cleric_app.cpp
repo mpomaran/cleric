@@ -36,9 +36,9 @@ SOFTWARE.
 #include "granada/http/oauth2/redis_oauth2.h"
 #include "granada/http/session/map_session.h"
 #include "granada/http/session/redis_session.h"
-#include <easylogging++.h>
 #include <stdio.h>
 #include <string>
+#include <easylogging++.h>
 
 ClericApp::ClericApp() {}
 

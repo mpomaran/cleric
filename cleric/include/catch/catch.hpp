@@ -5906,6 +5906,7 @@ namespace Catch {
 #ifdef __AFXDLL
 #include <AfxWin.h>
 #else
+#include <winsock2.h>
 #include <windows.h>
 #endif
 

@@ -24,6 +24,13 @@ SOFTWARE.
 
 */
 
+#if defined _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <winsock2.h>
+#include <windows.h>
+#endif
+
 #if defined(WINVER) && !defined(__MINGW32__) 
 #include <winsock2.h>
 #endif

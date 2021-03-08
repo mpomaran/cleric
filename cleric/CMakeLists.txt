@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0074 OLD)
+
 set(GRANADA_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/granada")
 
 FIND_PACKAGE(Boost 1.69 COMPONENTS program_options filesystem REQUIRED)
@@ -10,6 +12,13 @@ if("${EASYLOGGINGPP_INCLUDE}" STREQUAL "EASYLOGGINGPP_INCLUDE-NOTFOUND")
 	message(SEND_ERROR "Could not found easylogging++.h, please specify CMAKE_PREFIX_PATH")
 else()
 	message("Found easylogging++.h in:'${EASYLOGGINGPP_INCLUDE}' ")
+endif()
+
+find_path(PICOJSON_INCLUDE picojson.h PATH_SUFFIXES picojson)
+if("${PICOJSON_INCLUDE}" STREQUAL "PICOJSON_INCLUDE-NOTFOUND")
+	message(SEND_ERROR "Could not found picojson.h, please specify CMAKE_PREFIX_PATH")
+else()
+	message("Found picojson.h in:'${PICOJSON_INCLUDE}' ")
 endif()
 
 #find_package(msgpack CONFIG REQUIRED)
@@ -30,11 +39,10 @@ endif()
 add_definitions(-DELPP_THREAD_SAFE -DELPP_NO_DEFAULT_LOG_FILE)
 
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${EASYLOGGINGPP_INCLUDE_DIRS})
 include_directories(${OPENSSL_INCLUDE_DIRS})
-#include_directories(${PICOJSON_INCLUDE_DIRS})
 include_directories(${MSGPACK_INCLUDE_DIRS})
 include_directories(${EASYLOGGINGPP_INCLUDE})
+include_directories(${PICOJSON_INCLUDE})
 
 include_directories(include)
 

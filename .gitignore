@@ -1,7 +1,9 @@
 .ninja_*
 *.ninja
+build/
 CMakeFiles/
 CMakeCache.txt
 CTestTestfile.cmake
 cmake_install.cmake
 src/stdafx.pch
+.vs/

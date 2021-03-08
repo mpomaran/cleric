@@ -85,7 +85,7 @@ void cpprest_init(JavaVM*);
 #include <agile.h>
 #include <ctxtcall.h>
 #include <winapifamily.h>
-
+#include <winsock2.h>
 #include <windows.h>
 #ifndef _UITHREADCTXT_SUPPORT
 

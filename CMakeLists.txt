@@ -1,11 +1,14 @@
 project(Cleric)
 
+cmake_policy(SET CMP0074 NEW)
+
 set (CMAKE_VERBOSE_MAKEFILE ON)
 
 # to disable conflict with boost
 #add_definitions(-D_TURN_OFF_PLATFORM_STRING)
 set (BOOST_DEBUG FALSE CACHE BOOL "Debug on boost not needed" FORCE)
 set (BOOST_USE_MULTITHREADED TRUE CACHE BOOL "MT ON, please" FORCE)
+set (CPPREST_EXCLUDE_COMPRESSION TRUE CACHE BOOL "Compression not needed" FORCE)
 
 set (THIRD_PARTY_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
 
@@ -32,14 +35,18 @@ IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 
 ELSE() 
 	message ("Compiling for Windows")
+	#set(BOOST_ROOT "${vcpkg_repo}/vcpkg/installed/x64-windows") 
+	add_compile_definitions(WIN32_LEAN_AND_MEAN)
+
+	#set(BOOST_INCLUDE_DIR "${BOOST_ROOT}/include")
+	#set(BOOST_INCLUDE_DIR "${BOOST_ROOT}/lib")
 #	set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
 #	set (BOOST_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0")
-#	set (BOOST_INCLUDEDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
 #	set (BOOST_LIBRARYDIR "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
 #	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/include")
 #	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0/lib")
 
-#	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n")
+	#set (OPENSSL_ROOT_DIR "${vcpkg_repo}/vcpkg/installed/x64-windows")
 #	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/lib")
 #	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/include")
 ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
@@ -56,7 +63,7 @@ include_directories("${CMAKE_SOURCE_DIR}/thirdparty/redisclient-0.6.0/include")
 
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/msgpack-c-cpp-3.1.1/include")
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0/")
+#include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0/")
 
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 3.1)
