@@ -1,5 +1,6 @@
 .ninja_*
 *.ninja
+build/
 CMakeFiles/
 CMakeCache.txt
 CTestTestfile.cmake

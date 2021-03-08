@@ -13,24 +13,24 @@ message (STATUS "System processor: " ${CMAKE_SYSTEM_PROCESSOR})
 
 set (WEBSOCKETPP_DIR "${CMAKE_SOURCE_DIR}/libs/websocket-0.8.1")
 
-IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
+IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 	message ("Compiling for ARM")
 
 	SET(CXX_FLAGS "-Wno-conversion -fPIC")
 	SET(LINKER_FLAGS "")
 
-	set (BOOST_INCLUDEDIR "${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/include")
-	set (BOOST_LIBRARYDIR "${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/lib")
+    #set (BOOST_INCLUDEDIR "${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/include")
+    #set (BOOST_LIBRARYDIR "${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/lib")
 
-	message ("${BOOST_INCLUDEDIR}")
+    #message ("${BOOST_INCLUDEDIR}")
 
-	include_directories("${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/include")
-	link_directories("${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/lib")
+    #include_directories("${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/include")
+    #link_directories("${THIRD_PARTY_ROOT_DIR}/arm_boost_1_69_0/lib")
 	set(WERROR OFF CACHE BOOL "Do not treat Warnings as Errors.")
 
 	include (FindOpenSSL)
 
-ELSE() 
+ELSE()
 	message ("Compiling for Windows")
 #	set(WERROR ON CACHE BOOL "Treat Warnings as Errors.")
 #	set (BOOST_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/win_boost_1_66_0")
@@ -42,7 +42,7 @@ ELSE()
 #	set (OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n")
 #	link_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/lib")
 #	include_directories("${CMAKE_SOURCE_DIR}/thirdparty/win_openssl-1.0.2n/include")
-ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
+ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}" )
 SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}" )
@@ -54,9 +54,9 @@ set (CPPREST_EXCLUDE_WEBSOCKETS ON CACHE BOOL "Enable websockets" FORCE)
 
 include_directories("${CMAKE_SOURCE_DIR}/thirdparty/redisclient-0.6.0/include")
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/msgpack-c-cpp-3.1.1/include")
+#include_directories("${CMAKE_SOURCE_DIR}/thirdparty/msgpack-c-cpp-3.1.1/include")
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0/")
+#include_directories("${CMAKE_SOURCE_DIR}/thirdparty/picojson-1.3.0/")
 
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 3.1)

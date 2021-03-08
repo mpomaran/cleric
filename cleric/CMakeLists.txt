@@ -5,7 +5,7 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 
 message("Found boost in:'${Boost_INCLUDE_DIRS}' ")
 
-find_path(EASYLOGGINGPP_INCLUDE easylogging++.h PATHS "${THIRD_PARTY_ROOT_DIR}/easyloggingpp-master/src")
+find_path(EASYLOGGINGPP_INCLUDE easylogging++.h)
 if("${EASYLOGGINGPP_INCLUDE}" STREQUAL "EASYLOGGINGPP_INCLUDE-NOTFOUND")
 	message(SEND_ERROR "Could not found easylogging++.h, please specify CMAKE_PREFIX_PATH")
 else()
@@ -92,7 +92,7 @@ add_executable(cleric-server
   )
 
 target_link_libraries(cleric-server ${Casablanca_LIBRARIES} ${OPENSSL_LIBS}
-	${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto) 
+	${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
 
 if(WIN32 OR MINGW)
   target_link_libraries(cleric-server wsock32 ws2_32)
@@ -102,6 +102,6 @@ endif()
 #add_custom_command(
 #     TARGET ${UNIT_TEST}
 #     COMMENT "Run tests"
-#     POST_BUILD 
+#     POST_BUILD
 #     COMMAND ${UNIT_TEST} --tests-only
 #)
