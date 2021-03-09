@@ -96,6 +96,10 @@ Below points, while valid, need to be expanded:
 
 8. Copy properties to the directory where the cleric binary is located, Run the cleric, turn on Arctic, wait for it to send the firt message
 
+```bash
+sudo ./cleric-server --root_path=/home/pi/cleric/cleric/www -v --storage-strategy=hdd #this command runs the Cleric in the standalone (not daemonized) mode
+```
+
 - you can doublecheck if the server is running by browsing <http://gateway.local:85> on your web browser
 - if you run on defaults (default secrets, etc) you can simulate Arctic by putting something like <http://gateway.local:85/m2m/1/00000000A643C98690000000066334873A687ABBBF27B175F> in your browser, it should insert some fake data
 
