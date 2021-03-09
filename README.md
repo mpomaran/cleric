@@ -92,12 +92,21 @@ export CMAKE_MODULE_PATH=`find /usr -iname "FindOpenSSL.cmake" -exec dirname {} 
 
 Below points, while valid, need to be expanded:
 
-7. Modify properties, expose the correct port (corresponding to Arctic), setup DNS, so that Arctic can find your gateway
+7. Modify properties (cleric/cleric/test_data/cleric.properties), expose the correct port (corresponding to Arctic), setup DNS, so that Arctic can find your gateway. Look for the cleric.properties in test directory, set bindinding according to comments, set port to the exposed one (default is 85) 
 
-8. Run the cleric, turn on Arctic, wait for it to send the firt message
+8. Copy properties to the directory where the cleric binary is located, Run the cleric, turn on Arctic, wait for it to send the firt message
+
+- you can doublecheck if the server is running by browsing <http://gateway.local:85> on your web browser
+- if you run on defaults (default secrets, etc) you can simulate Arctic by putting something like <http://gateway.local:85/m2m/1/00000000A643C98690000000066334873A687ABBBF27B175F> in your browser, it should insert some fake data
 
 9. Add Cleric as a WebThing
 
+- log in into the gatway trough WWW (as described in <https://webthings.io/docs/gateway-getting-started-guide.html> )
+- click "+" in the bottom right corner
+- click "Add by URL..."
+- enter following URL in the "Enter web thing URL...": http://127.0.0.1:85/things/mixbox-bridge
+- click "Submit"
+- fill the name, icon and click "Save", then "Done"
 
 ### Google Cloud Platform builds
 
@@ -106,6 +115,7 @@ Example job configuration is stored in devops/config.xml (no DSL yet). Replace "
 
 ## Things to do
 
+- update links in www (cleric/www/index.html)
 - integration tests with Arctic
 - add more to the instruction
 - write installation scripts to run Cleric as a daemon in Webthings environment
