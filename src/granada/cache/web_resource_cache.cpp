@@ -389,7 +389,7 @@ bool WebResourceCache::RecursiveLoad(const std::string &relative_path,
       } else {
         // cache the file.
         // but only if its inside the cache memory usage limits
-        int file_size = boost::filesystem::file_size(path);
+        int file_size = (int)boost::filesystem::file_size(path);
         maximum_cache_memory -= file_size;
 
         if (maximum_cache_memory > 0) {
@@ -397,7 +397,7 @@ bool WebResourceCache::RecursiveLoad(const std::string &relative_path,
             // remove the .gz extension from the file name if file is
             // compressed. The resultant name will be the identifier of the file
             // client is going to request example.html not example.html.gz.
-            int filename_length = filename.length();
+            int filename_length = (int)filename.length();
             if (filename_length > 3) {
               std::string extension =
                   filename.substr(filename_length - 3, filename_length);

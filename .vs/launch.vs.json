@@ -24,12 +24,6 @@
       "type": "native",
       "name": "C:\\workspace\\Repos\\arcticpanther\\Cleric",
       "project": ""
-    },
-    {
-      "type": "default",
-      "project": "cmakelists.txt",
-      "projectTarget": "cleric-server.exe (Binaries\\cleric-server.exe)",
-      "name": "cleric-server.exe (Binaries\\cleric-server.exe)"
     }
   ]
 }
