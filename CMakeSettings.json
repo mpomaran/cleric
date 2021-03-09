@@ -5,7 +5,7 @@
       "BuildDir": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build",
       "PropFile": "${projectDir}\\cleric\\test_data\\cleric.properties",
       "StorageRoot": "${projectDir}\\cleric\\test_data",
-      "WWWRoot": "${projectDir}\\cleric\\www\\cleric-front\\dist\\cleric-front"
+      "WWWRoot": "${projectDir}\\cleric\\www"
     }
   ],
 

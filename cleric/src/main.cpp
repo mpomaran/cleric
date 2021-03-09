@@ -63,8 +63,6 @@ void exposeProperty(const std::string &propertyName, const std::string &defVal, 
 }
 
 int main(int argc, char *argv[]) {
-
-
 	int result = -1;
 	try {
 
