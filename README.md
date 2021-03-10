@@ -119,7 +119,6 @@ Example job configuration is stored in devops/config.xml (no DSL yet). Replace "
 
 ## Things to do
 
-- update links in www (cleric/www/index.html)
 - integration tests with Arctic
 - add more to the instruction
 - write installation scripts to run Cleric as a daemon in Webthings environment
