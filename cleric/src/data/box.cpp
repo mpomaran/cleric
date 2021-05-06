@@ -77,6 +77,7 @@ Box::~Box() {}
 std::string Box::process(const ::std::string &message) {
   assertIsInitialized();
   {
+	  // TODO fix secrets
     const uint64_t SECRET = 0x474996006560796aUL;
     const ::std::string SECRET_STR = "0x474996006560796a";
 
@@ -95,6 +96,9 @@ std::string Box::process(const ::std::string &message) {
         DataPoint::fromSensorFormatToVolts(msg.getSensorPowerSupplyVoltage());
     auto convertedValue = DataPoint::fromSensorFormatToValue(
         msg.getMeasurement(), msg.getSensorType(), convertedVCC);
+
+	VLOG(1) << "[Box::process] {vcc='" << convertedVCC << "', value='"
+		<< convertedValue << ", type='" << msg.getSensorType() << "'}";
 
     DataPoint data{rcvTimeMsSinceEpoch,
                    msg.getSensorType(),
