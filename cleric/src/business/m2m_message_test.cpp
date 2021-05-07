@@ -149,6 +149,19 @@ TEST_CASE("M2MMessage from box can be encoded and decoded properlly", "[M2MMessa
 	CHECK(m2m.getSensorType() == TYPE);
 }
 
+TEST_CASE("Another M2MMessage from box can be decoded properly", "[M2MMessage]") {
+	const auto BOX_ID = 0;
+	const auto READING = 0x2;
+	const auto TYPE = 0x2f;
+	const auto VCC = 0x1be;
+
+	M2MMessage m2m = M2MMessage::decode("000000000000CE8A700000000E3516319DB389E89D7FC6A65", M2M_SECRET);
+	CHECK(m2m.getBoxId() == BOX_ID);
+	CHECK(m2m.getMeasurement() == READING);
+	CHECK(m2m.getSensorPowerSupplyVoltage() == VCC);
+	CHECK(m2m.getSensorType() == TYPE);
+}
+
 
 
 TEST_CASE("M2MMessage from box can be decoded", "[M2MMessage]") {

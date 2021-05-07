@@ -343,7 +343,7 @@ double Box::DataPoint::fromSensorFormatToValue(uint64_t sensorValue,
 		// temperature sensor
 
 		// convert reading to millivolts
-		double t = sensorValue / 1024 * vcc * 1000;
+		double t = (double)sensorValue / 1024.0 * vcc * 1000.0;
 
 		// measure delta between reading and 750 mv
 		// using 10mV/C formula caltulate delta in C between this value and 25C
