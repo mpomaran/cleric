@@ -98,7 +98,7 @@ std::string Box::process(const ::std::string &message) {
         msg.getMeasurement(), msg.getSensorType(), convertedVCC);
 
 	VLOG(1) << "[Box::process] {vcc='" << convertedVCC << "', value='"
-		<< convertedValue << ", type='" << msg.getSensorType() << "'}";
+		<< convertedValue << "', type='" << msg.getSensorType() << "'}";
 
     DataPoint data{rcvTimeMsSinceEpoch,
                    msg.getSensorType(),
@@ -330,28 +330,36 @@ bool Box::DataPoint::operator==(const Box::DataPoint &o) const {
 }
 
 double Box::DataPoint::fromSensorFormatToVolts(uint64_t sensorVCC) {
-  return (sensorVCC + 4000) / 1000.0;
+  return (sensorVCC * 2 + 4000) / 1000.0;
 }
 
 double Box::DataPoint::fromSensorFormatToValue(uint64_t sensorValue,
                                                uint64_t sensorType,
                                                double vcc) {
-  switch (sensorType) {
-  case 0x1ff: {                         // temparature sensor
-    double t = sensorValue / 512.0; // divided by 2 in the sensor
-    t *= vcc;
-    t -= 0.5; // substract the offset
-    t *= 100; // convert to degrees
-	return t;
-  }
-  default:
-	  if (sensorType != 509) {		// value used in tests
-		  LOG(WARNING) << "[Box::DataPoint::fromSensorFormatToValue] {Unknown sensor "
-			  "type} {sensorType='"
-			  << sensorType << "'}";
-	  }
-    return (double)sensorValue;
-  }
+	if (sensorType > 50 && sensorType < 200) {
+		// temperature sensor
+
+		// convert reading to millivolts
+		double t = sensorValue / 1024 * vcc * 1000;
+
+		// measure delta between reading and 750 mv
+		// using 10mV/C formula caltulate delta in C between this value and 25C
+		double deltaC = (750.0 - t) / 10.0;
+		t = 25.0 - deltaC;
+
+		VLOG(1) << "[Box::DataPoint::fromSensorFormatToValue] {sensorType='Temp sensor' value='"
+			<< t << "'}";
+		return t;
+	}
+	else {
+		if (sensorType == 509) {
+			LOG(WARNING) << "[Box::DataPoint::fromSensorFormatToValue] {Unknown sensor "
+				"type} {sensorType='"
+				<< sensorType << "'}";
+			// used for testing
+		}
+		return (double)sensorValue;
+	}
 }
 
 } // namespace data
