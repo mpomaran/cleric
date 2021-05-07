@@ -226,7 +226,7 @@ namespace cleric {
 					response.set_status_code(status_codes::NotFound);
 
 					auto uri = request.absolute_uri().path();
-					LOG(INFO) << "[ThingsController::handleGet] {request='" << uri << "'}";
+//					LOG(INFO) << "[ThingsController::handleGet] {request='" << uri << "'}";
 
 					auto paths = uri::split_path(uri::decode(uri));
 
@@ -290,7 +290,7 @@ namespace cleric {
 										if (param == "value" || param == "vcc" || param == "type") {
 
 											auto responseJson = getPropertyResource(boxId, param);
-											LOG(TRACE) << "[ThingsController::handleGet] {response='" << responseJson << "'}";
+//											LOG(TRACE) << "[ThingsController::handleGet] {response='" << responseJson << "'}";
 											reply(request, status_codes::OK, responseJson);
 											return;
 										}

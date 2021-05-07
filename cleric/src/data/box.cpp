@@ -336,7 +336,7 @@ double Box::DataPoint::fromSensorFormatToVolts(uint64_t sensorVCC) {
 double Box::DataPoint::fromSensorFormatToValue(uint64_t sensorValue,
                                                uint64_t sensorType,
                                                double vcc) {
-	if (sensorType > 50 && sensorType < 200) {
+	if (sensorType > 150 && sensorType < 250) {
 		// temperature sensor
 
 		// convert reading to millivolts
