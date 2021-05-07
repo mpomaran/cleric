@@ -274,7 +274,9 @@ namespace cleric {
 						if (p1 == PROPERTIES_URL) {
 							try {
 								auto p2 = utility::conversions::to_utf8string(paths[3]);
-//								p2.erase(0, std::string("mix_box_").size());	// TODO make more efficient
+								if (p2.find("mix_box_") == 0) {
+									p2.erase(0, std::string("mix_box_").size());	// TODO make more efficient
+								}
 
 								boost::char_separator<char> sep("_");
 								boost::tokenizer<boost::char_separator<char>> tokens(p2, sep);

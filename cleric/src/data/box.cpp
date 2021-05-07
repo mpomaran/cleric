@@ -97,13 +97,15 @@ std::string Box::process(const ::std::string &message) {
     auto convertedValue = DataPoint::fromSensorFormatToValue(
         msg.getMeasurement(), msg.getSensorType(), convertedVCC);
 
-	VLOG(1) << "[Box::process] {vcc='" << convertedVCC << "', value='"
-		<< convertedValue << "', type='" << msg.getSensorType() << "'}";
+	VLOG(1) << "[Box::process] {rawVcc='" << msg.getSensorPowerSupplyVoltage() << "', rawValue='"
+		<< convertedValue << "', rawType='" << msg.getSensorType() << "'}";
 
+	// we store unmodified events, since it's easier to fix the server processing then
+	// you might thing about it as a some kind of the of event sourcing
     DataPoint data{rcvTimeMsSinceEpoch,
                    msg.getSensorType(),
-                   convertedValue,
-                   convertedVCC,
+				   msg.getMeasurement(),
+				   msg.getSensorPowerSupplyVoltage(),
                    message,
                    SECRET_STR};
 
@@ -229,8 +231,8 @@ Box::Reading Box::operator[](int i) const
 
 	result.rcvTimeInMsSinceEpoch = d.rcvTimeInMsSinceEpoch;
 	result.sensorType = d.sensorType;
-	result.value = DataPoint::fromSensorFormatToValue (d.value, d.sensorType, d.vcc);
-	result.vcc = DataPoint::fromSensorFormatToVolts (d.vcc);
+	result.vcc = DataPoint::fromSensorFormatToVolts(d.vcc);
+	result.value = DataPoint::fromSensorFormatToValue (d.value, d.sensorType, result.vcc);
 
 	return result;
 }
