@@ -154,6 +154,10 @@ TEST_CASE("After sending value they are presented in /things endpoint as propert
 	auto type_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value_type";
 	REQUIRE(json["properties"].get<picojson::object>().count(type_key) == 1);
 
+	auto rcv_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_rcv";
+	REQUIRE(json["properties"].get<picojson::object>().count(rcv_key) == 1);
+
+
 	BoxServerLocator::clearAllServers();
 }
 
@@ -210,13 +214,16 @@ TEST_CASE("Sensor value sent by sensor is accessible on /things/mixbox-bridge/pr
 	auto vcc_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_vcc";
 	auto value_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value";
 	auto type_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_value_type";
+	auto time_key = std::string("mix_box_") + std::to_string(BOX_ID) + "_rcv";
 	auto vcc = json.find(vcc_key);
 	auto value = json.find(value_key);
 	auto type = json.find(type_key);
+	auto rcv = json.find(time_key);
 
 	REQUIRE(value != json.end());
 	REQUIRE(type != json.end());
 	REQUIRE(vcc != json.end());
+	REQUIRE(rcv != json.end());
 
 	REQUIRE(vcc->second.is<double>());
 	REQUIRE(value->second.is<double>());

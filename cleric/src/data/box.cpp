@@ -32,6 +32,12 @@ SOFTWARE.
 #include <msgpack.hpp>
 #include <mutex>
 #include <sstream>
+#include <map>
+#include <sstream>
+#include <iostream>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 using namespace ::std;
 using namespace ::std::chrono;
@@ -97,8 +103,12 @@ std::string Box::process(const ::std::string &message) {
     auto convertedValue = DataPoint::fromSensorFormatToValue(
         msg.getMeasurement(), msg.getSensorType(), convertedVCC);
 
-	VLOG(1) << "[Box::process] {rawVcc='" << msg.getSensorPowerSupplyVoltage() << "', rawValue='"
-		<< convertedValue << "', rawType='" << msg.getSensorType() << "'}";
+	VLOG(1) << "[Box::process] {message='" << message 
+		<< "', rcvTimeMsSinceEpoch='" << rcvTimeMsSinceEpoch
+		<< "', rawVcc='" << msg.getSensorPowerSupplyVoltage()
+		<< "', rawValue='" << convertedValue 
+		<< "', rawType='" << msg.getSensorType() 
+		<< "'}";
 
 	// we store unmodified events, since it's easier to fix the server processing then
 	// you might thing about it as a some kind of the of event sourcing
@@ -174,6 +184,17 @@ std::string jsonPair(const std::string &key, const T &value) {
   return ss.str();
 }
 
+Box::Reading::ReadableType Box::getSensorReadingType() const
+{
+	if (size() == 0) {
+		return Box::Reading::ReadableType::UNKNOWN;
+	}
+	else {
+		auto reading = (*this)[0];
+		return DataPoint::fromSensorTypeToReadableType(reading.sensorType);
+	}
+}
+
 std::string Box::toJson() const {
   stringstream ss;
 
@@ -215,7 +236,7 @@ void Box::persist() {
   }
 }
 
-int Box::size()
+int Box::size() const 
 {
 	return dataPoints.size();
 }
@@ -229,10 +250,11 @@ Box::Reading Box::operator[](int i) const
 	Reading result;
 	auto d = dataPoints[i];
 
-	result.rcvTimeInMsSinceEpoch = d.rcvTimeInMsSinceEpoch;
+	result.rcvTime = DataPoint::fromMsSinceEpochToDateTime(d.rcvTimeInMsSinceEpoch);
 	result.sensorType = d.sensorType;
 	result.vcc = DataPoint::fromSensorFormatToVolts(d.vcc);
 	result.value = DataPoint::fromSensorFormatToValue (d.value, d.sensorType, result.vcc);
+	result.readableType = DataPoint::fromSensorTypeToReadableType(d.sensorType);
 
 	return result;
 }
@@ -335,35 +357,75 @@ double Box::DataPoint::fromSensorFormatToVolts(uint64_t sensorVCC) {
   return (sensorVCC * 2 + 4000) / 1000.0;
 }
 
+string Box::DataPoint::fromMsSinceEpochToDateTime(uint64_t msSinceEpoch) {
+	std::time_t t = msSinceEpoch / 1000;
+
+	//std::tm tm = *std::gmtime(&t); //GMT (UTC)
+	std::tm tm = *std::localtime(&t); //Locale time-zone, usually UTC by default.
+	std::stringstream ss;
+	ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+	return ss.str();
+}
+
+Box::Reading::ReadableType Box::DataPoint::fromSensorTypeToReadableType(uint64_t sensorType)
+{
+	if (sensorType > 150 && sensorType < 250) {
+		return Box::Reading::ReadableType::TEMPERATURE;
+	}
+
+	return Box::Reading::ReadableType::UNKNOWN;
+}
+
+// vcc is vcc in volts
+static double fromSensorFormatToTemperature(uint64_t sensorValue, double vcc) {
+	// temperature sensor
+
+	// convert reading to millivolts
+	double t = (double)sensorValue / 1024.0 * vcc * 1000.0;
+
+	// measure delta between reading and 750 mv
+	// using 10mV/C formula caltulate delta in C between this value and 25C
+	double deltaC = (750.0 - t) / 10.0;
+	t = 25.0 - deltaC;
+
+	//VLOG(1) << "[Box::DataPoint::fromSensorFormatToValue] {sensorType='Temp sensor' value='"
+//			<< t << "'}";
+	return t;
+}
+
+static double fromSensorFormatToDefault(uint64_t sensorValue, double vcc) {
+	VLOG(1) << "[Box::DataPoint::fromSensorFormatToValue] {sensorValue='"
+		<< sensorValue << "', sensorType='default'"
+		<<  ", vcc = '" << vcc << "'}";
+
+	return sensorValue;
+}
+
+typedef double(*ConverterFunction)(uint64_t, double);
+
+const static ::std::map<int, ConverterFunction> converters = {
+	{Box::Reading::TEMPERATURE, fromSensorFormatToTemperature},
+	{Box::Reading::UNKNOWN, fromSensorFormatToDefault}
+	};
+
+// vcc is vcc in volts
 double Box::DataPoint::fromSensorFormatToValue(uint64_t sensorValue,
                                                uint64_t sensorType,
                                                double vcc) {
-	VLOG(1) << "[Box::DataPoint::fromSensorFormatToValue] {sensorValue='"
-		<< sensorValue << "', sensorType='"
-		<< sensorType << "', vcc = '" << vcc << "'}";
-	if (sensorType > 150 && sensorType < 250) {
-		// temperature sensor
-
-		// convert reading to millivolts
-		double t = (double)sensorValue / 1024.0 * vcc * 1000.0;
-
-		// measure delta between reading and 750 mv
-		// using 10mV/C formula caltulate delta in C between this value and 25C
-		double deltaC = (750.0 - t) / 10.0;
-		t = 25.0 - deltaC;
-
-		VLOG(1) << "[Box::DataPoint::fromSensorFormatToValue] {sensorType='Temp sensor' value='"
-			<< t << "'}";
-		return t;
+	auto type = fromSensorTypeToReadableType(sensorType);
+	auto it = converters.find(type);
+	if (it == converters.end()) {
+		VLOG(1) << "[Box::DataPoint::fromSensorFormatToValue] {sensorValue='"
+			<< sensorValue << "', sensorType='"
+			<< sensorType << "', vcc = '" << vcc << "'}";
+		LOG(WARNING) << "[Box::DataPoint::fromSensorFormatToValue] {Unknown sensor "
+			"type} {sensorType='"
+			<< sensorType << "'}";
+		return (double)sensorValue;
 	}
 	else {
-		if (sensorType == 509) {
-			LOG(WARNING) << "[Box::DataPoint::fromSensorFormatToValue] {Unknown sensor "
-				"type} {sensorType='"
-				<< sensorType << "'}";
-			// used for testing
-		}
-		return (double)sensorValue;
+		auto converter = it->second;
+		return converter(sensorValue, vcc);
 	}
 }
 

@@ -108,6 +108,7 @@ namespace cleric {
 				static std::string getSensorVccPropertyKey(const BoxId &id);
 				static std::string getSensorTypePropertyKey(const BoxId &id);
 				static std::string getSensorValuePropertyKey(const BoxId &id);
+				static std::string getSensorRcvTimestampPropertyKey(const BoxId &id);
 
 				friend class test::WebThingControllerTester;
 

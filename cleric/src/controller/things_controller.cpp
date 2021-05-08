@@ -58,6 +58,10 @@ namespace cleric {
 				return std::string("mix_box_") + std::to_string(id) + "_value";
 			}
 
+			string ThingsController::getSensorRcvTimestampPropertyKey(const BoxId &id) {
+				return std::string("mix_box_") + std::to_string(id) + "_rcv";
+			}
+
 			ThingsController::ThingsController(
 				utility::string_t url,
 				shared_ptr<granada::http::session::SessionFactory> &session_factory) {
@@ -69,6 +73,75 @@ namespace cleric {
 				LOG(INFO)
 					<< "[ThingsController::ThingsController] {/things controller created}";
 			}
+
+			struct SensorPropertyDescription {
+				string title;
+				string type;
+				string unit;
+				bool readOnly;
+				string description;
+				string shortName;
+				/*
+				SensorPropertyDescription(string title_,
+				string type_,
+				string unit_,
+				bool readOnly_,
+				string description_,
+				string shortName_) : title(title_),
+					type (type_),
+					unit(unit_),
+					readOnly(readOnly_),
+					description(description_),
+					shortName(shortName_) {}*/
+			};
+
+			static picojson::value createProperty(
+				string linkPrefix,
+				string boxName,
+				BoxId boxId,
+				const SensorPropertyDescription & propDescription
+			) {
+				value::object result;
+				string name = "Box " + boxName + " " + propDescription.title;
+
+				result["title"] = value(name);
+				result["type"] = value(propDescription.type);
+				result["unit"] = value(propDescription.unit);
+				result["read-only"] = value(propDescription.readOnly ? "true" : "false");
+				result["description"] = value(propDescription.description);
+
+				value::array link;
+				value::object href;
+				href["href"] = value(linkPrefix + to_string(boxId) + "_" + propDescription.shortName);
+				link.push_back(value(href));
+				result["links"] = value(link);
+
+				return value(result);
+			}
+
+
+			map<Box::Reading::ReadableType, SensorPropertyDescription> sensorToNameMapping = {
+				{Box::Reading::ReadableType::TEMPERATURE,
+					{
+						"temperature",
+						"number",
+						"[degC]",
+						true,
+						"Current temparature"
+						"value"
+					}
+				},
+				{Box::Reading::ReadableType::UNKNOWN,
+					{
+						"reading",
+						"number",
+						"[1]",
+						true,
+						"Current sensor reading"
+						"value"
+					}
+				}
+			};
 
 			unique_ptr<::value::object> ThingsController::getThingPropertiesResource() const {
 
@@ -84,67 +157,79 @@ namespace cleric {
 
 						auto linkPrefix = string("/things/") + string(THING_NAME) + string("/properties/");
 
+						auto boxName = box->getName();
+
+						// vcc property
 						{
-							// vcc property
-							string name = box->getName() + " voltage";
-							value::object prop;
-							prop["title"] = value(name);
-							prop["type"] = value("number");
-							prop["unit"] = value("volts");
-							prop["read-only"] = value("true");
-							prop["description"] = value("Current battery voltage");
-
-							value::array link;
-							value::object href;
-							href["href"] = value(linkPrefix + to_string(boxId) + "_vcc");
-							link.push_back(value(href));
-							prop["links"] = value(link);
-
-							(*properties)[ThingsController::getSensorVccPropertyKey(boxId)] = value(prop);
+							(*properties)[ThingsController::getSensorVccPropertyKey(boxId)] =
+								createProperty(
+									linkPrefix,
+									boxName,
+									boxId,
+									{
+										"voltage",
+										"number",
+										"[V]",
+										true,
+										"Current battery voltatge",
+										"vcc"
+									}
+							);
 						}
 
 						{
-							// TODO here I should add recognition of the sensor value type
-							// and add description accordingle
-							// it is best done in the box class
-							// Fix before the final release, not needed for MVP
+							// value
+							auto readingType = box->getSensorReadingType();
+							auto propDescIterator = sensorToNameMapping.find(readingType);
+							if (propDescIterator != sensorToNameMapping.end()) {
+								propDescIterator = sensorToNameMapping.find(Box::Reading::ReadableType::UNKNOWN);
+								LOG(ERROR) << "Unknown type: " << readingType;
+							}
+							const auto & propDesc = propDescIterator->second;
+							(*properties)[ThingsController::getSensorValuePropertyKey(boxId)] =
+								createProperty(
+									linkPrefix,
+									boxName,
+									boxId,
+									propDesc
+								);
 
-							// value property
-							string name = box->getName() + " sensor reading";
-							value::object prop;
-							prop["title"] = value(name);
-							prop["type"] = value("number");
-							prop["unit"] = value("TBD");
-							prop["read-only"] = value("true");
-							prop["description"] = value("Sensor's reading - TBD");
+						}
 
-							value::array link;
-							value::object href;
-							href["href"] = value(linkPrefix + to_string(boxId)+"_value");
-							link.push_back(value(href));
-							prop["links"] = value(link);
-
-							(*properties)[ThingsController::getSensorValuePropertyKey(boxId)] = value(prop);
+						// value type property
+						{
+							(*properties)[ThingsController::getSensorTypePropertyKey(boxId)] =
+								createProperty(
+									linkPrefix,
+									boxName,
+									boxId,
+									{
+										"type",
+										"number",
+										"[V]",
+										true,
+										"ID if the sensor type",
+										"type"
+									}
+							);
 						}
 
 						{
-
-							// value type property
-							string name = box->getName() + " sensor type";
-							value::object prop;
-							prop["title"] = value(name);
-							prop["type"] = value("number");
-							prop["unit"] = value("number");
-							prop["read-only"] = value("true");
-							prop["description"] = value("ID if the sensor type");
-
-							value::array link;
-							value::object href;
-							href["href"] = value(linkPrefix+ to_string(boxId) + "_type");
-							link.push_back(value(href));
-							prop["links"] = value(link);
-
-							(*properties)[ThingsController::getSensorTypePropertyKey(boxId)] = value(prop);
+							// receive date time property
+							(*properties)[ThingsController::getSensorRcvTimestampPropertyKey(boxId)] =
+								createProperty(
+									linkPrefix,
+									boxName,
+									boxId,
+									{
+										"last message",
+										"string",
+										"[t]",
+										true,
+										"timestamp of the last message",
+										"rcv"
+									}
+							);
 						}
 					}
 				}
@@ -185,6 +270,7 @@ namespace cleric {
 							properties[ThingsController::getSensorVccPropertyKey(boxId)] = value(data.vcc);
 							properties[ThingsController::getSensorValuePropertyKey(boxId)] = value(data.value);
 							properties[ThingsController::getSensorTypePropertyKey(boxId)] = value((double)data.sensorType);
+							properties[ThingsController::getSensorRcvTimestampPropertyKey(boxId)] = value(data.rcvTime);
 						}
 					}
 				}
@@ -209,6 +295,9 @@ namespace cleric {
 					}
 					else if (param == "type") {
 						prop[ThingsController::getSensorTypePropertyKey(boxId)] = value((double)data.sensorType);
+					}
+					else if (param == "rcv") {
+						prop[ThingsController::getSensorTypePropertyKey(boxId)] = value(data.rcvTime);
 					}
 					else {
 						throw runtime_error("Illegal resource");

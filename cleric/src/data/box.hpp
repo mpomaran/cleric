@@ -53,10 +53,15 @@ namespace cleric {
 		class Box : public ISerializable {
 		public:
 			struct Reading {
-				uint64_t rcvTimeInMsSinceEpoch; // chrono not supported during serialization
+				::std::string rcvTime; // chrono not supported during serialization
 				uint64_t sensorType;
 				double value;	// value in proper units
 				double vcc;		// voltage in volts
+				enum ReadableType {
+					UNKNOWN = 0,
+					TEMPERATURE
+				} readableType;
+
 			};
 
 
@@ -95,12 +100,14 @@ namespace cleric {
 			std::string getName() const { return name; }
 			void setName(const std::string &name_) { name = name_; }
 
+			Box::Reading::ReadableType getSensorReadingType() const;
+
 			std::string toJson() const;
 
 			// use serialization strategy to store itself
 			void persist();
 
-			int size();
+			int size() const;
 			Reading operator[] (int i) const;
 
 		private:
@@ -116,6 +123,9 @@ namespace cleric {
 				static double fromSensorFormatToVolts(uint64_t sensorVCC);
 				static double fromSensorFormatToValue(uint64_t sensorValue,
 					uint64_t sensorType, double vcc);
+				static ::std::string fromMsSinceEpochToDateTime(uint64_t msSinceEpoch);
+
+				static Box::Reading::ReadableType fromSensorTypeToReadableType(uint64_t sensorType);
 
 				MSGPACK_DEFINE(rcvTimeInMsSinceEpoch, sensorType, value, vcc,
 					originalMessage, secret);
