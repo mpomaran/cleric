@@ -181,7 +181,7 @@ namespace cleric {
 							// value
 							auto readingType = box->getSensorReadingType();
 							auto propDescIterator = sensorToNameMapping.find(readingType);
-							if (propDescIterator != sensorToNameMapping.end()) {
+							if (propDescIterator == sensorToNameMapping.end()) {
 								propDescIterator = sensorToNameMapping.find(Box::Reading::ReadableType::UNKNOWN);
 								LOG(ERROR) << "Unknown type: " << readingType;
 							}
@@ -206,7 +206,7 @@ namespace cleric {
 									{
 										"type",
 										"number",
-										"[V]",
+										"type",
 										true,
 										"ID if the sensor type",
 										"type"
@@ -315,7 +315,7 @@ namespace cleric {
 					response.set_status_code(status_codes::NotFound);
 
 					auto uri = request.absolute_uri().path();
-//					LOG(INFO) << "[ThingsController::handleGet] {request='" << uri << "'}";
+					LOG(INFO) << "[ThingsController::handleGet] {request='" << uri << "'}";
 
 					auto paths = uri::split_path(uri::decode(uri));
 

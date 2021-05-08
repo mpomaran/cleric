@@ -107,15 +107,15 @@ namespace cleric {
 			// use serialization strategy to store itself
 			void persist();
 
-			int size() const;
+			size_t size() const;
 			Reading operator[] (int i) const;
 
 		private:
 			struct DataPoint {
 				uint64_t rcvTimeInMsSinceEpoch; // chrono not supported during serialization
 				uint64_t sensorType;
-				double value;
-				double vcc;
+				uint64_t value;
+				uint64_t vcc;
 				::std::string originalMessage;
 				::std::string secret;			// TODO secutiry before the final release
 

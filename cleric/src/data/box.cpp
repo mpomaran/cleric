@@ -236,7 +236,7 @@ void Box::persist() {
   }
 }
 
-int Box::size() const 
+size_t Box::size() const 
 {
 	return dataPoints.size();
 }
@@ -398,7 +398,7 @@ static double fromSensorFormatToDefault(uint64_t sensorValue, double vcc) {
 		<< sensorValue << "', sensorType='default'"
 		<<  ", vcc = '" << vcc << "'}";
 
-	return sensorValue;
+	return (double)sensorValue;
 }
 
 typedef double(*ConverterFunction)(uint64_t, double);

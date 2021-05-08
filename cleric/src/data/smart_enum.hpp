@@ -67,4 +67,4 @@ public:                                                             \
       return x;                                                     \
     }                                                               \
     bool operator<(const EnumName a) const { return (int)*this < (int)a; } \
-};      
+};
